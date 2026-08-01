@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Capital_Item_Justification.ViewModels
 {
-    public class ClJVendorViewModel
+    public class CIJVendorViewModel
     {
         public int QuotationId { get; set; }
         public int Cijid { get; set; }

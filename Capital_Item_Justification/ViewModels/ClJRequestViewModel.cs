@@ -2,7 +2,7 @@
 
 namespace Capital_Item_Justification.ViewModels
 {
-    public class ClJRequestViewModel
+    public class CIJRequestViewModel
     {
         public string? CIJSNumber { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.Today;
@@ -15,6 +15,8 @@ namespace Capital_Item_Justification.ViewModels
         public string? Designation { get; set; }
         public string? MobileNo { get; set; }
         public string? Subject { get; set; }
+        public int? ItemtypeId { get; set; }
+        public List<SelectListItem> ItemTypes { get; set; } = new();
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> CostCenters { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
