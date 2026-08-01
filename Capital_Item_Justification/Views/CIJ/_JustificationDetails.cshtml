@@ -1,0 +1,47 @@
+﻿ @{
+ @model Capital_Item_Justification.ViewModels.CIJFormViewModel
+ }
+<div class="card shadow-sm border-0 rounded-2 mt-2">
+    <div class="card-body p-2">
+        <h5 class="text-primary fw-bold mb-2">
+            Justification for Procurement
+        </h5>
+        <div class="row mb-3 align-items-center">
+            <label class="col-md-9 col-form-label fw-semibold">
+                (i) If it is new treatment / diagnostic provision calculation
+                (Number of Beneficiary) of Return on Investment (ROI)
+            </label>
+            <div class="col-md-3">
+                <input asp-for="CIJSNumber" class="form-control" placeholder="ROI Number" />
+            </div>
+        </div>
+        <div class="mb-2">
+            <label class="form-label fw-semibold">
+                (ii) If it is replacement of old asset, old asset beyond repairs confirmation from Biomedical.
+                Biomedical shall confirm if there is spare equipment at any location in the network.
+            </label>
+        </div>
+        <div class="mb-2">
+            <label class="form-label fw-semibold">
+                (iii) If it is addition to capacity, number of patients/tests being done with earlier
+                equipment and current waiting period for patients.
+            </label>
+        </div>
+        <hr />
+        <div class="mb-2">
+            <label class="form-label fw-semibold required">Justification</label>
+            <textarea asp-for="CIJSNumber" rows="6" class="form-control" placeholder="Enter detailed justification..."></textarea>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    Attachment
+                </label>
+                <input asp-for="CIJSNumber" type="file" class="form-control" />
+                <small class="text-muted">
+                    Supported formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

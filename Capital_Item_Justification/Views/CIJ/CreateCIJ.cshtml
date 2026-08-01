@@ -1,0 +1,25 @@
+﻿@model Capital_Item_Justification.ViewModels.CIJFormViewModel
+
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5>Create Capital Item Justification</h5>
+        <div>
+            <button type="submit" form="cijForm" class="btn btn-success">
+                Submit
+            </button>
+
+            <button type="submit" form="cijForm" formaction="@Url.Action("SaveDraft","CIJ")" class="btn btn-warning">
+                Save Draft
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary"> Cancel </a>
+        </div>
+    </div>
+    <form id="cijForm" asp-action="Create" method="post">
+        <partial name="_RequestInformation" model="Model" />
+        <partial name="_EquipmentDetails" model="Model" />
+        <partial name="_JustificationDetails" model="Model" />
+        <partial name="_VendorDetails" model="Model" />
+        <partial name="_RemarksDetails" model="Model" />
+    </form>
+</div>

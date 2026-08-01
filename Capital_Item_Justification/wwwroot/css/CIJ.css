@@ -1,0 +1,162 @@
+﻿body {
+    background: #f4f7fb;
+}
+
+.cij-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+}
+
+.cij-header {
+    background: #fff;
+    border-bottom: 1px solid #edf0f5;
+    color: #1659c0;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 18px 25px;
+}
+
+.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    height: 35px;
+    border-radius: 8px;
+    border: 1px solid #d9dee8;
+    box-shadow: none;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 .15rem rgba(13,110,253,.15);
+}
+
+.form-select {
+    height: 35px;
+    border-radius: 8px;
+    border: 1px solid #d9dee8;
+}
+
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 .15rem rgba(13,110,253,.15);
+    }
+
+.badge {
+    font-size: 15px;
+    padding: 8px 12px;
+    border-radius: 50%;
+}
+.request-section{
+    color:blue
+}
+.table {
+    margin-bottom: 0;
+}
+
+    .table thead {
+        background: #f8f9fc;
+    }
+
+        .table thead th {
+            color: #3c4858;
+            font-size: 14px;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e8ef;
+        }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 14px;
+    }
+
+.table-hover tbody tr:hover {
+    background: #f6faff;
+}
+
+.btn-primary {
+    border-radius: 8px;
+    padding: 8px 18px;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 12px;
+}
+
+.modal-header {
+    background: #0d6efd;
+    color: white;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.btn-close {
+    filter: invert(1);
+}
+.equipment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 20px;
+}
+.equipment-total {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+    .equipment-total span {
+        font-weight: 600;
+        color: #495057;
+        white-space: nowrap;
+    }
+
+    .equipment-total .form-control {
+        width: 220px;
+        text-align: right;
+        font-weight: 700;
+        background: #f8f9fa;
+        color: #0d6efd;
+    }
+.vendor-card {
+    border: 1px solid #e8edf3;
+    border-radius: 10px;
+    padding: 20px;
+    background: #fafcff;
+    height: 100%;
+}
+
+.vendor-title {
+    color: #0d6efd;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e8edf3;
+    padding-bottom: 10px;
+}
+
+.vendor-card .form-control,
+.vendor-card .form-select {
+    border-radius: 8px;
+}
+
+.vendor-card:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,.08);
+    transition: .3s;
+}
+.custom-textarea {
+    height: 60px;
+    resize:vertical
+}

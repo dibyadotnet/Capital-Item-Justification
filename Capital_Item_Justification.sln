@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capital_Item_Justification", "Capital_Item_Justification\Capital_Item_Justification.csproj", "{4748822C-4F95-459F-A3FC-AD7645FF4B53}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4748822C-4F95-459F-A3FC-AD7645FF4B53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4748822C-4F95-459F-A3FC-AD7645FF4B53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4748822C-4F95-459F-A3FC-AD7645FF4B53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4748822C-4F95-459F-A3FC-AD7645FF4B53}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E7B4C588-CDB8-48D5-B333-760AABBFB63C}
+	EndGlobalSection
+EndGlobal

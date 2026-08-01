@@ -1,0 +1,68 @@
+﻿@{
+    @model Capital_Item_Justification.ViewModels.CIJFormViewModel
+
+}
+<div class="card cij-card mb-4">
+    @* <div class="card-header cij-header">
+    <span class="badge bg-primary me-2">1</span>
+    <span>Request Information</span>
+    </div> *@
+    <div class="card-body">
+        <div class="row g-4">
+            <span class="request-section">Request Information</span>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <label class="form-label">S.NO</label>
+                <input asp-for="CIJSNumber" class="form-control" readonly />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="RequestDate" class="form-label fw-semibold">Request Date</label>
+                <input asp-for="RequestDate" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Name of the Project(Code)</label>
+                <input asp-for="CIJSNumber" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Cost Center</label>
+                <input asp-for="CIJSNumber" class="form-control" />
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <label class="form-label">Budget Provision</label>
+                <select asp-for="CIJSNumber" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
+
+            </div>
+            <div class="col-md-3">
+                <label asp-for="RequestDate" class="form-label fw-semibold">Budget Amount</label>
+                <input asp-for="CIJSNumber" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Eqiupment Type</label>
+                <input asp-for="CIJSNumber" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Total Cost of Eqiupment</label>
+                <input asp-for="CIJSNumber" class="form-control" />
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <label asp-for="RequestDate" class="form-label fw-semibold">Project Amount</label>
+                <input asp-for="CIJSNumber" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">SCEH Amount</label>
+                <input asp-for="CIJSNumber" class="form-control" />
+            </div>
+  
+        </div>
+    </div>
+</div>
