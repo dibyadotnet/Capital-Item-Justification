@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI;
 using Capital_Item_Justification.Models;
+using Capital_Item_Justification.Repository.Interfaces;
+using Capital_Item_Justification.Repository;
+using Capital_Item_Justification.Services.Interfaces;
+using Capital_Item_Justification.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<CIJDbContext>(options =>
@@ -22,6 +26,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<ICIJRequestService, CIJRequestService>();
+builder.Services.AddScoped<ICIJMainRepository, CIJMainRepository>();
+
 
 var app = builder.Build();
 
