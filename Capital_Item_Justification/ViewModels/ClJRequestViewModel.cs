@@ -26,8 +26,8 @@ namespace Capital_Item_Justification.ViewModels
         [Column("SCEHCost", TypeName = "decimal(18, 2)")]
         public decimal? Scehcost { get; set; }
 
-        public string? PurchasePurpose { get; set; }
-        public string? OldEquipmentTreatment { get; set; }
+        public string? PurchasePurposeId { get; set; }
+        public string? OldEquipmentTreatmentId { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? OldEquipmentCost { get; set; }
@@ -48,5 +48,7 @@ namespace Capital_Item_Justification.ViewModels
         public IEnumerable<SelectListItem> CostCenters { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> BudgetProvisionList { get; set; } = new();
+        public List<SelectListItem> PurchagePurposeList { get; set; } = new();
+        public List<SelectListItem> OldEqupTreatmentList { get; set; } = new();
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Capital_Item_Justification.Models;
+using Capital_Item_Justification.Data;
 
 namespace Capital_Item_Justification.Models;
 
@@ -42,6 +43,9 @@ public partial class CIJDbContext : IdentityDbContext
     public virtual DbSet<CijWorkflowStep> CijWorkflowSteps { get; set; }
 
     public virtual DbSet<CijWorkflowTransaction> CijWorkflowTransactions { get; set; }
+    public virtual DbSet<CijPurchasePurpose> CijPurchasePurposes { get; set; }
+
+    public virtual DbSet<CijOldEquipmemtTreatment> CijOldEquipmemtTreatments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CIJConnection");
@@ -193,7 +197,18 @@ public partial class CIJDbContext : IdentityDbContext
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
+        modelBuilder.Entity<CijPurchasePurpose>(entity =>
+        {
+            entity.HasKey(e => e.PurposeId).HasName("PK__CIJ_Purc__79E6A19479E3D91C");
 
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+        modelBuilder.Entity<CijOldEquipmemtTreatment>(entity =>
+        {
+            entity.HasKey(e => e.TreatmentId).HasName("PK__CIJ_OldE__1A57B7F13526EBD5");
+
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
         OnModelCreatingPartial(modelBuilder);
     }
 

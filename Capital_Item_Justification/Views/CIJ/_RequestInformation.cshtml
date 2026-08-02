@@ -9,7 +9,7 @@
         </h5>
         <div class="row">
             <div class="col">
-                <label class="form-label">S.NO</label>
+                <label class="form-label">Serial.NO</label>
                 <input asp-for="CIJSNumber" class="form-control" readonly />
             </div>
             <div class="col">
@@ -60,14 +60,14 @@
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Purpose of Purchase</label>
-                <select asp-for="OldEquipmentTreatment" asp-items="Model.ItemTypes" class="form-select">
-                    <option value="">-- Select Item Type --</option>
+                <select asp-for="PurchasePurposeId" asp-items="Model.PurchagePurposeList" class="form-select">
+                    <option value="">-- Select Purpose --</option>
                 </select>
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Old Equipment</label>
-                <select asp-for="OldEquipmentTreatment" asp-items="Model.ItemTypes" class="form-select">
-                    <option value="">-- Select Item Type --</option>
+                <select asp-for="OldEquipmentTreatmentId" asp-items="Model.OldEqupTreatmentList" class="form-select">
+                    <option value="">-- Select Treatment --</option>
                 </select>
             </div>
             

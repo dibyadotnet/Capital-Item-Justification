@@ -32,22 +32,27 @@ namespace Capital_Item_Justification.Controllers
                     new SelectListItem { Value="Yes",Text="Yes"},
                     new SelectListItem { Value="No",Text="No"}
                 };
-                var PurchasePurposeItem = new List<SelectListItem>()
+                var PurchasePurposeItems = await _service.GetPurchasePurpose();
+                var PurchasePurposeItem = PurchasePurposeItems.Select(x=> new SelectListItem
                 {
-                    new SelectListItem { Value="New Requirement",Text="New Requirement"},
-                    new SelectListItem { Value="Replacement",Text="Replacement"}
-                };
-                var TreatmentOldEqupItem = new List<SelectListItem>()
+                    Value=x.PurposeId.ToString(),
+                    Text=x.PurposeName
+                }).ToList();
+
+                var TreatmentItems = await _service.GetOldEquipmentTreatment();
+                var oldEqupTreatmentItem = TreatmentItems.Select(x => new SelectListItem
                 {
-                    new SelectListItem { Value="Scraped",Text="Scraped"},
-                    new SelectListItem { Value="Unde buy back",Text="Unde buy back"}
-                };
+                    Value = x.TreatmentId.ToString(),
+                    Text = x.TreatmentName
+                }).ToList();
 
 
                 var requestViewModel = new CIJRequestViewModel
                 {
                     ItemTypes = itemTypesItem,
-                    BudgetProvisionList = BudgetProvisionItem
+                    BudgetProvisionList = BudgetProvisionItem,
+                    PurchagePurposeList= PurchasePurposeItem,
+                    OldEqupTreatmentList= oldEqupTreatmentItem
                 };
 
                 vm = new CIJMainViewModel
