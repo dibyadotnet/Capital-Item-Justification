@@ -1,63 +1,95 @@
 ﻿@{
     @model Capital_Item_Justification.ViewModels.CIJRequestViewModel
+
 }
-<div class="card cij-card mb-2">
-    <div class="card-body">
-        <div class="row g-4">
-            <span class="request-section">Request Information</span>
-        </div>
-        <div class="row g-4">
-            <div class="col-md-3">
-                <label class="form-label">S.NO</label>
+<div class="card shadow-sm border-0 rounded-2 mt-1">
+    <div class="card-body p-2">
+        <h5 class="text-primary fw-bold mb-2">
+            Request Information
+        </h5>
+        <div class="row">
+            <div class="col">
+                <label class="form-label">Serial.NO</label>
                 <input asp-for="CIJSNumber" class="form-control" readonly />
             </div>
-            <div class="col-md-3">
+            <div class="col">
                 <label asp-for="RequestDate" class="form-label fw-semibold">Request Date</label>
-                <input asp-for="RequestDate" type="date" class="form-control" />
+                <input asp-for="RequestDate" type="date" class="form-control" readonly />
             </div>
-
-            <div class="col-md-3">
-                <label class="form-label">Name of the Project(Code)</label>
-                <input asp-for="CIJSNumber" class="form-control" />
-            </div>
-            <div class="col-md-3">
+            <div class="col">
                 <label class="form-label">Cost Center</label>
                 <input asp-for="CIJSNumber" class="form-control" />
             </div>
+            <div class="col">
+                <label class="form-label">Project(Code)</label>
+                <input asp-for="CIJSNumber" class="form-control" />
+            </div>
         </div>
         <div class="row g-4">
-            <div class="col-md-3">
+            <div class="col">
                 <label class="form-label">Budget Provision</label>
-                <select asp-for="CIJSNumber" class="form-select">
+                <select asp-for="BudgetProvision" asp-items="Model.BudgetProvisionList" class="form-select">
                     <option value="">-- Select --</option>
                 </select>
+            </div>
+            <div class="col">
+                <label class="form-label fw-semibold">Budget Amount</label>
+                <input asp-for="BudgetAmount" class="form-control" />
+            </div>
+            <div class="col">
+                <label class="form-label fw-semibold">Item Type</label>
+                <select asp-for="ItemtypeId" asp-items="Model.ItemTypes" class="form-select" id="ddlItemType">
+                    <option value="">-- Select Item Type --</option>
+                </select>
+            </div>
+            <div class="col">
+                <label class="form-label fw-semibold">Eqiupment Cost</label>
+                <input asp-for="TotalEquipmentCost" class="form-control" readonly />
+            </div>
+           
+        </div>
 
+        <div class="row g-4">
+            <div class="col">
+                <label class="form-label fw-semibold">Project Cost</label>
+                <input asp-for="ProjectCost" class="form-control" />
             </div>
-            <div class="col-md-3">
-                <label asp-for="RequestDate" class="form-label fw-semibold">Budget Amount</label>
-                <input asp-for="CIJSNumber" class="form-control" />
+            <div class="col">
+                <label class="form-label fw-semibold">SCEH Cost</label>
+                <input asp-for="Scehcost" class="form-control" />
             </div>
-
-            <div class="col-md-3">
-                <label class="form-label">Eqiupment Type</label>
-                <input asp-for="CIJSNumber" class="form-control" />
+            <div class="col">
+                <label class="form-label fw-semibold">Purpose of Purchase</label>
+                <select asp-for="PurchasePurposeId" asp-items="Model.PurchagePurposeList" class="form-select">
+                    <option value="">-- Select Purpose --</option>
+                </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Total Cost of Eqiupment</label>
-                <input asp-for="CIJSNumber" class="form-control" />
+            <div class="col">
+                <label class="form-label fw-semibold">Old Equipment</label>
+                <select asp-for="OldEquipmentTreatmentId" asp-items="Model.OldEqupTreatmentList" class="form-select">
+                    <option value="">-- Select Treatment --</option>
+                </select>
             </div>
+            
         </div>
         <div class="row g-4">
-            <div class="col-md-3">
-                <label asp-for="RequestDate" class="form-label fw-semibold">Project Amount</label>
-                <input asp-for="CIJSNumber" class="form-control" />
+            <div class="col">
+                <label class="form-label fw-semibold">Old Equipment Cost</label>
+                <input asp-for="OldEquipmentCost" class="form-control" readonly />
             </div>
-
-            <div class="col-md-3">
-                <label class="form-label">SCEH Amount</label>
-                <input asp-for="CIJSNumber" class="form-control" />
+            <div class="col">
+                <label class="form-label fw-semibold">Beneficiary Dept</label>
+                <input asp-for="BeneficiaryDepartmentId" class="form-control" />
             </div>
-  
+            <div class="col">
+                <label class="form-label fw-semibold">Beneficiary Location</label>
+                <input asp-for="BeneficiaryLocationId" class="form-control" />
+            </div>
+            <div class="col">
+                <label class="form-label fw-semibold">Waiting period</label>
+                <input asp-for="WaitingPeriod" class="form-control" />
+            </div>
         </div>
+
     </div>
 </div>

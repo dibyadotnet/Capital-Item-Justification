@@ -1,146 +1,84 @@
-﻿
-@{
-}
-<!-- Equipment Modal -->
+﻿@model Capital_Item_Justification.ViewModels.CIJEquipmentViewModel
+
 <div class="modal fade"
      id="equipmentModal"
-     tabindex="-1">
+     tabindex="-1"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false"
+     aria-hidden="true">
 
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width: 550px;">
+        <div class="modal-content shadow">
 
-            <div class="modal-header">
-
+            <!-- Header -->
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-
-                    Add Equipment
-
+                    <i class="bi bi-tools me-2"></i> Add Equipment
                 </h5>
 
-                <button class="btn-close" data-bs-dismiss="modal">
-                </button>
-
+                <button type="button" id="btnModalClose" class="btn btn-danger btn-sm" data-bs-dismiss="modal"> ✕ </button>
             </div>
 
+            <!-- Body -->
             <div class="modal-body">
 
-                <div class="row g-4">
-
+                <div class="row g-3">
+                    <input type="hidden" id="EquipmentId" asp-for="EquipmentId" />
+                    <input type="hidden" id="EquipmentIndex" value="-1" />
+                    <!-- Equipment Name -->
                     <div class="col-md-6">
-
-                        <label class="form-label required">
-
-                            Equipment Name
-
-                        </label>
-
-                        <input class="form-control"
-                               id="EquipmentName" />
-
+                        <label asp-for="EquipmentName" class="form-label required"></label>
+                        <input asp-for="EquipmentName" class="form-control" />
+                        <span asp-validation-for="EquipmentName" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-3">
-
-                        <label class="form-label required">
-
-                            Category
-
-                        </label>
-
-                        <select class="form-select">
-
-                            <option>Select</option>
-
-                        </select>
-
+                    <!-- Quantity -->
+                    <div class="col-md-6">
+                        <label asp-for="EquipmentQty" class="form-label required"></label>
+                        <input asp-for="EquipmentQty" type="number" class="form-control" min="1" />
+                        <span asp-validation-for="EquipmentQty" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-3">
-
-                        <label class="form-label required">
-
-                            Quantity
-
-                        </label>
-
-                        <input type="number"
-                               class="form-control" />
-
+                    <!-- Manufacturer -->
+                    <div class="col-md-6">
+                        <label asp-for="Make" class="form-label"></label>
+                        <input asp-for="Make" class="form-control" />
                     </div>
 
-                    <div class="col-md-4">
-
-                        <label class="form-label">
-
-                            Manufacturer
-
-                        </label>
-
-                        <input class="form-control" />
-
+                    <!-- Model -->
+                    <div class="col-md-6">
+                        <label asp-for="Model" class="form-label"></label>
+                        <input asp-for="Model" class="form-control" />
                     </div>
 
-                    <div class="col-md-4">
-
-                        <label class="form-label">
-
-                            Model
-
-                        </label>
-
-                        <input class="form-control" />
-
+                    <!-- Estimated Cost -->
+                    <div class="col-md-6">
+                        <label asp-for="EquipmentCost" class="form-label required"></label>
+                        <input asp-for="EquipmentCost" type="number" class="form-control" />
+                        <span asp-validation-for="EquipmentCost" class="text-danger"></span>
                     </div>
-
-                    <div class="col-md-4">
-
-                        <label class="form-label required">
-
-                            Estimated Cost
-
-                        </label>
-
-                        <input type="number"
-                               class="form-control" />
-
-                    </div>
-
-                    <div class="col-md-12">
-
-                        <label class="form-label">
-
-                            Technical Specification
-
-                        </label>
-
-                        <textarea class="form-control"
-                                  rows="4"></textarea>
-
+                    <div class="col-md-6">
+                        <label asp-for="PreferenceOrder" class="form-label">Doctor’s Preference</label>
+                        <input asp-for="PreferenceOrder" class="form-control" />
+                        @*  <span asp-validation-for="PreferenceOrder" class="text-danger"></span> *@
                     </div>
 
                 </div>
 
             </div>
 
+            <!-- Footer -->
             <div class="modal-footer">
-
-                <button class="btn btn-light"
-                        data-bs-dismiss="modal">
-
+                <button type="button" id="btnModalCancel" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     Cancel
-
                 </button>
 
-                <button class="btn btn-primary">
-
-                    Save Equipment
-
+                <button id="btnEquipmentSave" type="button" class="btn btn-success">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Save
                 </button>
-
             </div>
 
         </div>
-
     </div>
-
 </div>
