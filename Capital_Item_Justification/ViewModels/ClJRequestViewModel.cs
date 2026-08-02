@@ -1,24 +1,52 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace Capital_Item_Justification.ViewModels
 {
     public class CIJRequestViewModel
     {
-        public string? CIJSNumber { get; set; }
+        public int Cijid { get; set; }
+        public string CIJSNumber { get; set; } = null!;
         public DateTime RequestDate { get; set; } = DateTime.Today;
-        public DateTime? RequiredDate { get; set; }
-        public string? Priority { get; set; }
-        public int? DepartmentId { get; set; }
+        public string? ProjectCode { get; set; }
         public int? CostCenterId { get; set; }
-        public int? LocationId { get; set; }
-        public string? RequesterName { get; set; }
-        public string? Designation { get; set; }
-        public string? MobileNo { get; set; }
-        public string? Subject { get; set; }
+        public string? BudgetProvision { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? BudgetAmount { get; set; }
         public int? ItemtypeId { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? TotalEquipmentCost { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? ProjectCost { get; set; }
+
+        [Column("SCEHCost", TypeName = "decimal(18, 2)")]
+        public decimal? Scehcost { get; set; }
+
+        public string? PurchasePurpose { get; set; }
+        public string? OldEquipmentTreatment { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? OldEquipmentCost { get; set; }
+
+        public int? BeneficiaryDepartmentId { get; set; }
+
+        public int? BeneficiaryLocationId { get; set; }
+
+        [StringLength(100)]
+        public string? WaitingPeriod { get; set; }
+
+        public int StatusId { get; set; }
+
+        public int? CurrentWorkflowStepId { get; set; }
+
         public List<SelectListItem> ItemTypes { get; set; } = new();
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> CostCenters { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> BudgetProvisionList { get; set; } = new();
     }
 }
