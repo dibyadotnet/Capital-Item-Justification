@@ -16,18 +16,15 @@
                     <i class="bi bi-tools me-2"></i> Add Equipment
                 </h5>
 
-                <button type="button"
-                        class="btn btn-danger btn-sm"
-                        data-bs-dismiss="modal">
-                    ✕
-                </button>
+                <button type="button" id="btnModalClose" class="btn btn-danger btn-sm" data-bs-dismiss="modal"> ✕ </button>
             </div>
 
             <!-- Body -->
             <div class="modal-body">
 
                 <div class="row g-3">
-
+                    <input type="hidden" id="EquipmentId" asp-for="EquipmentId" />
+                    <input type="hidden" id="EquipmentIndex" value="-1" />
                     <!-- Equipment Name -->
                     <div class="col-md-6">
                         <label asp-for="EquipmentName" class="form-label required"></label>
@@ -60,6 +57,11 @@
                         <input asp-for="EquipmentCost" type="number" class="form-control" />
                         <span asp-validation-for="EquipmentCost" class="text-danger"></span>
                     </div>
+                    <div class="col-md-6">
+                        <label asp-for="PreferenceOrder" class="form-label">Doctor’s Preference</label>
+                        <input asp-for="PreferenceOrder" class="form-control" />
+                        @*  <span asp-validation-for="PreferenceOrder" class="text-danger"></span> *@
+                    </div>
 
                 </div>
 
@@ -67,13 +69,11 @@
 
             <!-- Footer -->
             <div class="modal-footer">
-                <button type="button"
-                        class="btn btn-outline-secondary"
-                        data-bs-dismiss="modal">
+                <button type="button" id="btnModalCancel" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     Cancel
                 </button>
 
-                <button type="submit" class="btn btn-success">
+                <button id="btnEquipmentSave" type="button" class="btn btn-success">
                     <i class="bi bi-check-circle me-1"></i>
                     Save
                 </button>

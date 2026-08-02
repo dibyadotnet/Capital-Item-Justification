@@ -15,6 +15,7 @@
                         <th>Manufacturer</th>
                         <th>Model</th>
                         <th>Estimated Cost</th>
+                        <th>Doc Pref</th>
                         <th width="120" class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -35,9 +36,14 @@
                                 <td>@item.Make</td>
                                 <td>@item.Model</td>
                                 <td>@item.EquipmentCost</td>
+                                <td>@item.PreferenceOrder</td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning">Edit</button>
-                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                    <button class="btn btn-sm btn-warning me-1" onclick="EditEquipment(1)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="DeleteEquipment(1)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
 
@@ -61,7 +67,7 @@
             </button>
             <div class="equipment-total">
                 <span>Total Estimated Equipment Cost</span>
-                <input type="text" id="TotalEquipmentCost" class="form-control" value="₹ 0.00" readonly />
+                <input type="text" id="TotalEstEquipmentCost" class="form-control" value="₹ 0.00" readonly />
             </div>
         </div>
     </div>
