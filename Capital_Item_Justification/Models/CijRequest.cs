@@ -19,7 +19,8 @@ public partial class CijRequest
 
     public DateOnly RequestDate { get; set; }
 
-    public int? ProjectId { get; set; }
+    [StringLength(30)]
+    public string? ProjectName { get; set; }
 
     public int HospitalLocationId { get; set; }
 
@@ -41,10 +42,9 @@ public partial class CijRequest
     [Column("SCEHCost", TypeName = "decimal(18, 2)")]
     public decimal? Scehcost { get; set; }
 
-    public string? Purpose { get; set; }
+    public int? PurchasePurposeId { get; set; }
 
-    [StringLength(100)]
-    public string? OldEquipmentTreatment { get; set; }
+    public int? OldEquipmentTreatmentId { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal? OldEquipmentCost { get; set; }
@@ -60,30 +60,31 @@ public partial class CijRequest
 
     public int? CurrentWorkflowStepId { get; set; }
 
-    public int CreatedBy { get; set; }
+    [StringLength(50)]
+    public string? CreatedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedDate { get; set; }
 
-    public int? ModifiedBy { get; set; }
+    [StringLength(50)]
+    public string? ModifiedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? ModifiedDate { get; set; }
 
     public bool? IsActive { get; set; }
 
-    [InverseProperty("Cij")]
+    public int? CostCenterId { get; set; }
+
+    public int? ItemTypeId { get; set; }
+
     public virtual ICollection<CijApprovalHistory> CijApprovalHistories { get; set; } = new List<CijApprovalHistory>();
-
-    [InverseProperty("Cij")]
     public virtual ICollection<CijCommitteeComment> CijCommitteeComments { get; set; } = new List<CijCommitteeComment>();
-
-    [InverseProperty("Cij")]
     public virtual ICollection<CijEquipment> CijEquipments { get; set; } = new List<CijEquipment>();
-
-    [InverseProperty("Cij")]
     public virtual ICollection<CijJustification> CijJustifications { get; set; } = new List<CijJustification>();
-
-    [InverseProperty("Cij")]
     public virtual ICollection<CijVendorQuotation> CijVendorQuotations { get; set; } = new List<CijVendorQuotation>();
+
+
+
 }
+

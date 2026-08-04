@@ -1,6 +1,6 @@
 ﻿@{
     @model Capital_Item_Justification.ViewModels.CIJRequestViewModel
-
+    ViewData.TemplateInfo.HtmlFieldPrefix = "CIJRequest";
 }
 <div class="card shadow-sm border-0 rounded-2 mt-1">
     <div class="card-body p-2">
@@ -18,11 +18,13 @@
             </div>
             <div class="col">
                 <label class="form-label">Cost Center</label>
-                <input asp-for="CIJSNumber" class="form-control" />
+                <select asp-for="CostCenterId" asp-items="Model.Locations" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
             </div>
             <div class="col">
                 <label class="form-label">Project(Code)</label>
-                <input asp-for="CIJSNumber" class="form-control" />
+                <input asp-for="ProjectName" class="form-control" />
             </div>
         </div>
         <div class="row g-4">
@@ -65,7 +67,7 @@
                 </select>
             </div>
             <div class="col">
-                <label class="form-label fw-semibold">Old Equipment</label>
+                <label class="form-label fw-semibold">Old Equipment Treatment</label>
                 <select asp-for="OldEquipmentTreatmentId" asp-items="Model.OldEqupTreatmentList" class="form-select">
                     <option value="">-- Select Treatment --</option>
                 </select>
@@ -75,15 +77,19 @@
         <div class="row g-4">
             <div class="col">
                 <label class="form-label fw-semibold">Old Equipment Cost</label>
-                <input asp-for="OldEquipmentCost" class="form-control" readonly />
+                <input asp-for="OldEquipmentCost" class="form-control" />
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Beneficiary Dept</label>
-                <input asp-for="BeneficiaryDepartmentId" class="form-control" />
+                <select asp-for="BeneficiaryDepartmentId" asp-items="Model.Departments" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Beneficiary Location</label>
-                <input asp-for="BeneficiaryLocationId" class="form-control" />
+                <select asp-for="BeneficiaryLocationId" asp-items="Model.Locations" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Waiting period</label>

@@ -47,6 +47,8 @@ public partial class CIJDbContext : IdentityDbContext
 
     public virtual DbSet<CijOldEquipmemtTreatment> CijOldEquipmemtTreatments { get; set; }
 
+    public virtual DbSet<CijStatus> CijStatuses { get; set; }
+    public virtual DbSet<CijLocation> CijLocations { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CIJConnection");
 
@@ -209,6 +211,23 @@ public partial class CIJDbContext : IdentityDbContext
 
             entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
+
+        modelBuilder.Entity<CijLocation>(entity =>
+        {
+            entity.HasKey(e => e.LocationId).HasName("PK__CIJ_Loca__E7FEA497827DF1B3");
+
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<CijStatus>(entity =>
+        {
+            entity.HasKey(e => e.StatusId).HasName("PK__CIJ_Stat__C8EE2063093C31B2");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 

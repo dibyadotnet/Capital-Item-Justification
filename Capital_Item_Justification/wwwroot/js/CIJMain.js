@@ -16,15 +16,15 @@ $("#btnEquipmentSave").on("click", function () {
 function addEquipment() {
     debugger;
     var equipment = {
-        EquipmentId: $("#EquipmentId").val(),
+        EquipmentId: parseInt($("#EquipmentId").val())||0,
         EquipmentName: $("#EquipmentName").val(),
-        EquipmentQty: $("#EquipmentQty").val(),
+        EquipmentQty: parseInt($("#EquipmentQty").val())||0,
         Make: $("#Make").val(),
         Model: $("#Model").val(),
-        EquipmentCost: $("#EquipmentCost").val(),
-        PreferenceOrder: $("#PreferenceOrder").val() 
+        EquipmentCost: parseFloat($("#EquipmentCost").val())||0,
+        PreferenceOrder: parseInt($("#PreferenceOrder").val())||0
     };
-    var index = parseInt($("#EquipmentIndex").val());
+    var index = parseInt($("#EquipmentIndex").val())||0;
     if (index == -1) {
         equipments.push(equipment);
     }
@@ -104,7 +104,8 @@ function loadEquipmentTable() {
         `);
 
     });
-
+    // Store the latest equipment list in the hidden field
+    $("#EquipmentJson").val(JSON.stringify(equipments));
 }
 function clearEquipment() {
 

@@ -5,16 +5,17 @@
         <h5>Create Capital Item Justification</h5>
         <div>
             <button type="submit" form="cijForm" class="btn btn-success"> Submit </button>
-            <button type="submit" form="cijForm" formaction="@Url.Action("SaveDraft","CIJ")" class="btn btn-warning">Save Draft</button>
+            <button formmethod="post" type="submit" form="cijForm" formaction="@Url.Action("SaveCIJ","CIJ")" class="btn btn-warning">Save Draft</button>
             <a asp-action="Index" class="btn btn-secondary"> Cancel </a>
         </div>
     </div>
     <form id="cijForm" asp-action="Create" method="post">
+        <input type="hidden" id="EquipmentJson" asp-for="EquipmentJson" />
         <partial name="_RequestInformation" model="Model.CIJRequest" />
         <partial name="_EquipmentDetails" model="Model.Equipments" />
         <partial name="_JustificationDetails" model="Model" />
-       @*  <partial name="_VendorDetails" model="Model" /> *@
-        <partial name="_RemarksDetails" model="Model" /> 
+        <partial name="_RemarksDetails" model="Model" />
+        @*  <partial name="_VendorDetails" model="Model" /> *@
     </form>
 </div>
 
