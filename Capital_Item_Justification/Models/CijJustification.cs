@@ -30,12 +30,12 @@ public partial class CijJustification
 
     public string? Remarks { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedDate { get; set; }
 
-    public int? ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? ModifiedDate { get; set; }

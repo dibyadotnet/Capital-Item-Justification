@@ -41,5 +41,13 @@ namespace Capital_Item_Justification.Services
         {
             return await _cijMainRepository.GetDepartment();
         }
+        public async Task<CIJMainViewModel> GetCIJById(int cijId)
+        {
+            return await _cijMainRepository.GetCIJById(cijId);
+        }
+        public async Task<string> UpdateCIJ(CIJMainViewModel cIJMainViewModel)
+        {
+            return await _cijMainRepository.UpdateCIJ(cIJMainViewModel);
+        }
     }
 }

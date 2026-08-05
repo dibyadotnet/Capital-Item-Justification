@@ -13,5 +13,7 @@ namespace Capital_Item_Justification.Repository.Interfaces
         Task<List<DashboardViewModel>> GetDashboard();
         Task<List<CijLocation>> GetLocation();
         Task<List<CijDepartment>> GetDepartment();
+        Task<CIJMainViewModel> GetCIJById(int cijId);
+        Task<string> UpdateCIJ(CIJMainViewModel cIJMainViewModel);
     }
 }

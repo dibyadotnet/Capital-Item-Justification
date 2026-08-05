@@ -29,11 +29,11 @@ public partial class CijEquipment
     [Column(TypeName = "decimal(18, 2)")]
     public decimal EquipmentCost { get; set; }
 
-    public int CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
-    public int? ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
 
     public DateTime? ModifiedDate { get; set; }
 
@@ -42,4 +42,6 @@ public partial class CijEquipment
     [ForeignKey("Cijid")]
     [InverseProperty("CijEquipments")]
     public virtual CijRequest Cij { get; set; } = null!;
+
+    public int Qty { get; set; }
 }

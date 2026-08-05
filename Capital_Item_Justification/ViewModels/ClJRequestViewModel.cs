@@ -11,7 +11,7 @@ namespace Capital_Item_Justification.ViewModels
         public DateOnly RequestDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public string? ProjectName{ get; set; }
         public int? CostCenterId { get; set; }
-        public bool BudgetProvision { get; set; }
+        public string? BudgetProvision { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? BudgetAmount { get; set; }

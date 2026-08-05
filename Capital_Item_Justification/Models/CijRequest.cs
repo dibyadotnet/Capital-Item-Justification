@@ -24,7 +24,7 @@ public partial class CijRequest
 
     public int HospitalLocationId { get; set; }
 
-    public bool BudgetAvailable { get; set; }
+    public string? BudgetAvailable { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal? BudgetAmount { get; set; }

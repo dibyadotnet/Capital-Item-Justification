@@ -32,6 +32,99 @@ namespace Capital_Item_Justification.Controllers
             CIJMainViewModel vm = new();
             try
             {
+                CIJRequestViewModel dropDowns = await PopulateDropDownList();
+
+                var requestViewModel = new CIJRequestViewModel
+                {
+                    ItemTypes = dropDowns.ItemTypes,
+                    Departments = dropDowns.Departments,
+                    Locations = dropDowns.Locations,
+                    BudgetProvisionList = dropDowns.BudgetProvisionList,
+                    PurchagePurposeList = dropDowns.PurchagePurposeList,
+                    OldEqupTreatmentList = dropDowns.OldEqupTreatmentList
+                };
+
+                vm = new CIJMainViewModel
+                {
+                    CIJRequest = requestViewModel,
+                    Equipments = new List<CIJEquipmentViewModel>(),
+                    Vendors = new List<CIJVendorViewModel>(),
+                    Justification = new CIJJustificationViewModel()
+                };
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return View(vm);
+        }
+        [HttpPost]
+        public async Task<IActionResult> SaveCIJ(CIJMainViewModel cIJMainViewModel)
+        {
+            try
+            {
+                if (cIJMainViewModel.CIJRequest.Cijid > 0)
+                {
+                    await _service.UpdateCIJ(cIJMainViewModel);
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))
+                    {
+                        cIJMainViewModel.Equipments = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
+                    }
+                    await _service.SaveCIJ(cIJMainViewModel);
+                }
+                return RedirectToAction("Dashboard", "CIJ");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(cIJMainViewModel);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int cijId)
+        {
+            try
+            {
+                if (cijId <= 0)
+                {
+                    return BadRequest();
+                }
+
+                var cIJMainViewModel = await _service.GetCIJById(cijId);
+
+                if (cIJMainViewModel == null)
+                {
+                    return NotFound();
+                }
+                CIJRequestViewModel dropDowns = await PopulateDropDownList();
+
+                cIJMainViewModel.CIJRequest.ItemTypes = dropDowns.ItemTypes;
+                cIJMainViewModel.CIJRequest.Departments = dropDowns.Departments;
+                cIJMainViewModel.CIJRequest.Locations = dropDowns.Locations;
+                cIJMainViewModel.CIJRequest.BudgetProvisionList = dropDowns.BudgetProvisionList;
+                cIJMainViewModel.CIJRequest.PurchagePurposeList = dropDowns.PurchagePurposeList;
+                cIJMainViewModel.CIJRequest.OldEqupTreatmentList = dropDowns.OldEqupTreatmentList;
+
+                return View("CreateCIJ", cIJMainViewModel);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(new CIJMainViewModel());
+            }
+        }
+
+
+        private async Task<CIJRequestViewModel> PopulateDropDownList()
+        {
+            try
+            {
                 //Item Type Master
                 var itemTypes = await _service.GetItemType();
                 var itemTypesItem = itemTypes.Select(x => new SelectListItem
@@ -75,49 +168,19 @@ namespace Capital_Item_Justification.Controllers
                     Text = x.TreatmentName
                 }).ToList();
 
-
-                var requestViewModel = new CIJRequestViewModel
+                return new CIJRequestViewModel
                 {
                     ItemTypes = itemTypesItem,
-                    Departments=departmentItems,
-                    Locations=locationItems,
+                    Departments = departmentItems,
+                    Locations = locationItems,
                     BudgetProvisionList = BudgetProvisionItem,
                     PurchagePurposeList = PurchasePurposeItem,
                     OldEqupTreatmentList = oldEqupTreatmentItem
-                };
-
-                vm = new CIJMainViewModel
-                {
-                    CIJRequest = requestViewModel,
-                    Equipments = new List<CIJEquipmentViewModel>(),
-                    Vendors = new List<CIJVendorViewModel>(),
-                    Justification = new CIJJustificationViewModel()
                 };
             }
             catch (Exception)
             {
 
-                throw;
-            }
-
-            return View(vm);
-        }
-        [HttpPost]
-        public async Task<IActionResult> SaveCIJ(CIJMainViewModel cIJMainViewModel)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))
-                {
-                    cIJMainViewModel.Equipments = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
-                }
-                await _service.SaveCIJ(cIJMainViewModel);
-                return View(cIJMainViewModel);
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", ex.Message);
-                return View(cIJMainViewModel);
                 throw;
             }
         }
