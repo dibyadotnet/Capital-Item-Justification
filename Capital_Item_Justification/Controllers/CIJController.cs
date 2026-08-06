@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Capital_Item_Justification.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
+using System.Globalization;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -67,6 +68,11 @@ namespace Capital_Item_Justification.Controllers
             {
                 if (cIJMainViewModel.CIJRequest.Cijid > 0)
                 {
+                    if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))
+                    {
+                        List<CIJEquipmentViewModel>? EquipmentsJson = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
+                        cIJMainViewModel.Equipments = EquipmentsJson;
+                    }
                     await _service.UpdateCIJ(cIJMainViewModel);
                 }
                 else
@@ -110,6 +116,12 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.CIJRequest.BudgetProvisionList = dropDowns.BudgetProvisionList;
                 cIJMainViewModel.CIJRequest.PurchagePurposeList = dropDowns.PurchagePurposeList;
                 cIJMainViewModel.CIJRequest.OldEqupTreatmentList = dropDowns.OldEqupTreatmentList;
+
+                var culture = new CultureInfo("en-IN");
+                string formattedCost = string.Format(culture, "₹ {0:N2}", cIJMainViewModel.CIJRequest.TotalEquipmentCost);
+                cIJMainViewModel.CIJRequest.TotalEquipmentCostDisplay = formattedCost;
+
+                @ViewBag.TotalEstEquipmentCost = formattedCost;
 
                 return View("CreateCIJ", cIJMainViewModel);
             }

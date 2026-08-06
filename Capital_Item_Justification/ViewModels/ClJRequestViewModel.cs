@@ -42,7 +42,7 @@ namespace Capital_Item_Justification.ViewModels
         public int StatusId { get; set; }
 
         public int? CurrentWorkflowStepId { get; set; }
-
+        public string? TotalEquipmentCostDisplay { get; set; }
         public List<SelectListItem> ItemTypes { get; set; } = new();
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();

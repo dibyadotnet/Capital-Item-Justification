@@ -17,7 +17,7 @@ public partial class CijCommitteeComment
 
     public string Comments { get; set; } = null!;
 
-    public int CommentedBy { get; set; }
+    public string? CommentedBy { get; set; }
 
     public DateTime CommentDate { get; set; }
 

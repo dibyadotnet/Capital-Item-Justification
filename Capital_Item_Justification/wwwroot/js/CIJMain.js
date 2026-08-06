@@ -1,5 +1,11 @@
 ﻿let equipments = [];
-
+$(document).ready(function () {
+    debugger;
+    var equipmentJson = $("#EquipmentJson").val();
+    if (equipmentJson && equipmentJson !== "") {
+        equipments = JSON.parse(equipmentJson);
+    }
+});
 $("#ddlItemType").on("change", function () {
 
     if ($("#ddlItemType option:selected").text() === "Medical") {
@@ -13,6 +19,31 @@ $("#ddlItemType").on("change", function () {
 $("#btnEquipmentSave").on("click", function () {
     addEquipment();
 });
+function loadEquipmentTable() {
+
+    $("#tblEquipment tbody").empty();
+    $.each(equipments, function (i, item) {
+
+        $("#tblEquipment tbody").append(`
+            <tr>
+                <td>${i + 1}</td>
+                <td>${item.EquipmentName}</td>
+                <td>${item.EquipmentQty}</td>
+                <td>${item.Make}</td>
+                <td>${item.Model}</td>
+                <td>${item.EquipmentCost}</td>
+                 <td>${item.PreferenceOrder}</td>
+                <td>
+                    <button type="button" onclick="EditEquipment(${i})" class="btn btn-warning btn-sm me-1"> <i class="bi bi-pencil-square"></i></button>
+                    <button type="button" onclick="DeleteEquipment(${i})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        `);
+
+    });
+    // Store the latest equipment list in the hidden field
+    $("#EquipmentJson").val(JSON.stringify(equipments));
+}
 function addEquipment() {
     debugger;
     var equipment = {
@@ -31,9 +62,13 @@ function addEquipment() {
     else {
         equipments[index] = equipment;
     }
+
+    $("#EquipmentJson").val(JSON.stringify(equipments));
+
     $("#EquipmentIndex").val("-1");
     $("#btnEquipmentSave").text("Save");
 
+  
     loadEquipmentTable();
 
     calculateTotalEquipmentCost();
@@ -82,31 +117,7 @@ function DeleteEquipment(index) {
     calculateTotalEquipmentCost();
 
 }
-function loadEquipmentTable() {
 
-    $("#tblEquipment tbody").empty();
-    $.each(equipments, function (i, item) {
-
-        $("#tblEquipment tbody").append(`
-            <tr>
-                <td>${i + 1}</td>
-                <td>${item.EquipmentName}</td>
-                <td>${item.EquipmentQty}</td>
-                <td>${item.Make}</td>
-                <td>${item.Model}</td>
-                <td>${item.EquipmentCost}</td>
-                 <td>${item.PreferenceOrder}</td>
-                <td>
-                    <button type="button" onclick="EditEquipment(${i})" class="btn btn-warning btn-sm me-1"> <i class="bi bi-pencil-square"></i></button>
-                    <button type="button" onclick="DeleteEquipment(${i})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-        `);
-
-    });
-    // Store the latest equipment list in the hidden field
-    $("#EquipmentJson").val(JSON.stringify(equipments));
-}
 function clearEquipment() {
 
     $("#EquipmentName").val("");
@@ -131,7 +142,8 @@ function calculateTotalEquipmentCost() {
         maximumFractionDigits: 2
     })
     $("#TotalEstEquipmentCost").val(eqpCost);
-    $("#TotalEquipmentCost").val(eqpCost);
+    $("#CIJRequest_TotalEquipmentCostDisplay").val(eqpCost);
+    $("#CIJRequest_TotalEquipmentCost").val(total);
 }
 $("#btnModalClose").on("click", function () {
     clearEquipment();

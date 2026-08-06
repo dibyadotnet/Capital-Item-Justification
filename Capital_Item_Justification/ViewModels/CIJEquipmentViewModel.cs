@@ -17,5 +17,6 @@ namespace Capital_Item_Justification.ViewModels
         [Column(TypeName = "decimal(18, 2)")]
         public decimal EquipmentCost { get; set; }
         public int EquipmentQty { get; set; }
+        public string? TotalEstEquipmentCost { get; set; }
     }
 }

@@ -10,7 +10,7 @@
         </div>
     </div>
     <form id="cijForm" asp-action="Create" method="post">
-        <input type="hidden" id="EquipmentJson" asp-for="EquipmentJson" />
+        <input type="hidden" id="EquipmentJson" name="EquipmentJson" value="@Model.EquipmentJson" />
         <partial name="_RequestInformation" model="Model.CIJRequest" />
         <partial name="_EquipmentDetails" model="Model.Equipments" />
         <partial name="_JustificationDetails" model="Model" />

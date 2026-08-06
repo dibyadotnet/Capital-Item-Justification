@@ -59,11 +59,9 @@ namespace Capital_Item_Justification.Repository
                 CostCenterId = model?.CIJRequest?.CostCenterId,
                 BudgetAvailable = model.CIJRequest.BudgetProvision,
                 BudgetAmount = model.CIJRequest.BudgetAmount,
-                //HospitalLocationId = model.CIJRequest.BeneficiaryLocationId,
                 ItemTypeId = model.CIJRequest.ItemtypeId,
                 TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost,
                 RequestDate = model.CIJRequest.RequestDate,
-                //RequestDepartmentId = model.CIJRequest.BeneficiaryDepartmentId,               
                 ProjectCost = model.CIJRequest.ProjectCost,
                 Scehcost = model.CIJRequest.Scehcost,
                 PurchasePurposeId = model.CIJRequest.PurchasePurposeId,
@@ -72,6 +70,8 @@ namespace Capital_Item_Justification.Repository
                 WaitingPeriod = model.CIJRequest.WaitingPeriod,
                 StatusId = model.CIJRequest.StatusId,
                 CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId,
+                BeneficiaryDepartmentId = model.CIJRequest.BeneficiaryDepartmentId,
+                BeneficiaryLocationId = model.CIJRequest.BeneficiaryLocationId,
             };
             _context.CijRequests.Add(request);
             int row = await _context.SaveChangesAsync();
@@ -127,107 +127,138 @@ namespace Capital_Item_Justification.Repository
         }
         public async Task<string> UpdateCIJ(CIJMainViewModel model)
         {
-            if (model == null)
-                return string.Empty;
-
-            var request = await _context.CijRequests
-                .FirstOrDefaultAsync(x => x.Cijid == model.CIJRequest.Cijid);
-
-            if (request == null)
-                return "CIJ record not found.";
-
-            // Update Request
-            request.Cijnumber = model.CIJRequest.CIJSNumber;
-            request.ProjectName = model.CIJRequest.ProjectName;
-            request.CostCenterId = model.CIJRequest.CostCenterId;
-            request.BudgetAvailable = model.CIJRequest.BudgetProvision;
-            request.BudgetAmount = model.CIJRequest.BudgetAmount;
-            request.ItemTypeId = model.CIJRequest.ItemtypeId;
-            request.TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost;
-            request.RequestDate = model.CIJRequest.RequestDate;
-            request.ProjectCost = model.CIJRequest.ProjectCost;
-            request.Scehcost = model.CIJRequest.Scehcost;
-            request.PurchasePurposeId = model.CIJRequest.PurchasePurposeId;
-            request.OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId;
-            request.OldEquipmentCost = model.CIJRequest.OldEquipmentCost;
-            request.WaitingPeriod = model.CIJRequest.WaitingPeriod;
-            request.StatusId = model.CIJRequest.StatusId;
-            request.CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId;
-
-            await _context.SaveChangesAsync();
-
-            int cijId = request.Cijid;
-
-            //Update Equipment
-
-            var existingEquipments = await _context.CijEquipments
-                .Where(x => x.Cijid == cijId)
-                .ToListAsync();
-
-            _context.CijEquipments.RemoveRange(existingEquipments);
-
-            if (model.Equipments != null && model.Equipments.Any())
+            try
             {
+
+                if (model == null)
+                    return string.Empty;
+
+                var request = await _context.CijRequests
+                    .FirstOrDefaultAsync(x => x.Cijid == model.CIJRequest.Cijid);
+
+                if (request == null)
+                    return "CIJ record not found.";
+
+                // Update Request
+                request.Cijnumber = model.CIJRequest.CIJSNumber;
+                request.ProjectName = model.CIJRequest.ProjectName;
+                request.CostCenterId = model.CIJRequest.CostCenterId;
+                request.BudgetAvailable = model.CIJRequest.BudgetProvision;
+                request.BudgetAmount = model.CIJRequest.BudgetAmount;
+                request.ItemTypeId = model.CIJRequest.ItemtypeId;
+                request.TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost;
+                request.RequestDate = model.CIJRequest.RequestDate;
+                request.ProjectCost = model.CIJRequest.ProjectCost;
+                request.Scehcost = model.CIJRequest.Scehcost;
+                request.PurchasePurposeId = model.CIJRequest.PurchasePurposeId;
+                request.OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId;
+                request.OldEquipmentCost = model.CIJRequest.OldEquipmentCost;
+                request.WaitingPeriod = model.CIJRequest.WaitingPeriod;
+                request.StatusId = model.CIJRequest.StatusId;
+                request.CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId;
+                request.BeneficiaryDepartmentId = model.CIJRequest.BeneficiaryDepartmentId;
+                request.BeneficiaryLocationId = model.CIJRequest.BeneficiaryLocationId;
+
+                await _context.SaveChangesAsync();
+
+                int cijId = request.Cijid;
+
+                //Update Equipment
+                // Existing equipment IDs coming from UI
+                var equipmentIds = model.Equipments.Where(x => x.EquipmentId > 0).Select(x => x.EquipmentId).ToList();
+
+
+                // Delete removed equipments
+                var removedEquipments = await _context.CijEquipments
+                    .Where(x => x.Cijid == cijId && !equipmentIds.Contains(x.EquipmentId))
+                    .ToListAsync();
+
+                if (removedEquipments.Any())
+                {
+                    _context.CijEquipments.RemoveRange(removedEquipments);
+                }
+
                 foreach (var item in model.Equipments)
                 {
-                    _context.CijEquipments.Add(new CijEquipment
+                    if (item.EquipmentId > 0)
                     {
-                        Cijid = cijId,
-                        EquipmentName = item.EquipmentName,
-                        Qty = item.EquipmentQty,
-                        Make = item.Make,
-                        Model = item.Model,
-                        EquipmentCost = item.EquipmentCost,
-                        PreferenceOrder = item.PreferenceOrder
-                    });
+                        var existingEquipment = await _context.CijEquipments.Where(x => x.EquipmentId == item.EquipmentId).FirstOrDefaultAsync();
+                        if (existingEquipment != null)
+                        {
+                            //existingEquipment.Cijid = cijId;
+                            existingEquipment.EquipmentName = item.EquipmentName;
+                            existingEquipment.Qty = item.EquipmentQty;
+                            existingEquipment.Make = item.Make;
+                            existingEquipment.Model = item.Model;
+                            existingEquipment.EquipmentCost = item.EquipmentCost;
+                            existingEquipment.PreferenceOrder = item.PreferenceOrder;
+                        }
+                    }
+                    else
+                    {
+                        CijEquipment cijEquipment = new CijEquipment
+                        {
+                            Cijid = cijId,
+                            EquipmentName = item.EquipmentName,
+                            Qty = item.EquipmentQty,
+                            Make = item.Make,
+                            Model = item.Model,
+                            EquipmentCost = item.EquipmentCost,
+                            PreferenceOrder = item.PreferenceOrder
+                        };
+                        _context.CijEquipments.Add(cijEquipment);
+                    }
                 }
-            }
+                await _context.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
+                // Update Justification
 
-            // Update Justification
+                var justification = await _context.CijJustifications
+                    .FirstOrDefaultAsync(x => x.Cijid == cijId);
 
-            var justification = await _context.CijJustifications
-                .FirstOrDefaultAsync(x => x.Cijid == cijId);
-
-            if (justification == null)
-            {
-                justification = new CijJustification
+                if (justification == null)
                 {
-                    Cijid = cijId
-                };
+                    justification = new CijJustification
+                    {
+                        Cijid = cijId
+                    };
 
-                _context.CijJustifications.Add(justification);
-            }
+                    _context.CijJustifications.Add(justification);
+                }
 
-            justification.Roinumber = model.Justification.Roinumber;
-            justification.IsPurchasedEarlier = model.Justification.IsPurchasedEarlier;
-            justification.Justification = model.Justification.Justification;
-            justification.Remarks = model.Justification.Remarks;
+                justification.Roinumber = model.Justification.Roinumber;
+                justification.IsPurchasedEarlier = model.Justification.IsPurchasedEarlier;
+                justification.Justification = model.Justification.Justification;
+                justification.Remarks = model.Justification.Remarks;
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-            //Update Committee Comment
+                //Update Committee Comment
 
-            var committeeComment = await _context.CijCommitteeComments
-                .FirstOrDefaultAsync(x => x.Cijid == cijId);
+                var committeeComment = await _context.CijCommitteeComments.FirstOrDefaultAsync(x => x.Cijid == cijId);
 
-            if (committeeComment == null)
-            {
-                committeeComment = new CijCommitteeComment
+                if (committeeComment == null)
                 {
-                    Cijid = cijId
-                };
+                    committeeComment = new CijCommitteeComment
+                    {
+                        Cijid = cijId
+                    };
 
-                _context.CijCommitteeComments.Add(committeeComment);
+                    _context.CijCommitteeComments.Add(committeeComment);
+                }
+
+                committeeComment.CommentDate = DateTime.Now;
+                committeeComment.Comments = model.CommitteeComment.Comments;
+
+                await _context.SaveChangesAsync();
+
+                return "Success";
+
             }
-
-            committeeComment.CommentDate = DateTime.Now;
-            committeeComment.Comments = model.CommitteeComment.Comments;
-
-            await _context.SaveChangesAsync();
-
-            return "Success";
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
         public async Task<List<DashboardViewModel>> GetDashboard()
         {
@@ -296,7 +327,9 @@ namespace Capital_Item_Justification.Repository
                 OldEquipmentCost = request.OldEquipmentCost,
                 WaitingPeriod = request.WaitingPeriod,
                 StatusId = request.StatusId,
-                CurrentWorkflowStepId = request.CurrentWorkflowStepId
+                CurrentWorkflowStepId = request.CurrentWorkflowStepId,
+                BeneficiaryDepartmentId = request.BeneficiaryDepartmentId,
+                BeneficiaryLocationId = request.BeneficiaryLocationId
             };
 
             model.Equipments = await _context.CijEquipments
@@ -309,7 +342,8 @@ namespace Capital_Item_Justification.Repository
                     Make = x.Make,
                     Model = x.Model,
                     EquipmentCost = x.EquipmentCost,
-                    PreferenceOrder = x.PreferenceOrder
+                    PreferenceOrder = x.PreferenceOrder,
+                    Cijid = x.Cijid,
                 }).ToListAsync();
 
             model.EquipmentJson = JsonSerializer.Serialize(model.Equipments);
