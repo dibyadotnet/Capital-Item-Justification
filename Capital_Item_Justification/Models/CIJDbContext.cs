@@ -49,6 +49,8 @@ public partial class CIJDbContext : IdentityDbContext
 
     public virtual DbSet<CijStatus> CijStatuses { get; set; }
     public virtual DbSet<CijLocation> CijLocations { get; set; }
+
+    public virtual DbSet<CijProject> CijProjects { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CIJConnection");
 
@@ -68,6 +70,7 @@ public partial class CIJDbContext : IdentityDbContext
 
         modelBuilder.Entity<CijAttachment>(entity =>
         {
+            entity.HasKey(e => e.AttachmentId);
             entity.Property(e => e.AttachmentId).ValueGeneratedOnAdd();
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
@@ -225,6 +228,14 @@ public partial class CIJDbContext : IdentityDbContext
             entity.HasKey(e => e.StatusId).HasName("PK__CIJ_Stat__C8EE2063093C31B2");
 
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<CijProject>(entity =>
+        {
+            entity.HasKey(e => e.ProjectId).HasName("PK__Project__761ABEF0639F6D83");
+
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 

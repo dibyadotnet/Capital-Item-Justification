@@ -19,8 +19,7 @@ public partial class CijRequest
 
     public DateOnly RequestDate { get; set; }
 
-    [StringLength(30)]
-    public string? ProjectName { get; set; }
+    public int? ProjectId { get; set; }
 
     public int HospitalLocationId { get; set; }
 

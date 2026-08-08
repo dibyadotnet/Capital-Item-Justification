@@ -1,0 +1,130 @@
+﻿<nav class="app-header navbar navbar-expand bg-body">
+
+    <div class="container-fluid">
+
+        <!-- Left side -->
+        <ul class="navbar-nav">
+
+            <!-- Sidebar Toggle -->
+            <li class="nav-item">
+
+                <a class="nav-link"
+                   data-lte-toggle="sidebar"
+                   href="#"
+                   role="button">
+
+                    <i class="bi bi-list"></i>
+
+                </a>
+
+            </li>
+
+            <!-- Home -->
+            <li class="nav-item d-none d-md-block">
+
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   class="nav-link">
+
+                    Home
+
+                </a>
+
+            </li>
+
+        </ul>
+
+
+        <!-- Right side -->
+        <ul class="navbar-nav ms-auto">
+
+            <!-- Notifications -->
+            <li class="nav-item dropdown">
+
+                <a class="nav-link"
+                   data-bs-toggle="dropdown"
+                   href="#">
+
+                    <i class="fa-regular fa-bell"></i>
+
+                </a>
+
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+
+                    <span class="dropdown-item dropdown-header">
+                        Notifications
+                    </span>
+
+                    <div class="dropdown-divider"></div>
+
+                    <a href="#" class="dropdown-item">
+
+                        <i class="fa-solid fa-envelope me-2"></i>
+
+                        No new notifications
+
+                    </a>
+
+                </div>
+
+            </li>
+
+
+            <!-- User Menu -->
+            <li class="nav-item dropdown user-menu">
+
+                <a href="#"
+                   class="nav-link dropdown-toggle"
+                   data-bs-toggle="dropdown">
+
+                    <i class="fa-solid fa-user-circle me-1"></i>
+
+                    <span class="d-none d-md-inline">
+                        User
+                    </span>
+
+                </a>
+
+
+                <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+
+                    <!-- User Header -->
+                    <li class="user-header text-bg-primary">
+
+                        <i class="fa-solid fa-user fa-3x mb-2"></i>
+
+                        <p>
+                            CIJ User
+                        </p>
+
+                    </li>
+
+
+                    <!-- User Footer -->
+                    <li class="user-footer">
+
+                        <a href="#"
+                           class="btn btn-default btn-flat">
+
+                            Profile
+
+                        </a>
+
+                        <a href="#"
+                           class="btn btn-default btn-flat float-end">
+
+                            Sign out
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </li>
+
+        </ul>
+
+    </div>
+
+</nav>

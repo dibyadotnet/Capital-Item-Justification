@@ -1,0 +1,130 @@
+﻿@model Capital_Item_Justification.ViewModels.CIJMainViewModel
+
+<div class="card shadow-sm border-0 rounded-2 mt-1">
+    <div class="card-body p-2">
+        <h5 class="text-primary fw-bold mb-2">
+            Vendor Attachments
+        </h5>
+        <div class="row g-2">
+
+            <!-- Upload Attachment -->
+            <div class="col-md-5">
+
+                <div class="border rounded p-3 h-100">
+
+                    @*  <h5 class="mb-3">
+                    <i class="fas fa-upload me-2"></i>
+                    Attach File
+                    </h5> *@
+
+                    <div class="mb-3">
+                        <label for="attachmentFile"
+                               class="form-label fw-semibold">
+                            Select File
+                        </label>
+
+                        <input type="file"
+                               asp-for="Attachments"
+                               class="form-control"
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple />
+
+                        <small class="text-muted">
+                            Allowed: PDF, Word, Excel, JPG, PNG
+                        </small>
+                    </div>
+
+                    @*  <div class="mb-3">
+                    <label for="attachmentDescription"
+                    class="form-label fw-semibold">
+                    Description
+                    </label>
+
+                    <textarea id="attachmentDescription"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Enter attachment description"></textarea>
+                    </div> *@
+
+                    @*  <div class="text-end">
+                    <button type="button"
+                    id="btnUploadAttachment"
+                    class="btn btn-primary custom-btn">
+
+                    <i class="fas fa-upload me-1"></i>
+                    Upload
+
+                    </button>
+
+                    </div> *@
+
+                </div>
+
+            </div>
+
+
+            <!-- Uploaded Files -->
+            <div class="col-md-7">
+
+                <div class="border rounded p-3 h-100">
+
+                    <span class="mb-2">
+                        <i class="fas fa-folder-open me-2"></i>
+                        Uploaded Files
+                    </span>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-0 table-sm" id="tblAttachments">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="d-none"> </th>
+                                    <th class="d-none"></th>
+                                    <th>File Name</th>
+                                    <th class="text-center" style="width:100px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attachmentTableBody">
+                                @if (Model != null && Model.AttachmentVm != null && Model.AttachmentVm.Count > 0)
+                                {
+                                    @foreach (var item in Model.AttachmentVm)
+                                    {
+                                        <tr>
+                                            <td class="d-none">@item.AttachmentId</td>
+                                            <td class="d-none">@item.Cijid</td>
+                                            <td>@item.FileName</td>
+                                            <td align="center">
+                                                <a title="Download" href="@Url.Action("DownloadAttachment", "CIJ", new { attachmentId = item.AttachmentId,cijId=item.Cijid })">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                                &nbsp;&nbsp;
+                                                <a onclick="deleteAttachment(@item.AttachmentId)" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr id="noAttachmentRow">
+                                        <td colspan="3"
+                                            class="text-center text-muted py-2">
+                                            <i class="fas fa-file-upload fa-2x d-block mb-2"></i>
+                                            No files uploaded.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

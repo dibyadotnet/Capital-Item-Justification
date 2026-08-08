@@ -4,6 +4,8 @@ using Capital_Item_Justification.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
+using Capital_Item_Justification.Models;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -42,7 +44,8 @@ namespace Capital_Item_Justification.Controllers
                     Locations = dropDowns.Locations,
                     BudgetProvisionList = dropDowns.BudgetProvisionList,
                     PurchagePurposeList = dropDowns.PurchagePurposeList,
-                    OldEqupTreatmentList = dropDowns.OldEqupTreatmentList
+                    OldEqupTreatmentList = dropDowns.OldEqupTreatmentList,
+                    ProjectList = dropDowns.ProjectList
                 };
 
                 vm = new CIJMainViewModel
@@ -74,21 +77,30 @@ namespace Capital_Item_Justification.Controllers
                         cIJMainViewModel.Equipments = EquipmentsJson;
                     }
                     await _service.UpdateCIJ(cIJMainViewModel);
+                    TempData["ToastMessage"] = "CIJ updated successfully.";
+                    TempData["ToastType"] = "success";
                 }
                 else
                 {
+                    int? locationId = cIJMainViewModel.CIJRequest.CostCenterId;
+                    string cijNumber = await _service.GenerateCIJNumber(locationId);
+                    cIJMainViewModel.CIJRequest.CIJSNumber = cijNumber;
                     if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))
                     {
                         cIJMainViewModel.Equipments = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
                     }
                     await _service.SaveCIJ(cIJMainViewModel);
+                    TempData["ToastMessage"] = "CIJ saved successfully.";
+                    TempData["ToastType"] = "success";
                 }
                 return RedirectToAction("Dashboard", "CIJ");
             }
             catch (Exception ex)
             {
+                TempData["ToastMessage"] = "Error while saving CIJ.";
+                TempData["ToastType"] = "error";
                 ModelState.AddModelError("", ex.Message);
-                return View(cIJMainViewModel);
+                return View("CreateCIJ", cIJMainViewModel);
             }
         }
 
@@ -116,12 +128,17 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.CIJRequest.BudgetProvisionList = dropDowns.BudgetProvisionList;
                 cIJMainViewModel.CIJRequest.PurchagePurposeList = dropDowns.PurchagePurposeList;
                 cIJMainViewModel.CIJRequest.OldEqupTreatmentList = dropDowns.OldEqupTreatmentList;
+                cIJMainViewModel.CIJRequest.ProjectList = dropDowns.ProjectList;
 
                 var culture = new CultureInfo("en-IN");
                 string formattedCost = string.Format(culture, "₹ {0:N2}", cIJMainViewModel.CIJRequest.TotalEquipmentCost);
                 cIJMainViewModel.CIJRequest.TotalEquipmentCostDisplay = formattedCost;
 
                 @ViewBag.TotalEstEquipmentCost = formattedCost;
+
+                //get attachments
+                List<AttachmentViewModel> model = await _service.GetAttachmentsById(cijId);
+                cIJMainViewModel.AttachmentVm = model;
 
                 return View("CreateCIJ", cIJMainViewModel);
             }
@@ -144,6 +161,7 @@ namespace Capital_Item_Justification.Controllers
                     Value = x.ItemTypeId.ToString(),
                     Text = x.ItemTypeCode
                 }).ToList();
+
                 //Department master
                 var departmentsList = await _service.GetDepartment();
                 var departmentItems = departmentsList.Select(x => new SelectListItem
@@ -180,6 +198,14 @@ namespace Capital_Item_Justification.Controllers
                     Text = x.TreatmentName
                 }).ToList();
 
+                //Project Master
+                var projects = await _service.GetProjectCode();
+                var projectItems = projects.Select(x => new SelectListItem
+                {
+                    Value = x.ProjectId.ToString(),
+                    Text = x.ProjectCode
+                }).ToList();
+
                 return new CIJRequestViewModel
                 {
                     ItemTypes = itemTypesItem,
@@ -187,8 +213,74 @@ namespace Capital_Item_Justification.Controllers
                     Locations = locationItems,
                     BudgetProvisionList = BudgetProvisionItem,
                     PurchagePurposeList = PurchasePurposeItem,
-                    OldEqupTreatmentList = oldEqupTreatmentItem
+                    OldEqupTreatmentList = oldEqupTreatmentItem,
+                    ProjectList = projectItems
                 };
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> DownloadAttachment(int attachmentId, int cijId)
+        {
+            try
+            {
+                var attachments = await _service.GetAttachmentsById(cijId);
+                if (attachments == null && attachments?.Count == 0)
+                    return NotFound("Attachment file not found.");
+
+                var attachment = attachments?.Where(x => x.AttachmentId == attachmentId).FirstOrDefault();
+
+                if (attachment == null)
+                {
+                    return NotFound();
+                }
+
+                if (string.IsNullOrEmpty(attachment.FilePath) ||
+                    !System.IO.File.Exists(attachment.FilePath))
+                {
+                    return NotFound("Attachment file not found.");
+                }
+
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(attachment.FilePath);
+
+                return File(
+                    fileBytes,
+                    "application/octet-stream",
+                    attachment.FileName
+                );
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAttachment(int attachmentId)
+        {
+            try
+            {
+                int deleteStatus = await _service.DeleteAttachment(attachmentId);
+                if (deleteStatus == 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Attachment not found."
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Attachment deleted successfully."
+                    });
+                }
             }
             catch (Exception)
             {

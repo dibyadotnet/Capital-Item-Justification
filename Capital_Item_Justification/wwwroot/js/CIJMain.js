@@ -113,6 +113,7 @@ function DeleteEquipment(index) {
         return;
 
     equipments.splice(index, 1);
+
     loadEquipmentTable();
     calculateTotalEquipmentCost();
 
@@ -153,3 +154,26 @@ $("#btnModalCancel").on("click", function () {
     clearEquipment();
     $("#EquipmentIndex").val("-1");
 });
+function deleteAttachment(attachmentId) {
+    if (!confirm("Are you sure you want to delete this attachment?")) {
+        return;
+    }
+    $.ajax({
+        url: '/CIJ/DeleteAttachment',
+        type: 'POST',
+        data: {
+            attachmentId: attachmentId
+        },
+        success: function (response) {
+            debugger;
+            if (response.success) {
+                location.reload();
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function () {
+            alert("Error while deleting attachment.");
+        }
+    });
+}

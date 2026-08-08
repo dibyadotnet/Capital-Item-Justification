@@ -10,6 +10,7 @@ namespace Capital_Item_Justification.Models;
 [Table("CIJ_Attachment")]
 public partial class CijAttachment
 {
+    [Key]
     public int AttachmentId { get; set; }
 
     [Column("CIJId")]

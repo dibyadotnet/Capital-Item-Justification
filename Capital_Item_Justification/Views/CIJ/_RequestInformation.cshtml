@@ -24,8 +24,10 @@
                 </select>
             </div>
             <div class="col">
-                <label class="form-label">Project(Code)</label>
-                <input asp-for="ProjectName" class="form-control" />
+                <label class="form-label">Project Code</label>
+                <select asp-for="ProjectId" asp-items="Model.ProjectList" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
             </div>
         </div>
         <div class="row g-4">

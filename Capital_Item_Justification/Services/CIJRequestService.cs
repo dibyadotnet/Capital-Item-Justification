@@ -3,6 +3,8 @@ using Capital_Item_Justification.Models;
 using Capital_Item_Justification.Repository.Interfaces;
 using Capital_Item_Justification.Services.Interfaces;
 using Capital_Item_Justification.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace Capital_Item_Justification.Services
 {
@@ -49,5 +51,22 @@ namespace Capital_Item_Justification.Services
         {
             return await _cijMainRepository.UpdateCIJ(cIJMainViewModel);
         }
+        public async Task<string> GenerateCIJNumber(int? locationId)
+        {
+            return await _cijMainRepository.GenerateCIJNumber(locationId);
+        }
+        public async Task<List<CijProject>> GetProjectCode()
+        {
+            return await _cijMainRepository.GetProjectCode();
+        }
+        public async Task<List<AttachmentViewModel>> GetAttachmentsById(int cijId)
+        {
+            return await _cijMainRepository.GetAttachmentsById(cijId);
+        }
+        public async Task<int> DeleteAttachment(int attachmentId)
+        {
+            return await _cijMainRepository.DeleteAttachment(attachmentId);
+        }
+        
     }
 }
