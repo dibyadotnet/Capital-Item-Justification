@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Capital_Item_Justification.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
+using System.Globalization;
+using Microsoft.EntityFrameworkCore;
+using Capital_Item_Justification.Models;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -32,6 +35,125 @@ namespace Capital_Item_Justification.Controllers
             CIJMainViewModel vm = new();
             try
             {
+                CIJRequestViewModel dropDowns = await PopulateDropDownList();
+
+                var requestViewModel = new CIJRequestViewModel
+                {
+                    ItemTypes = dropDowns.ItemTypes,
+                    Departments = dropDowns.Departments,
+                    Locations = dropDowns.Locations,
+                    BudgetProvisionList = dropDowns.BudgetProvisionList,
+                    PurchagePurposeList = dropDowns.PurchagePurposeList,
+                    OldEqupTreatmentList = dropDowns.OldEqupTreatmentList,
+                    ProjectList = dropDowns.ProjectList
+                };
+
+                vm = new CIJMainViewModel
+                {
+                    CIJRequest = requestViewModel,
+                    Equipments = new List<CIJEquipmentViewModel>(),
+                    Vendors = new List<CIJVendorViewModel>(),
+                    Justification = new CIJJustificationViewModel()
+                };
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return View(vm);
+        }
+        [HttpPost]
+        public async Task<IActionResult> SaveCIJ(CIJMainViewModel cIJMainViewModel)
+        {
+            try
+            {
+                if (cIJMainViewModel.CIJRequest.Cijid > 0)
+                {
+                    if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))
+                    {
+                        List<CIJEquipmentViewModel>? EquipmentsJson = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
+                        cIJMainViewModel.Equipments = EquipmentsJson;
+                    }
+                    await _service.UpdateCIJ(cIJMainViewModel);
+                    TempData["ToastMessage"] = "CIJ updated successfully.";
+                    TempData["ToastType"] = "success";
+                }
+                else
+                {
+                    int? locationId = cIJMainViewModel.CIJRequest.CostCenterId;
+                    string cijNumber = await _service.GenerateCIJNumber(locationId);
+                    cIJMainViewModel.CIJRequest.CIJSNumber = cijNumber;
+                    if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))
+                    {
+                        cIJMainViewModel.Equipments = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
+                    }
+                    await _service.SaveCIJ(cIJMainViewModel);
+                    TempData["ToastMessage"] = "CIJ saved successfully.";
+                    TempData["ToastType"] = "success";
+                }
+                return RedirectToAction("Dashboard", "CIJ");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Error while saving CIJ.";
+                TempData["ToastType"] = "error";
+                ModelState.AddModelError("", ex.Message);
+                return View("CreateCIJ", cIJMainViewModel);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int cijId)
+        {
+            try
+            {
+                if (cijId <= 0)
+                {
+                    return BadRequest();
+                }
+
+                var cIJMainViewModel = await _service.GetCIJById(cijId);
+
+                if (cIJMainViewModel == null)
+                {
+                    return NotFound();
+                }
+                CIJRequestViewModel dropDowns = await PopulateDropDownList();
+
+                cIJMainViewModel.CIJRequest.ItemTypes = dropDowns.ItemTypes;
+                cIJMainViewModel.CIJRequest.Departments = dropDowns.Departments;
+                cIJMainViewModel.CIJRequest.Locations = dropDowns.Locations;
+                cIJMainViewModel.CIJRequest.BudgetProvisionList = dropDowns.BudgetProvisionList;
+                cIJMainViewModel.CIJRequest.PurchagePurposeList = dropDowns.PurchagePurposeList;
+                cIJMainViewModel.CIJRequest.OldEqupTreatmentList = dropDowns.OldEqupTreatmentList;
+                cIJMainViewModel.CIJRequest.ProjectList = dropDowns.ProjectList;
+
+                var culture = new CultureInfo("en-IN");
+                string formattedCost = string.Format(culture, "₹ {0:N2}", cIJMainViewModel.CIJRequest.TotalEquipmentCost);
+                cIJMainViewModel.CIJRequest.TotalEquipmentCostDisplay = formattedCost;
+
+                @ViewBag.TotalEstEquipmentCost = formattedCost;
+
+                //get attachments
+                List<AttachmentViewModel> model = await _service.GetAttachmentsById(cijId);
+                cIJMainViewModel.AttachmentVm = model;
+
+                return View("CreateCIJ", cIJMainViewModel);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(new CIJMainViewModel());
+            }
+        }
+
+
+        private async Task<CIJRequestViewModel> PopulateDropDownList()
+        {
+            try
+            {
                 //Item Type Master
                 var itemTypes = await _service.GetItemType();
                 var itemTypesItem = itemTypes.Select(x => new SelectListItem
@@ -39,6 +161,7 @@ namespace Capital_Item_Justification.Controllers
                     Value = x.ItemTypeId.ToString(),
                     Text = x.ItemTypeCode
                 }).ToList();
+
                 //Department master
                 var departmentsList = await _service.GetDepartment();
                 var departmentItems = departmentsList.Select(x => new SelectListItem
@@ -75,23 +198,23 @@ namespace Capital_Item_Justification.Controllers
                     Text = x.TreatmentName
                 }).ToList();
 
+                //Project Master
+                var projects = await _service.GetProjectCode();
+                var projectItems = projects.Select(x => new SelectListItem
+                {
+                    Value = x.ProjectId.ToString(),
+                    Text = x.ProjectCode
+                }).ToList();
 
-                var requestViewModel = new CIJRequestViewModel
+                return new CIJRequestViewModel
                 {
                     ItemTypes = itemTypesItem,
-                    Departments=departmentItems,
-                    Locations=locationItems,
+                    Departments = departmentItems,
+                    Locations = locationItems,
                     BudgetProvisionList = BudgetProvisionItem,
                     PurchagePurposeList = PurchasePurposeItem,
-                    OldEqupTreatmentList = oldEqupTreatmentItem
-                };
-
-                vm = new CIJMainViewModel
-                {
-                    CIJRequest = requestViewModel,
-                    Equipments = new List<CIJEquipmentViewModel>(),
-                    Vendors = new List<CIJVendorViewModel>(),
-                    Justification = new CIJJustificationViewModel()
+                    OldEqupTreatmentList = oldEqupTreatmentItem,
+                    ProjectList = projectItems
                 };
             }
             catch (Exception)
@@ -99,25 +222,69 @@ namespace Capital_Item_Justification.Controllers
 
                 throw;
             }
-
-            return View(vm);
         }
-        [HttpPost]
-        public async Task<IActionResult> SaveCIJ(CIJMainViewModel cIJMainViewModel)
+        [HttpGet]
+        public async Task<IActionResult> DownloadAttachment(int attachmentId, int cijId)
         {
             try
             {
-                if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))
+                var attachments = await _service.GetAttachmentsById(cijId);
+                if (attachments == null && attachments?.Count == 0)
+                    return NotFound("Attachment file not found.");
+
+                var attachment = attachments?.Where(x => x.AttachmentId == attachmentId).FirstOrDefault();
+
+                if (attachment == null)
                 {
-                    cIJMainViewModel.Equipments = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
+                    return NotFound();
                 }
-                await _service.SaveCIJ(cIJMainViewModel);
-                return View(cIJMainViewModel);
+
+                if (string.IsNullOrEmpty(attachment.FilePath) ||
+                    !System.IO.File.Exists(attachment.FilePath))
+                {
+                    return NotFound("Attachment file not found.");
+                }
+
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(attachment.FilePath);
+
+                return File(
+                    fileBytes,
+                    "application/octet-stream",
+                    attachment.FileName
+                );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View(cIJMainViewModel);
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAttachment(int attachmentId)
+        {
+            try
+            {
+                int deleteStatus = await _service.DeleteAttachment(attachmentId);
+                if (deleteStatus == 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Attachment not found."
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Attachment deleted successfully."
+                    });
+                }
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
         }

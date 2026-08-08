@@ -7,6 +7,7 @@
         <h5 class="text-primary fw-bold mb-2">
             Request Information
         </h5>
+        <input type="hidden" id="cijId" asp-for="Cijid" />
         <div class="row">
             <div class="col">
                 <label class="form-label">Serial.NO</label>
@@ -23,8 +24,10 @@
                 </select>
             </div>
             <div class="col">
-                <label class="form-label">Project(Code)</label>
-                <input asp-for="ProjectName" class="form-control" />
+                <label class="form-label">Project Code</label>
+                <select asp-for="ProjectId" asp-items="Model.ProjectList" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
             </div>
         </div>
         <div class="row g-4">
@@ -46,7 +49,8 @@
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Eqiupment Cost</label>
-                <input asp-for="TotalEquipmentCost" class="form-control" readonly />
+                <input asp-for="TotalEquipmentCostDisplay" class="form-control" readonly />
+                <input asp-for="TotalEquipmentCost" type="hidden" />
             </div>
            
         </div>

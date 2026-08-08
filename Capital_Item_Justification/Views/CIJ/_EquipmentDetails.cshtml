@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Capital_Item_Justification.ViewModels.CIJEquipmentViewModel>
+﻿@model List<Capital_Item_Justification.ViewModels.CIJEquipmentViewModel>
 
 <div class="card shadow-sm border-0 rounded-2 mt-1">
     <div class="card-body p-2">
@@ -9,6 +9,8 @@
             <table class="table table-striped table-bordered table-hover table-sm" id="tblEquipment" width="100%">
                 <thead>
                     <tr>
+                        <th class="d-none"></th>
+                        <th class="d-none"></th>
                         <th width="60">#</th>
                         <th>Equipment Name</th>
                         <th>Qty</th>
@@ -21,33 +23,29 @@
                 </thead>
                 <tbody>
                     @if (Model !=null && Model.Count() > 0)
-                    {
-                        int i = 0;
-                        {
-                            i = 1;
-                        }
+                    {                      
 
-                        @foreach (var item in Model)
+                        @for (int i = 0; i < Model.Count(); i++)
                         {
                             <tr>
-                                <td>@i</td>
-                                <td>@item.EquipmentName</td>
-                                <td>@item.EquipmentQty</td>
-                                <td>@item.Make</td>
-                                <td>@item.Model</td>
-                                <td>@item.EquipmentCost</td>
-                                <td>@item.PreferenceOrder</td>
+                                <td class="d-none">@Model[i].EquipmentId</td>
+                                <td class="d-none">@Model[i].Cijid</td>
+                                <td>@(i + 1)</td>
+                                <td>@Model[i].EquipmentName</td>
+                                <td>@Model[i].EquipmentQty</td>
+                                <td>@Model[i].Make</td>
+                                <td>@Model[i].Model</td>
+                                <td>@Model[i].EquipmentCost</td>
+                                <td>@Model[i].PreferenceOrder</td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning me-1" onclick="EditEquipment(1)">
+                                    <button type="button" class="btn btn-sm btn-warning me-1" onclick="EditEquipment(@i)">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger" onclick="DeleteEquipment(1)">
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="DeleteEquipment(@i)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>
                             </tr>
-
-                            i++;
                         }
                     }
                     else
@@ -62,12 +60,12 @@
             </table>
         </div>
         <div class="equipment-footer">
-            <button type="button" class="btn btn-primary" id="btnAddEquipment" data-bs-toggle="modal" data-bs-target="#equipmentModal">
+            <button type="button" class="btn btn-primary btn-addEqup" id="btnAddEquipment" data-bs-toggle="modal" data-bs-target="#equipmentModal">
                 Add Equipment
             </button>
             <div class="equipment-total">
                 <span>Total Estimated Equipment Cost</span>
-                <input type="text" id="TotalEstEquipmentCost" class="form-control" value="₹ 0.00" readonly />
+                <input type="text" id="TotalEstEquipmentCost" class="form-control" value="@(ViewBag.TotalEstEquipmentCost ?? "₹ 0.00")" readonly />
             </div>
         </div>
     </div>

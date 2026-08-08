@@ -17,15 +17,15 @@ public partial class CijCommitteeComment
 
     public string Comments { get; set; } = null!;
 
-    public int CommentedBy { get; set; }
+    public string? CommentedBy { get; set; }
 
     public DateTime CommentDate { get; set; }
 
-    public int CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
-    public int? ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
 
     public DateTime? ModifiedDate { get; set; }
 

@@ -1,6 +1,7 @@
 ﻿using Capital_Item_Justification.Data;
 using Capital_Item_Justification.Models;
 using Capital_Item_Justification.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Capital_Item_Justification.Repository.Interfaces
 {
@@ -13,5 +14,11 @@ namespace Capital_Item_Justification.Repository.Interfaces
         Task<List<DashboardViewModel>> GetDashboard();
         Task<List<CijLocation>> GetLocation();
         Task<List<CijDepartment>> GetDepartment();
+        Task<CIJMainViewModel> GetCIJById(int cijId);
+        Task<string> UpdateCIJ(CIJMainViewModel cIJMainViewModel);
+        Task<string> GenerateCIJNumber(int? locationId);
+        Task<List<CijProject>> GetProjectCode();
+        Task<List<AttachmentViewModel>> GetAttachmentsById(int cijId);
+        Task<int> DeleteAttachment(int attachmentId);
     }
 }

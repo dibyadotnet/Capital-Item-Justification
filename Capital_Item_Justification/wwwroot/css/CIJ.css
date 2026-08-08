@@ -109,7 +109,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 10px;
     gap: 20px;
 }
 .equipment-total {
@@ -163,4 +163,8 @@
 .custom-btn {
     border-radius: 4px;
     padding: 6px 14px;
+}
+.btn-addEqup {
+    border-radius: 4px;
+    padding: 4px 4px;
 }

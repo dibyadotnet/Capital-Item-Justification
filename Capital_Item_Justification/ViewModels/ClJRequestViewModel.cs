@@ -9,9 +9,9 @@ namespace Capital_Item_Justification.ViewModels
         public int Cijid { get; set; }
         public string CIJSNumber { get; set; } = null!;
         public DateOnly RequestDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-        public string? ProjectName{ get; set; }
+        public int? ProjectId{ get; set; }
         public int? CostCenterId { get; set; }
-        public bool BudgetProvision { get; set; }
+        public string? BudgetProvision { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? BudgetAmount { get; set; }
@@ -42,12 +42,13 @@ namespace Capital_Item_Justification.ViewModels
         public int StatusId { get; set; }
 
         public int? CurrentWorkflowStepId { get; set; }
-
+        public string? TotalEquipmentCostDisplay { get; set; }
         public List<SelectListItem> ItemTypes { get; set; } = new();
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> BudgetProvisionList { get; set; } = new();
         public List<SelectListItem> PurchagePurposeList { get; set; } = new();
         public List<SelectListItem> OldEqupTreatmentList { get; set; } = new();
+        public IEnumerable<SelectListItem> ProjectList { get; set; } = new List<SelectListItem>();
     }
 }

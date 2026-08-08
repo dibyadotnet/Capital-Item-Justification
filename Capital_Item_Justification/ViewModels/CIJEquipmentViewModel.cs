@@ -16,6 +16,7 @@ namespace Capital_Item_Justification.ViewModels
         public int? PreferenceOrder { get; set; }
         [Column(TypeName = "decimal(18, 2)")]
         public decimal EquipmentCost { get; set; }
-        public decimal EquipmentQty { get; set; }
+        public int EquipmentQty { get; set; }
+        public string? TotalEstEquipmentCost { get; set; }
     }
 }

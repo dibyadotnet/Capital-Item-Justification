@@ -19,12 +19,11 @@ public partial class CijRequest
 
     public DateOnly RequestDate { get; set; }
 
-    [StringLength(30)]
-    public string? ProjectName { get; set; }
+    public int? ProjectId { get; set; }
 
     public int HospitalLocationId { get; set; }
 
-    public bool BudgetAvailable { get; set; }
+    public string? BudgetAvailable { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal? BudgetAmount { get; set; }

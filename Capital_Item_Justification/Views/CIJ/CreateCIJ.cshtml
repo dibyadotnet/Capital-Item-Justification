@@ -1,22 +1,23 @@
 ﻿@model Capital_Item_Justification.ViewModels.CIJMainViewModel
 
-<div class="container-fluid mt-3">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5>Create Capital Item Justification</h5>
-        <div>
-            <button type="submit" form="cijForm" class="btn btn-success"> Submit </button>
-            <button formmethod="post" type="submit" form="cijForm" formaction="@Url.Action("SaveCIJ","CIJ")" class="btn btn-warning">Save Draft</button>
-            <a asp-action="Index" class="btn btn-secondary"> Cancel </a>
-        </div>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5>Create Capital Item Justification</h5>       
     </div>
-    <form id="cijForm" asp-action="Create" method="post">
-        <input type="hidden" id="EquipmentJson" asp-for="EquipmentJson" />
+    <form id="cijForm" asp-action="Create" method="post" enctype="multipart/form-data">
+        <input type="hidden" id="EquipmentJson" name="EquipmentJson" value="@Model.EquipmentJson" />
         <partial name="_RequestInformation" model="Model.CIJRequest" />
         <partial name="_EquipmentDetails" model="Model.Equipments" />
         <partial name="_JustificationDetails" model="Model" />
         <partial name="_RemarksDetails" model="Model" />
+        <partial name="_Attachments" model="Model" />
         @*  <partial name="_VendorDetails" model="Model" /> *@
     </form>
+    <div class="d-flex justify-content-end gap-1">
+        <button type="submit" form="cijForm" class="btn btn-success"> Submit </button>
+        <button formmethod="post" type="submit" form="cijForm" formaction="@Url.Action("SaveCIJ","CIJ")" class="btn btn-warning">Save Draft</button>
+        <a asp-action="Index" class="btn btn-secondary"> Cancel </a>
+    </div>
 </div>
 
 @section Scripts

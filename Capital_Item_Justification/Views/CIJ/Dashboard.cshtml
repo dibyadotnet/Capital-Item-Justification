@@ -5,38 +5,38 @@
     </a>
 </div>
 <div>
-<table class="table table-bordered table-striped">
-    <thead class="table-primary">
-        <tr>
-            <th class="d-none"></th>
-            <th>CIJ No</th>
-            <th>Project Name</th>
-            <th>Item Type</th>
-            <th>Cost Center</th>
-            <th>Equipment Cost</th>
-            <th>Status</th>
-            <th>Request Date</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <table class="table table-bordered table-striped">
+        <thead class="table-primary">
             <tr>
-                <td class="d-none">@item.CIJId</td>
-                <td>@item.CIJNumber</td>
-                <td>@item.ProjectName</td>
-                <td>@item.ItemType</td>
-                <td>@item.CostCenter</td>
-                <td>@item.TotalEquipmentCost?.ToString("N2")</td>
-                <td>@item.Status</td>
-                <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.CIJId" class="btn btn-sm btn-info">View</a>
-                    <a asp-action="Edit" asp-route-id="@item.CIJId" class="btn btn-sm btn-warning">Edit</a>
-                </td>
+                <th class="d-none"></th>
+                <th>CIJ No</th>
+                <th>Project Name</th>
+                <th>Item Type</th>
+                <th>Cost Center</th>
+                <th>Equipment Cost</th>
+                <th>Status</th>
+                <th>Request Date</th>
+                <th>Action</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="d-none">@item.CIJId</td>
+                    <td>@item.CIJNumber</td>
+                    <td>@item.ProjectName</td>
+                    <td>@item.ItemType</td>
+                    <td>@item.CostCenter</td>
+                    <td>@item.TotalEquipmentCost?.ToString("N2")</td>
+                    <td>@item.Status</td>
+                    <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
+                    <td>
+                        <a asp-action="Details" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a>
+                        <a asp-action="Edit" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-warning">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
