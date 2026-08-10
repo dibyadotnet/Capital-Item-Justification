@@ -32,23 +32,28 @@ namespace Capital_Item_Justification.ViewModels
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? OldEquipmentCost { get; set; }
 
-        public int? BeneficiaryDepartmentId { get; set; }
+        public string? BeneficiaryDepartment { get; set; }
 
-        public int? BeneficiaryLocationId { get; set; }
+        public string? BeneficiaryLocation { get; set; }
 
         [StringLength(100)]
         public string? WaitingPeriod { get; set; }
 
         public int StatusId { get; set; }
-
+        public int LocationId { get; set; }
         public int? CurrentWorkflowStepId { get; set; }
         public string? TotalEquipmentCostDisplay { get; set; }
+        public int? BudgetTypeId { get; set; }
         public List<SelectListItem> ItemTypes { get; set; } = new();
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
+        public List<int> SelectedBenefDeptIds { get; set; } = new();
+        public List<int> SelectedBenefLocIds { get; set; } = new();
         public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> BudgetProvisionList { get; set; } = new();
         public List<SelectListItem> PurchagePurposeList { get; set; } = new();
         public List<SelectListItem> OldEqupTreatmentList { get; set; } = new();
         public IEnumerable<SelectListItem> ProjectList { get; set; } = new List<SelectListItem>();
+        public IEnumerable<SelectListItem> CostCenterList { get; set; } = new List<SelectListItem>();
+        public IEnumerable<SelectListItem> BudgetTypeList { get; set; } = new List<SelectListItem>();
     }
 }

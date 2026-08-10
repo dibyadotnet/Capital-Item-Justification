@@ -8,6 +8,7 @@
                 <label class="form-label fw-semibold required">
                     Is the same brand as earlier purchased / available?
                 </label>
+                <span class="text-danger">*</span>
                 <div class="mt-2">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" value="true" id="rbYes" asp-for="Justification.IsPurchasedEarlier">
@@ -21,14 +22,16 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6" id="brandRemarkSection">
-            <label class="form-label fw-semibold"> Remarks</label>
-                <textarea asp-for="Justification.Remarks" rows="5" class="form-control custom-textarea" placeholder="Enter detailed remarks..."></textarea>
-        </div>
+            <div class="col-md-6" id="divRemarkSection">
+                <label class="form-label fw-semibold"> Remarks</label>
+                <span class="text-danger">*</span>
+                <textarea asp-for="Justification.Remarks" rows="10" class="form-control custom-textarea" placeholder="Enter detailed remarks..."></textarea>
+            </div>
             <div class="col-md-6" id="divCommiteeComments">
-            <label class="form-label fw-semibold">Committee Comments</label>
-                <textarea asp-for="CommitteeComment.Comments" rows="5" id="txtCommiteeComments" class="form-control custom-textarea" placeholder="Enter detailed comments..."></textarea>
-        </div>
+                <label class="form-label fw-semibold">Equipment Committee Comments</label>
+                <span class="text-danger">*</span>
+                <textarea asp-for="CommitteeComment.Comments" rows="10" id="txtCommiteeComments" class="form-control custom-textarea" placeholder="Enter detailed comments..."></textarea>
+            </div>
         </div>
     </div>
 

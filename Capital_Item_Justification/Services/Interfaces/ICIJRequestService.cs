@@ -10,7 +10,7 @@ namespace Capital_Item_Justification.Services.Interfaces
         Task<List<CijItemType>> GetItemType();
         Task<List<CijPurchasePurpose>> GetPurchasePurpose();
         Task<List<CijOldEquipmemtTreatment>> GetOldEquipmentTreatment();
-        Task<string> SaveCIJ(CIJMainViewModel cIJMainViewModel);
+        Task<int> SaveCIJ(CIJMainViewModel cIJMainViewModel);
         Task<List<DashboardViewModel>> GetDashboard();
         Task<List<CijLocation>> GetLocation();
         Task<List<CijDepartment>> GetDepartment();
@@ -20,5 +20,7 @@ namespace Capital_Item_Justification.Services.Interfaces
         Task<List<CijProject>> GetProjectCode();
         Task<List<AttachmentViewModel>> GetAttachmentsById(int cijId);
         Task<int> DeleteAttachment(int attachmentId);
+        Task<List<CijCostCenter>> GetCostCenter();
+        Task<List<CijBudgetType>> GetBudgetType();
     }
 }

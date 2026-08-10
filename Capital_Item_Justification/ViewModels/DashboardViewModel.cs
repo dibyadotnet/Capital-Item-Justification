@@ -10,5 +10,6 @@
         public decimal? TotalEquipmentCost { get; set; }
         public string? ProjectName { get; set; }
         public string? Status { get; set; }
+        public string? Location { get; set; }
     }
 }

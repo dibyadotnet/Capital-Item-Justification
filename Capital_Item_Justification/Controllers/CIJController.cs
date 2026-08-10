@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Capital_Item_Justification.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -45,7 +46,9 @@ namespace Capital_Item_Justification.Controllers
                     BudgetProvisionList = dropDowns.BudgetProvisionList,
                     PurchagePurposeList = dropDowns.PurchagePurposeList,
                     OldEqupTreatmentList = dropDowns.OldEqupTreatmentList,
-                    ProjectList = dropDowns.ProjectList
+                    ProjectList = dropDowns.ProjectList,
+                    CostCenterList = dropDowns.CostCenterList,
+                    BudgetTypeList = dropDowns.BudgetTypeList,
                 };
 
                 vm = new CIJMainViewModel
@@ -69,8 +72,25 @@ namespace Capital_Item_Justification.Controllers
         {
             try
             {
-                if (cIJMainViewModel.CIJRequest.Cijid > 0)
+                string beneficieryDept = string.Empty;
+                string beneficieryLoc = string.Empty;
+                int cijId = 0;
+
+                var selectedBenefDepts = cIJMainViewModel?.CIJRequest?.SelectedBenefDeptIds;
+                var selectedBenefLocs = cIJMainViewModel?.CIJRequest?.SelectedBenefLocIds;
+                if (selectedBenefDepts != null && selectedBenefDepts.Count > 0)
                 {
+                    beneficieryDept = string.Join(",", selectedBenefDepts);
+                }
+                if (selectedBenefLocs != null && selectedBenefLocs.Count > 0)
+                {
+                    beneficieryLoc = string.Join(",", selectedBenefLocs);
+                }
+                cIJMainViewModel.CIJRequest.BeneficiaryDepartment = beneficieryDept;
+                cIJMainViewModel.CIJRequest.BeneficiaryLocation = beneficieryLoc;
+                if (cIJMainViewModel?.CIJRequest?.Cijid > 0)
+                {
+                    cijId = cIJMainViewModel.CIJRequest.Cijid;
                     if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))
                     {
                         List<CIJEquipmentViewModel>? EquipmentsJson = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
@@ -89,18 +109,23 @@ namespace Capital_Item_Justification.Controllers
                     {
                         cIJMainViewModel.Equipments = JsonSerializer.Deserialize<List<CIJEquipmentViewModel>>(cIJMainViewModel.EquipmentJson);
                     }
-                    await _service.SaveCIJ(cIJMainViewModel);
+                    cijId = await _service.SaveCIJ(cIJMainViewModel);
                     TempData["ToastMessage"] = "CIJ saved successfully.";
                     TempData["ToastType"] = "success";
                 }
-                return RedirectToAction("Dashboard", "CIJ");
+                return RedirectToAction(nameof(Edit), new { cijId = cijId });
             }
             catch (Exception ex)
             {
-                TempData["ToastMessage"] = "Error while saving CIJ.";
+                TempData["ToastMessage"] = "Error while Save CIJ.";
                 TempData["ToastType"] = "error";
-                ModelState.AddModelError("", ex.Message);
-                return View("CreateCIJ", cIJMainViewModel);
+                if (cIJMainViewModel.CIJRequest.Cijid>0) {
+                    return RedirectToAction(nameof(Edit), new { cijId = cIJMainViewModel.CIJRequest.Cijid });
+                }
+                else
+                {
+                    return View("CreateCIJ", cIJMainViewModel);
+                }
             }
         }
 
@@ -120,6 +145,24 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return NotFound();
                 }
+                if (cIJMainViewModel.CIJRequest != null)
+                {
+                    if (!string.IsNullOrEmpty(cIJMainViewModel.CIJRequest.BeneficiaryDepartment))
+                    {
+                        cIJMainViewModel.CIJRequest.SelectedBenefDeptIds = cIJMainViewModel.CIJRequest.BeneficiaryDepartment
+                                                                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                                            .Select(int.Parse)
+                                                                            .ToList();
+                    }
+                    if (!string.IsNullOrEmpty(cIJMainViewModel.CIJRequest.BeneficiaryLocation))
+                    {
+                        cIJMainViewModel.CIJRequest.SelectedBenefLocIds = cIJMainViewModel.CIJRequest.BeneficiaryLocation
+                                                                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                                            .Select(int.Parse)
+                                                                            .ToList();
+                    }
+                }
+
                 CIJRequestViewModel dropDowns = await PopulateDropDownList();
 
                 cIJMainViewModel.CIJRequest.ItemTypes = dropDowns.ItemTypes;
@@ -129,6 +172,8 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.CIJRequest.PurchagePurposeList = dropDowns.PurchagePurposeList;
                 cIJMainViewModel.CIJRequest.OldEqupTreatmentList = dropDowns.OldEqupTreatmentList;
                 cIJMainViewModel.CIJRequest.ProjectList = dropDowns.ProjectList;
+                cIJMainViewModel.CIJRequest.CostCenterList = dropDowns.CostCenterList;
+                cIJMainViewModel.CIJRequest.BudgetTypeList = dropDowns.BudgetTypeList;
 
                 var culture = new CultureInfo("en-IN");
                 string formattedCost = string.Format(culture, "₹ {0:N2}", cIJMainViewModel.CIJRequest.TotalEquipmentCost);
@@ -206,6 +251,21 @@ namespace Capital_Item_Justification.Controllers
                     Text = x.ProjectCode
                 }).ToList();
 
+                //Cost Center
+                var costCenters = await _service.GetCostCenter();
+                var costCenterItem = costCenters.Select(x => new SelectListItem
+                {
+                    Value = x.CostCenterId.ToString(),
+                    Text = x.CostCenterName
+                }).ToList();
+
+                var budgetTypes = await _service.GetBudgetType();
+                var budgetItem = budgetTypes.Select(x => new SelectListItem
+                {
+                    Value = x.BudgetTypeId.ToString(),
+                    Text = x.BudgetTypeName
+                }).ToList();
+
                 return new CIJRequestViewModel
                 {
                     ItemTypes = itemTypesItem,
@@ -214,7 +274,9 @@ namespace Capital_Item_Justification.Controllers
                     BudgetProvisionList = BudgetProvisionItem,
                     PurchagePurposeList = PurchasePurposeItem,
                     OldEqupTreatmentList = oldEqupTreatmentItem,
-                    ProjectList = projectItems
+                    ProjectList = projectItems,
+                    CostCenterList = costCenterItem,
+                    BudgetTypeList = budgetItem
                 };
             }
             catch (Exception)

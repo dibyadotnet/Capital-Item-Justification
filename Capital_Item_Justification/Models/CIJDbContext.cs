@@ -49,14 +49,32 @@ public partial class CIJDbContext : IdentityDbContext
 
     public virtual DbSet<CijStatus> CijStatuses { get; set; }
     public virtual DbSet<CijLocation> CijLocations { get; set; }
-
+    public virtual DbSet<CijCostCenter> CijCostCenters { get; set; }
     public virtual DbSet<CijProject> CijProjects { get; set; }
+    public virtual DbSet<CijBudgetType> CijBudgetTypes { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CIJConnection");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<CijBudgetType>(entity =>
+        {
+            entity.HasKey(e => e.BudgetTypeId).HasName("PK__CIJ_Budg__3BF8A71D658315F0");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<CijCostCenter>(entity =>
+        {
+            entity.HasKey(e => e.CostCenterId).HasName("PK__CIJ_Cost__89D876F19395839A");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+
         modelBuilder.Entity<CijApprovalHistory>(entity =>
         {
             entity.Property(e => e.ApprovedDate).HasDefaultValueSql("(getdate())");

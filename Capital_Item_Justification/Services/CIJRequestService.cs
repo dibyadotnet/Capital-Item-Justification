@@ -27,7 +27,7 @@ namespace Capital_Item_Justification.Services
         {
             return await _cijMainRepository.GetOldEquipmentTreatment();
         }
-        public async Task<string> SaveCIJ(CIJMainViewModel cIJMainViewModel)
+        public async Task<int> SaveCIJ(CIJMainViewModel cIJMainViewModel)
         {
             return await _cijMainRepository.SaveCIJ(cIJMainViewModel);
         }
@@ -67,6 +67,13 @@ namespace Capital_Item_Justification.Services
         {
             return await _cijMainRepository.DeleteAttachment(attachmentId);
         }
-        
+        public async Task<List<CijCostCenter>> GetCostCenter()
+        {
+            return await _cijMainRepository.GetCostCenter();
+        }
+        public async Task<List<CijBudgetType>> GetBudgetType()
+        {
+            return await _cijMainRepository.GetBudgetType();
+        }
     }
 }
