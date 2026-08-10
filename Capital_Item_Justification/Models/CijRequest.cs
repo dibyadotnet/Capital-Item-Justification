@@ -21,7 +21,7 @@ public partial class CijRequest
 
     public int? ProjectId { get; set; }
 
-    public int HospitalLocationId { get; set; }
+    public int LocationId { get; set; }
 
     public string? BudgetAvailable { get; set; }
 
@@ -48,9 +48,9 @@ public partial class CijRequest
     [Column(TypeName = "decimal(18, 2)")]
     public decimal? OldEquipmentCost { get; set; }
 
-    public int? BeneficiaryDepartmentId { get; set; }
+    public string? BeneficiaryDepartment { get; set; }
 
-    public int? BeneficiaryLocationId { get; set; }
+    public string? BeneficiaryLocation { get; set; }
 
     [StringLength(100)]
     public string? WaitingPeriod { get; set; }

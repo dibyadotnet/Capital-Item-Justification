@@ -49,10 +49,30 @@ namespace Capital_Item_Justification.Repository
 
             return treatments;
         }
-        public async Task<string> SaveCIJ(CIJMainViewModel model)
+        public async Task<List<CijCostCenter>> GetCostCenter()
+        {
+            var costCenters = await _context.CijCostCenters.Where(a => a.IsActive == true).Select(a => new CijCostCenter()
+            {
+                CostCenterId = a.CostCenterId,
+                CostCenterName = a.CostCenterName
+            }).OrderBy(a => a.CostCenterId).ToListAsync();
+
+            return costCenters;
+        }
+        public async Task<List<CijBudgetType>> GetBudgetType()
+        {
+            var budgetTypes = await _context.CijBudgetTypes.Where(a => a.IsActive == true).Select(a => new CijBudgetType()
+            {
+                BudgetTypeId = a.BudgetTypeId,
+                BudgetTypeName = a.BudgetTypeName
+            }).OrderBy(a => a.BudgetTypeId).ToListAsync();
+
+            return budgetTypes;
+        }
+        public async Task<int> SaveCIJ(CIJMainViewModel model)
         {
             if (model == null)
-                return string.Empty;
+                return 0;
 
             int statusId = _context.CijStatuses.Where(a => a.IsActive == true && a.StatusName == "Draft").Select(a => a.StatusId).FirstOrDefault();
 
@@ -75,8 +95,10 @@ namespace Capital_Item_Justification.Repository
                 WaitingPeriod = model.CIJRequest.WaitingPeriod,
                 StatusId = statusId, //model.CIJRequest.StatusId, 1- Draft
                 CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId,
-                BeneficiaryDepartmentId = model.CIJRequest.BeneficiaryDepartmentId,
-                BeneficiaryLocationId = model.CIJRequest.BeneficiaryLocationId,
+                BeneficiaryDepartment = model.CIJRequest.BeneficiaryDepartment,
+                BeneficiaryLocation = model.CIJRequest.BeneficiaryLocation,
+                LocationId=model.CIJRequest.LocationId,
+                BudgetTypeId= model.CIJRequest.BudgetTypeId,
             };
             _context.CijRequests.Add(request);
             int row = await _context.SaveChangesAsync();
@@ -96,7 +118,8 @@ namespace Capital_Item_Justification.Repository
                         Model = item.Model,
                         EquipmentCost = item.EquipmentCost,
                         PreferenceOrder = item.PreferenceOrder,
-                        IsActive = true
+                        IsActive = true,
+                        CreatedBy = "Dibya"
                     };
                     _context.CijEquipments.Add(cijEquipment);
                 }
@@ -131,12 +154,16 @@ namespace Capital_Item_Justification.Repository
             }
 
             // 2. Save attachments
-            if (model?.Attachments != null && model.Attachments.Count > 0)
+            if (model?.JustificationAttachment != null && model.JustificationAttachment.Count > 0)
             {
-                await SaveAttachmentsAsync(cijId, model.Attachments);
+                await SaveAttachmentsAsync(cijId, model.JustificationAttachment,"justification");
+            }
+            if (model?.VendorAttachments != null && model.VendorAttachments.Count > 0)
+            {
+                await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor");
             }
 
-            return "Success";
+            return cijId;
         }
         public async Task<string> UpdateCIJ(CIJMainViewModel model)
         {
@@ -167,10 +194,11 @@ namespace Capital_Item_Justification.Repository
                 request.OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId;
                 request.OldEquipmentCost = model.CIJRequest.OldEquipmentCost;
                 request.WaitingPeriod = model.CIJRequest.WaitingPeriod;
-                //request.StatusId = model.CIJRequest.StatusId;
+                request.LocationId = model.CIJRequest.LocationId;
                 request.CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId;
-                request.BeneficiaryDepartmentId = model.CIJRequest.BeneficiaryDepartmentId;
-                request.BeneficiaryLocationId = model.CIJRequest.BeneficiaryLocationId;
+                request.BeneficiaryDepartment = model.CIJRequest.BeneficiaryDepartment;
+                request.BeneficiaryLocation = model.CIJRequest.BeneficiaryLocation;
+                request.BudgetTypeId = model.CIJRequest.BudgetTypeId;
 
                 await _context.SaveChangesAsync();
 
@@ -195,7 +223,7 @@ namespace Capital_Item_Justification.Repository
                         {
                             equipment.IsActive = false;
                             equipment.ModifiedDate = DateTime.Now;
-                            // equipment.ModifiedBy = userId;        
+                            equipment.ModifiedBy = "Dibya";
                         }
                         _context.CijEquipments.UpdateRange(removedEquipments);
                     }
@@ -215,6 +243,8 @@ namespace Capital_Item_Justification.Repository
                             existingEquipment.Model = item.Model;
                             existingEquipment.EquipmentCost = item.EquipmentCost;
                             existingEquipment.PreferenceOrder = item.PreferenceOrder;
+                            existingEquipment.ModifiedBy = "Dibya";
+                            existingEquipment.ModifiedDate = DateTime.Now;
                         }
                     }
                     else
@@ -228,7 +258,8 @@ namespace Capital_Item_Justification.Repository
                             Model = item.Model,
                             EquipmentCost = item.EquipmentCost,
                             PreferenceOrder = item.PreferenceOrder,
-                            IsActive = true
+                            IsActive = true,
+                            CreatedBy = "Dibya"
                         };
                         _context.CijEquipments.Add(cijEquipment);
                     }
@@ -277,12 +308,16 @@ namespace Capital_Item_Justification.Repository
                 await _context.SaveChangesAsync();
 
                 // 2. Save attachments
-                if (model.Attachments != null && model.Attachments.Count > 0)
+                if (model?.JustificationAttachment != null && model.JustificationAttachment.Count > 0)
                 {
-                    await SaveAttachmentsAsync(cijId, model.Attachments);
+                    await SaveAttachmentsAsync(cijId, model.JustificationAttachment, "justification");
+                }
+                if (model?.VendorAttachments != null && model.VendorAttachments.Count > 0)
+                {
+                    await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor");
                 }
 
-                return "Success";
+                return "Updated Successfully";
 
             }
             catch (Exception ex)
@@ -306,7 +341,7 @@ namespace Capital_Item_Justification.Repository
                        from proj in projGroup.DefaultIfEmpty()
 
                        join loc in _context.CijLocations
-                       on r.CostCenterId equals loc.LocationId into locGroup
+                       on r.LocationId equals loc.LocationId into locGroup
                        from loc in locGroup.DefaultIfEmpty()
 
                        join st in _context.CijStatuses
@@ -320,7 +355,7 @@ namespace Capital_Item_Justification.Repository
                            RequestDate = r.RequestDate,
                            ProjectName = proj != null ? proj.ProjectCode : "",
                            ItemType = it != null ? it.ItemTypeName : "",
-                           CostCenter = loc != null ? loc.LocationName : "",
+                           Location = loc != null ? loc.LocationName : "",
                            TotalEquipmentCost = r.TotalEquipmentCost,
                            Status = st != null ? st.StatusName : ""
                        }).AsNoTracking().ToListAsync();
@@ -373,8 +408,10 @@ namespace Capital_Item_Justification.Repository
                 WaitingPeriod = request.WaitingPeriod,
                 StatusId = request.StatusId,
                 CurrentWorkflowStepId = request.CurrentWorkflowStepId,
-                BeneficiaryDepartmentId = request.BeneficiaryDepartmentId,
-                BeneficiaryLocationId = request.BeneficiaryLocationId
+                BeneficiaryDepartment = request.BeneficiaryDepartment,
+                BeneficiaryLocation = request.BeneficiaryLocation,
+                LocationId=request.LocationId,
+                BudgetTypeId=request.BudgetTypeId
             };
 
             model.Equipments = await _context.CijEquipments
@@ -443,7 +480,7 @@ namespace Capital_Item_Justification.Repository
                 nextSequence = int.Parse(lastSeq) + 1;
             }
 
-            return $"{locPrefix}/{financialYear}/{nextSequence:D5}";
+            return $"{"CIJ"}/{locPrefix}/{financialYear}/{nextSequence:D5}";
         }
         public async Task<List<CijProject>> GetProjectCode()
         {
@@ -457,7 +494,7 @@ namespace Capital_Item_Justification.Repository
             return projects;
         }
 
-        public async Task SaveAttachmentsAsync(int cijId, List<IFormFile> files)
+        public async Task SaveAttachmentsAsync(int cijId, List<IFormFile> files,string moduleName)
         {
             if (files == null || files.Count == 0)
                 return;
@@ -533,7 +570,8 @@ namespace Capital_Item_Justification.Repository
                     UploadedDate = DateTime.Now,
                     IsActive = true,
                     CreatedBy = 1,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
+                    ModuleName=moduleName
                 };
                 _context.CijAttachments.Add(attachment);
             }
@@ -542,12 +580,13 @@ namespace Capital_Item_Justification.Repository
         public async Task<List<AttachmentViewModel>> GetAttachmentsById(int cijId)
         {
             List<AttachmentViewModel> attachments = new();
-            attachments = await _context.CijAttachments.Where(a => a.Cijid == cijId && a.IsActive == true).Select(a=> new AttachmentViewModel()
+            attachments = await _context.CijAttachments.Where(a => a.Cijid == cijId && a.IsActive == true).Select(a => new AttachmentViewModel()
             {
-                AttachmentId=a.AttachmentId,
-                Cijid=a.Cijid,
-                FileName=a.FileName,
-                FilePath=a.FilePath, 
+                AttachmentId = a.AttachmentId,
+                Cijid = a.Cijid,
+                FileName = a.FileName,
+                FilePath = a.FilePath,
+                ModuleName=a.ModuleName
             }).ToListAsync();
 
             return attachments;
@@ -555,11 +594,11 @@ namespace Capital_Item_Justification.Repository
         public async Task<int> DeleteAttachment(int attachmentId)
         {
             int deleteStatus = 1;
-            var attachment = await _context.CijAttachments.FirstOrDefaultAsync(x => x.AttachmentId == attachmentId && x.IsActive==true);
+            var attachment = await _context.CijAttachments.FirstOrDefaultAsync(x => x.AttachmentId == attachmentId && x.IsActive == true);
 
             if (attachment == null)
             {
-               return deleteStatus = 0;
+                return deleteStatus = 0;
             }
 
             attachment.IsActive = false;

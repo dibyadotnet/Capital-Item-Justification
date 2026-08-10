@@ -9,5 +9,6 @@ namespace Capital_Item_Justification.ViewModels
         public int Cijid { get; set; }
         public string FileName { get; set; } = null!;
         public string FilePath { get; set; } = null!;
+        public string? ModuleName { get; set; } = null!;
     }
 }

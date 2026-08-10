@@ -3,7 +3,7 @@
 <div class="card shadow-sm border-0 rounded-2 mt-1">
     <div class="card-body p-2">
         <h5 class="text-primary fw-bold mb-2">
-            Vendor Attachments
+            Vendor Attachment(Quotation)
         </h5>
         <div class="row g-2">
 
@@ -24,7 +24,7 @@
                         </label>
 
                         <input type="file"
-                               asp-for="Attachments"
+                               asp-for="VendorAttachments"
                                class="form-control"
                                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple />
 
@@ -79,6 +79,7 @@
                                     <th class="d-none"> </th>
                                     <th class="d-none"></th>
                                     <th>File Name</th>
+                                    <th>Module Name</th>
                                     <th class="text-center" style="width:100px;">Action</th>
                                 </tr>
                             </thead>
@@ -91,6 +92,7 @@
                                             <td class="d-none">@item.AttachmentId</td>
                                             <td class="d-none">@item.Cijid</td>
                                             <td>@item.FileName</td>
+                                            <td>@item.ModuleName</td>
                                             <td align="center">
                                                 <a title="Download" href="@Url.Action("DownloadAttachment", "CIJ", new { attachmentId = item.AttachmentId,cijId=item.Cijid })">
                                                     <i class="bi bi-download"></i>

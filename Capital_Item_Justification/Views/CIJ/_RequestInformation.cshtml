@@ -18,8 +18,24 @@
                 <input asp-for="RequestDate" type="date" class="form-control" readonly />
             </div>
             <div class="col">
+                <label class="form-label">Location</label>
+                <span class="text-danger">*</span>
+                <select asp-for="LocationId" asp-items="Model.Locations" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+            <div class="col">
                 <label class="form-label">Cost Center</label>
-                <select asp-for="CostCenterId" asp-items="Model.Locations" class="form-select">
+                <span class="text-danger">*</span>
+                <select asp-for="CostCenterId" asp-items="Model.CostCenterList" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>           
+        </div>
+        <div class="row g-4">
+            <div class="col">
+                <label class="form-label">Budget Type</label>
+                <select asp-for="BudgetTypeId" asp-items="Model.BudgetTypeList" class="form-select">
                     <option value="">-- Select --</option>
                 </select>
             </div>
@@ -29,33 +45,34 @@
                     <option value="">-- Select --</option>
                 </select>
             </div>
-        </div>
-        <div class="row g-4">
             <div class="col">
                 <label class="form-label">Budget Provision</label>
+                <span class="text-danger">*</span>
                 <select asp-for="BudgetProvision" asp-items="Model.BudgetProvisionList" class="form-select">
                     <option value="">-- Select --</option>
                 </select>
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Budget Amount</label>
+                <span class="text-danger">*</span>
                 <input asp-for="BudgetAmount" class="form-control" />
-            </div>
+            </div>              
+        </div>
+
+        <div class="row g-4">
             <div class="col">
                 <label class="form-label fw-semibold">Item Type</label>
+                <span class="text-danger">*</span>
                 <select asp-for="ItemtypeId" asp-items="Model.ItemTypes" class="form-select" id="ddlItemType">
                     <option value="">-- Select Item Type --</option>
                 </select>
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Eqiupment Cost</label>
+                <span class="text-danger">*</span>
                 <input asp-for="TotalEquipmentCostDisplay" class="form-control" readonly />
                 <input asp-for="TotalEquipmentCost" type="hidden" />
             </div>
-           
-        </div>
-
-        <div class="row g-4">
             <div class="col">
                 <label class="form-label fw-semibold">Project Cost</label>
                 <input asp-for="ProjectCost" class="form-control" />
@@ -63,9 +80,12 @@
             <div class="col">
                 <label class="form-label fw-semibold">SCEH Cost</label>
                 <input asp-for="Scehcost" class="form-control" />
-            </div>
+            </div>          
+        </div>
+        <div class="row g-4">
             <div class="col">
                 <label class="form-label fw-semibold">Purpose of Purchase</label>
+                <span class="text-danger">*</span>
                 <select asp-for="PurchasePurposeId" asp-items="Model.PurchagePurposeList" class="form-select">
                     <option value="">-- Select Purpose --</option>
                 </select>
@@ -76,30 +96,29 @@
                     <option value="">-- Select Treatment --</option>
                 </select>
             </div>
-            
-        </div>
-        <div class="row g-4">
             <div class="col">
                 <label class="form-label fw-semibold">Old Equipment Cost</label>
                 <input asp-for="OldEquipmentCost" class="form-control" />
             </div>
+            
             <div class="col">
-                <label class="form-label fw-semibold">Beneficiary Dept</label>
-                <select asp-for="BeneficiaryDepartmentId" asp-items="Model.Departments" class="form-select">
-                    <option value="">-- Select --</option>
-                </select>
-            </div>
-            <div class="col">
-                <label class="form-label fw-semibold">Beneficiary Location</label>
-                <select asp-for="BeneficiaryLocationId" asp-items="Model.Locations" class="form-select">
-                    <option value="">-- Select --</option>
-                </select>
-            </div>
-            <div class="col">
-                <label class="form-label fw-semibold">Waiting period</label>
+                <label class="form-label fw-semibold">Period with in Item Required</label>
                 <input asp-for="WaitingPeriod" class="form-control" />
             </div>
         </div>
-
+        <div class="row g-4">
+            <div class="col-md-5">
+                <label class="form-label fw-semibold">Beneficiary Dept</label>
+                @* <input asp-for="BeneficiaryDepartment" class="form-control" /> *@
+                <select id="BeneDeptdropdown" asp-for="SelectedBenefDeptIds" asp-items="Model.Departments" class="form-select" multiple>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label fw-semibold">Beneficiary Location</label>
+                @* <input asp-for="BeneficiaryLocation" class="form-control" /> *@
+                <select id="BeneLocdropdown" asp-for="SelectedBenefLocIds" asp-items="Model.Locations" class="form-select" multiple>
+                </select>
+            </div>
+         </div>
     </div>
 </div>

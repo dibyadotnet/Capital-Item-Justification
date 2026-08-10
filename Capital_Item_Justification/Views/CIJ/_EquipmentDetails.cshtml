@@ -12,12 +12,12 @@
                         <th class="d-none"></th>
                         <th class="d-none"></th>
                         <th width="60">#</th>
-                        <th>Equipment Name</th>
-                        <th>Qty</th>
+                        <th>Equipment Name</th>                      
                         <th>Manufacturer</th>
                         <th>Model</th>
+                        <th>Qty</th>
                         <th>Estimated Cost</th>
-                        <th>Doc Pref</th>
+                        @* <th>Doc Pref</th> *@
                         <th width="120" class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -32,11 +32,11 @@
                                 <td class="d-none">@Model[i].Cijid</td>
                                 <td>@(i + 1)</td>
                                 <td>@Model[i].EquipmentName</td>
-                                <td>@Model[i].EquipmentQty</td>
                                 <td>@Model[i].Make</td>
                                 <td>@Model[i].Model</td>
+                                <td>@Model[i].EquipmentQty</td>
                                 <td>@Model[i].EquipmentCost</td>
-                                <td>@Model[i].PreferenceOrder</td>
+                                @* <td>@Model[i].PreferenceOrder</td> *@
                                 <td>
                                     <button type="button" class="btn btn-sm btn-warning me-1" onclick="EditEquipment(@i)">
                                         <i class="bi bi-pencil-square"></i>

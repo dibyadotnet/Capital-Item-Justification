@@ -38,6 +38,8 @@ public partial class CijAttachment
 
     public bool IsActive { get; set; }
 
+    public string? ModuleName { get; set; }
+
     [ForeignKey("Cijid")]
     public virtual CijRequest Cij { get; set; } = null!;
 }
