@@ -17,8 +17,7 @@
 
         <div class="card-body">
 
-            <form asp-action="Edit"
-                  method="post">
+            <form asp-action="Edit" method="post">
 
                 @Html.AntiForgeryToken()
 
@@ -109,11 +108,8 @@
 
                     </button>
 
-                    <a asp-action="Index"
-                       class="btn btn-secondary">
-
+                    <a asp-action="GetUsers" class="btn btn-secondary">
                         Cancel
-
                     </a>
 
                 </div>

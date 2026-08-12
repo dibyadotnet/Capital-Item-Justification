@@ -13,18 +13,17 @@ namespace Capital_Item_Justification.Controllers
     public class UserController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-
-        public UserController(UserManager<ApplicationUser> userManager)
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        public UserController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _userManager.Users
-                .OrderBy(x => x.FullName)
-                .ToListAsync();
+            var users = await _userManager.Users.OrderBy(x => x.FullName).ToListAsync();
 
             return View(users);
         }
@@ -49,7 +48,7 @@ namespace Capital_Item_Justification.Controllers
             if (existingUser != null)
             {
                 ModelState.AddModelError("Email", "A user with this email already exists.");
-                return View(model);
+                return View("CreateUser", model);
             }
 
             var user = new ApplicationUser
@@ -75,8 +74,10 @@ namespace Capital_Item_Justification.Controllers
 
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] = "User created successfully.";
-                return RedirectToAction(nameof(Index));
+                //TempData["SuccessMessage"] = "User created successfully.";
+                TempData["ToastMessage"] = "User created successfully.";
+                TempData["ToastType"] = "success";
+                return RedirectToAction(nameof(GetUsers));
             }
 
             foreach (var error in result.Errors)
@@ -159,19 +160,15 @@ namespace Capital_Item_Justification.Controllers
 
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] =
-                    "User updated successfully.";
-
-                return RedirectToAction(nameof(Index));
+                //TempData["SuccessMessage"] = "User updated successfully.";
+                TempData["ToastMessage"] = "User updated successfully.";
+                TempData["ToastType"] = "success";
+                return RedirectToAction(nameof(GetUsers));
             }
-
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    error.Description);
+                ModelState.AddModelError(string.Empty, error.Description);
             }
-
             return RedirectToAction("GetUsers");
         }
 
@@ -192,6 +189,107 @@ namespace Capital_Item_Justification.Controllers
             user.ModifiedBy = User.Identity?.Name;
 
             await _userManager.UpdateAsync(user);
+
+            return RedirectToAction(nameof(GetUsers));
+        }
+        [HttpGet]
+        public async Task<IActionResult> ManageRoles(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var assignedRoles =
+                await _userManager.GetRolesAsync(user);
+
+            var availableRoles =
+                await _userManager.GetRolesAsync(user);
+
+            var allRoles = await _userManager.GetRolesAsync(user);
+
+            var roleNames = await GetAllRoleNames();
+
+            var model = new UserRoleViewModel
+            {
+                UserId = user.Id,
+                UserName = user.FullName ?? user.Email ?? "",
+
+                AssignedRoles = assignedRoles.ToList(),
+
+                AvailableRoles = roleNames
+            };
+
+            return View(model);
+        }
+
+        private async Task<List<string>> GetAllRoleNames()
+        {
+            return await _roleManager.Roles
+                .Where(x => x.Name != null && x.IsActive)
+                .Select(x => x.Name!)
+                .OrderBy(x => x)
+                .ToListAsync();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManageRoles(string userId, List<string> selectedRoles)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var currentRoles =
+                await _userManager.GetRolesAsync(user);
+
+            var removeResult =
+                await _userManager.RemoveFromRolesAsync(
+                    user,
+                    currentRoles);
+
+            if (!removeResult.Succeeded)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Unable to update existing roles.");
+
+                return RedirectToAction(
+                    nameof(ManageRoles),
+                    new { id = userId });
+            }
+
+            if (selectedRoles != null &&
+                selectedRoles.Any())
+            {
+                var addResult =
+                    await _userManager.AddToRolesAsync(
+                        user,
+                        selectedRoles);
+
+                if (!addResult.Succeeded)
+                {
+                    foreach (var error in addResult.Errors)
+                    {
+                        ModelState.AddModelError( string.Empty,error.Description);
+                    }
+
+                    return RedirectToAction(nameof(ManageRoles), new { id = userId });
+                }
+            }
+
+            //TempData["SuccessMessage"] = "User roles updated successfully.";
+            TempData["ToastMessage"] = "User roles updated successfully.";
+            TempData["ToastType"] = "success";
 
             return RedirectToAction(nameof(GetUsers));
         }

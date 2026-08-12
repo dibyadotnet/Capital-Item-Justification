@@ -5,31 +5,71 @@ namespace Capital_Item_Justification.Data
 {
     public static class DbSeeder
     {
-        public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+        public static async Task SeedRoles(RoleManager<ApplicationRole> roleManager)
         {
             string[] roles =
             {
-                "HOD",
-                "IT",
-                "BME",
-                "Admin",
-                "Purchage committee",
-                "COO",
-                "Finance",
-                "MD",
-                "CEO",
-                "Purchase"
-            };
+            "HOD",
+            "IT",
+            "BME",
+            "Admin",
+            "Purchage committee",
+            "COO",
+            "Finance",
+            "MD",
+            "CEO",
+            "Purchase"
+        };
 
-            foreach (var role in roles)
+            foreach (var roleName in roles)
             {
-                if (!await roleManager.RoleExistsAsync(role))
+                var existingRole = await roleManager.FindByNameAsync(roleName);
+
+                if (existingRole == null)
                 {
-                    await roleManager.CreateAsync(new IdentityRole(role));
+                    var role = new ApplicationRole
+                    {
+                        Name = roleName,
+                        IsActive = true,
+                        CreatedBy = "System",
+                        CreatedOn = DateTime.UtcNow
+                    };
+
+                    var result = await roleManager.CreateAsync(role);
+
+                    if (!result.Succeeded)
+                    {
+                        var errors = string.Join(
+                            ", ",
+                            result.Errors.Select(e => e.Description));
+
+                        throw new Exception(
+                            $"Failed to create role '{roleName}': {errors}");
+                    }
+                }
+                else if (!existingRole.IsActive)
+                {
+                    // Reactivate role if it already exists but was soft deleted
+                    existingRole.IsActive = true;
+                    existingRole.ModifiedBy = "System";
+                    existingRole.ModifiedOn = DateTime.UtcNow;
+
+                    var result = await roleManager.UpdateAsync(existingRole);
+
+                    if (!result.Succeeded)
+                    {
+                        var errors = string.Join(
+                            ", ",
+                            result.Errors.Select(e => e.Description));
+
+                        throw new Exception(
+                            $"Failed to activate role '{roleName}': {errors}");
+                    }
                 }
             }
         }
-        public static async Task SeedAdmin(UserManager<ApplicationUser> userManager)
+    
+    public static async Task SeedAdmin(UserManager<ApplicationUser> userManager)
         {
             var email = "admin@cij.com";
 

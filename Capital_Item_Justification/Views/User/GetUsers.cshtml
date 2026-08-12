@@ -87,16 +87,15 @@
                                 </td>
 
                                 <td>
-
-                                    <a asp-action="EditUser"
-                                       asp-route-id="@user.Id"
-                                       class="btn btn-sm btn-outline-primary">
-
-                                        <i class="bi bi-pencil"></i>
-
-                                    </a>
-
-                                    <form asp-action="ToggleStatus"
+                                    @if (user.IsActive)
+                                    {
+                                        <a asp-action="EditUser" title="Edit User"
+                                        asp-route-id="@user.Id"
+                                        class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    }
+                                    <form asp-action="ToggleStatus" onsubmit="return confirm('Are you sure you want to change this User status?');"
                                           method="post"
                                           class="d-inline">
 
@@ -106,15 +105,23 @@
                                                name="id"
                                                value="@user.Id" />
 
-                                        <button type="submit"
+                                        <button type="submit" title="Manage Status"                                   
                                                 class="btn btn-sm btn-outline-warning">
-
                                             <i class="bi bi-toggle-on"></i>
 
                                         </button>
 
                                     </form>
+                                    @if(user.IsActive){
+                                    <a asp-action="ManageRoles"
+                                       asp-route-id="@user.Id"
+                                       class="btn btn-sm btn-outline-success"
+                                       title="Manage Roles">
 
+                                        <i class="bi bi-person-check"></i>
+
+                                    </a>
+                                    }
                                 </td>
 
                             </tr>

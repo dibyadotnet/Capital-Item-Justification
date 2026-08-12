@@ -1,0 +1,92 @@
+﻿@model Capital_Item_Justification.ViewModels.UserRoleViewModel
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+                <i class="bi bi-person-check"></i>
+                Manage User Roles
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    User
+                </label>
+
+                <input class="form-control"
+                       value="@Model.UserName"
+                       readonly />
+
+            </div>
+
+            <form asp-action="ManageRoles"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="userId"
+                       value="@Model.UserId" />
+
+                <label class="form-label">
+                    Roles
+                </label>
+
+                @foreach (var role in Model.AvailableRoles)
+                {
+                    var isSelected =
+                    Model.AssignedRoles.Contains(role);
+
+                    <div class="form-check mb-2">
+
+                        <input type="checkbox"
+                               class="form-check-input"
+                               name="selectedRoles"
+                               value="@role"
+                               checked="@isSelected"
+                               id="role_@role" />
+
+                        <label class="form-check-label"
+                               for="role_@role">
+
+                            @role
+
+                        </label>
+
+                    </div>
+                }
+
+                <div class="mt-4">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-check-circle"></i>
+                        Save Roles
+
+                    </button>
+
+                    <a asp-action="GetUsers"
+                       class="btn btn-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

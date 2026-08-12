@@ -6,7 +6,7 @@ using Capital_Item_Justification.Data;
 
 namespace Capital_Item_Justification.Models;
 
-public partial class CIJDbContext : IdentityDbContext<ApplicationUser>
+public partial class CIJDbContext : IdentityDbContext<ApplicationUser,ApplicationRole,string>
 {
     public CIJDbContext()
     {

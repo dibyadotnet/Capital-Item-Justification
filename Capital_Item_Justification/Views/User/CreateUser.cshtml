@@ -71,13 +71,11 @@
 
                     <div class="col-md-6">
 
-                        <label asp-for="PhoneNumber"
-                               class="form-label">
+                        <label asp-for="PhoneNumber" class="form-label">
                         </label>
 
-                        <input asp-for="PhoneNumber"
-                               class="form-control" />
-
+                        <input asp-for="PhoneNumber" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" 
+                        placeholder="Enter 10 digit phone number" class="form-control" />
                     </div>
 
                     <div class="col-md-6">
@@ -127,7 +125,7 @@
 
                     </button>
 
-                    <a asp-action="Index"
+                    <a asp-action="GetUsers"
                        class="btn btn-secondary">
 
                         Cancel
