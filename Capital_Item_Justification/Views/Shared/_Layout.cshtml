@@ -131,6 +131,21 @@
         });
     </script>
 
+    <script>
+        setTimeout(function () {
+            debugger;
+            var message = document.getElementById("successMessage");
+
+            if (message) {
+                message.classList.remove("show");
+
+                setTimeout(function () {
+                    message.remove();
+                }, 500);
+            }
+        }, 3000);
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

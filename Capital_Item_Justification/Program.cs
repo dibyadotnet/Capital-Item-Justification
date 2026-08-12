@@ -12,17 +12,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<CIJDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CIJConnection")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
+//builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+//{
+//    options.SignIn.RequireConfirmedAccount = false;
 
-    options.Password.RequireDigit = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-})
-.AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<CIJDbContext>();
+//    options.Password.RequireDigit = false;
+//    options.Password.RequireUppercase = false;
+//    options.Password.RequireLowercase = false;
+//    options.Password.RequireNonAlphanumeric = false;
+//}).AddRoles<IdentityRole>().AddEntityFrameworkStores<CIJDbContext>();
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+
+        options.Password.RequireDigit = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+
+        options.User.AllowedUserNameCharacters = null;
+    }).AddEntityFrameworkStores<CIJDbContext>().AddDefaultTokenProviders();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -55,7 +64,7 @@ app.MapControllerRoute(
 
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
     //var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
 

@@ -1,42 +1,49 @@
 ﻿@model IEnumerable<Capital_Item_Justification.ViewModels.DashboardViewModel>
-<div class="d-flex justify-content-end mb-1">
-    <a asp-controller="CIJ" asp-action="CreateCIJ" class="btn btn-primary custom-btn">
-        <i class="bi bi-plus-circle"></i> Create CIJ
-    </a>
+<div class="container-fluid">
+    <div class="d-flex justify-content-end mb-1">
+        <a asp-controller="CIJ" asp-action="CreateCIJ" class="btn btn-primary custom-btn">
+            <i class="bi bi-plus-circle"></i> Create CIJ
+        </a>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="d-none"></th>
+                            <th>CIJ No</th>
+                            <th>Location</th>
+                            <th>Item Type</th>
+                            <th>Project Name</th>
+                            <th>Equipment Cost</th>
+                            <th>Status</th>
+                            <th>Request Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="d-none">@item.CIJId</td>
+                                <td>@item.CIJNumber</td>
+                                <td>@item.Location</td>
+                                <td>@item.ItemType</td>
+                                <td>@item.ProjectName</td>
+                                <td>@item.TotalEquipmentCost?.ToString("N2")</td>
+                                <td>@item.Status</td>
+                                <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a>
+                                    <a asp-action="Edit" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-warning">Edit</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <table class="table table-bordered table-striped">
-        <thead class="table-primary">
-            <tr>
-                <th class="d-none"></th>
-                <th>CIJ No</th>
-                <th>Location</th>
-                <th>Item Type</th>
-                <th>Project Name</th>
-                <th>Equipment Cost</th>
-                <th>Status</th>
-                <th>Request Date</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td class="d-none">@item.CIJId</td>
-                    <td>@item.CIJNumber</td>
-                    <td>@item.Location</td>
-                    <td>@item.ItemType</td>
-                    <td>@item.ProjectName</td>
-                    <td>@item.TotalEquipmentCost?.ToString("N2")</td>
-                    <td>@item.Status</td>
-                    <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
-                    <td>
-                        <a asp-action="Details" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a>
-                        <a asp-action="Edit" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-warning">Edit</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+

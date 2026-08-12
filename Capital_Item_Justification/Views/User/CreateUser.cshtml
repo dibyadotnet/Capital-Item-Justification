@@ -1,0 +1,147 @@
+﻿@model Capital_Item_Justification.ViewModels.UserViewModel
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-person-plus"></i>
+                Create User
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Create"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label asp-for="EmployeeCode"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="EmployeeCode"
+                               class="form-control" />
+
+                        <span asp-validation-for="EmployeeCode"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="FullName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="FullName"
+                               class="form-control" />
+
+                        <span asp-validation-for="FullName"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="Email"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="Email"
+                               class="form-control" />
+
+                        <span asp-validation-for="Email"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="PhoneNumber" class="form-label">
+                        </label>
+
+                        <input asp-for="PhoneNumber" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" 
+                        placeholder="Enter 10 digit phone number" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="Password"
+                               class="form-label">
+                            Password
+                        </label>
+
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control" />
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <div class="form-check mt-2">
+
+                            <input asp-for="IsActive"
+                                   class="form-check-input" />
+
+                            <label asp-for="IsActive"
+                                   class="form-check-label">
+
+                                Active
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-check-circle"></i>
+                        Save
+
+                    </button>
+
+                    <a asp-action="GetUsers"
+                       class="btn btn-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

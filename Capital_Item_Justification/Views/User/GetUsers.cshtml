@@ -1,0 +1,140 @@
+﻿@model IEnumerable<Capital_Item_Justification.Models.ApplicationUser>
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h4>
+            <i class="bi bi-people"></i>
+            User Master
+        </h4>
+
+        <a asp-action="CreateUser"
+           class="btn btn-primary">
+
+            <i class="bi bi-plus-circle"></i>
+            Add User
+
+        </a>
+
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Employee Code</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th width="150">Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    @user.EmployeeCode
+                                </td>
+
+                                <td>
+                                    @user.FullName
+                                </td>
+
+                                <td>
+                                    @user.Email
+                                </td>
+
+                                <td>
+                                    @user.PhoneNumber
+                                </td>
+
+                                <td>
+
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge bg-success">
+                                            Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            Inactive
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <a asp-action="EditUser" title="Edit User"
+                                        asp-route-id="@user.Id"
+                                        class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    }
+                                    <form asp-action="ToggleStatus" onsubmit="return confirm('Are you sure you want to change this User status?');"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@user.Id" />
+
+                                        <button type="submit" title="Manage Status"                                   
+                                                class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-toggle-on"></i>
+
+                                        </button>
+
+                                    </form>
+                                    @if(user.IsActive){
+                                    <a asp-action="ManageRoles"
+                                       asp-route-id="@user.Id"
+                                       class="btn btn-sm btn-outline-success"
+                                       title="Manage Roles">
+
+                                        <i class="bi bi-person-check"></i>
+
+                                    </a>
+                                    }
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

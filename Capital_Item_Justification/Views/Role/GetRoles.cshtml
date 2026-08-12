@@ -1,0 +1,101 @@
+﻿@model IEnumerable<Capital_Item_Justification.Models.ApplicationRole>
+
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h4>
+            <i class="bi bi-shield-lock"></i>
+            Role Master
+        </h4>
+
+        <a asp-action="CreateRole"
+           class="btn btn-primary">
+
+            <i class="bi bi-plus-circle"></i>
+            Add Role
+
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-light">
+
+                    <tr>
+                        <th>Role Name</th>
+                        <th>Status</th>
+                        <th style="width:150px;">Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var role in Model)
+                    {
+                        <tr>
+                            <td>
+                                @role.Name
+                            </td>
+                            <td>
+                                @if (role.IsActive)
+                                {
+                                    <span class="badge bg-success">
+                                        Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        Inactive
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (role.IsActive){
+                                    <a asp-action="Edit"
+                                       asp-route-id="@role.Id"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Edit Role">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                }
+                                <form asp-action="ToggleStatus"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Are you sure you want to change this role status?');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@role.Id" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            title="Change Status">
+                                        <i class="bi bi-toggle-off"></i>
+                                    </button>
+
+                                </form>
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
