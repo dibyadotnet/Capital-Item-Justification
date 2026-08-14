@@ -1,0 +1,186 @@
+﻿
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: #f4f6f8;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 430px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+    overflow: hidden;
+}
+
+.login-header {
+    background: #ffffff;
+    color: #333333;
+    text-align: center;
+    padding: 30px 25px 15px;
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    background: transparent;
+}
+
+.sceh-logo {
+    display: block;
+    width: 190px;
+    max-width: 100%;
+    height: auto;
+    max-height: 85px;
+    object-fit: contain;
+    margin: 0 auto;
+}
+
+.login-header h5 {
+    margin: 10px 0 3px;
+    font-weight: 600;
+    font-size: 18px;
+    color: #333333;
+}
+
+.login-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #777777;
+}
+
+.login-body {
+    padding: 25px 30px 30px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #343a40;
+    margin-bottom: 6px;
+}
+
+.input-group-text {
+    background: #f8f9fa;
+    color: #555555;
+    border-color: #d5d9de;
+    border-right: 0;
+}
+
+.form-control {
+    height: 46px;
+    border-color: #d5d9de;
+    border-left: 0;
+}
+
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #d71920;
+    }
+
+.input-group:focus-within .input-group-text {
+    border-color: #d71920;
+    color: #d71920;
+}
+
+.password-toggle {
+    cursor: pointer;
+    border-left: 1;
+    color: #555555;
+}
+
+.password-toggle:hover {
+    color: #d71920;
+}
+
+.btn-login {
+    height: 46px;
+    font-weight: 600;
+    border-radius: 7px;
+    background-color: #d71920;
+    border-color: #d71920;
+    color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+    .btn-login:hover {
+        background-color: #b5121b;
+        border-color: #b5121b;
+        color: #ffffff;
+    }
+
+    .btn-login:focus {
+        background-color: #b5121b;
+        border-color: #b5121b;
+        box-shadow: 0 0 0 0.2rem rgba(215, 25, 32, 0.20);
+    }
+
+.remember-me {
+    font-size: 14px;
+}
+
+    .remember-me .form-check-input:checked {
+        background-color: #d71920;
+        border-color: #d71920;
+    }
+
+    .remember-me .form-check-input:focus {
+        box-shadow: 0 0 0 0.15rem rgba(215, 25, 32, 0.15);
+    }
+
+.login-body a {
+    color: #d71920;
+}
+
+    .login-body a:hover {
+        color: #b5121b;
+    }
+
+.validation-summary {
+    border-radius: 7px;
+    font-size: 14px;
+}
+.alert {
+    padding: 8px 12px;
+}
+.login-footer {
+    text-align: center;
+    color: #6c757d;
+    font-size: 12px;
+    padding: 0 30px 25px;
+}
+
+@media (max-width: 480px) {
+
+    .login-wrapper {
+        padding: 10px;
+    }
+
+    .login-card {
+        max-width: 100%;
+        border-radius: 10px;
+    }
+
+    .login-header {
+        padding: 25px 20px 10px;
+    }
+
+    .login-body {
+        padding: 20px;
+    }
+
+    .sceh-logo {
+        width: 170px;
+    }
+}

@@ -1,0 +1,69 @@
+﻿@model Capital_Item_Justification.ViewModels.LocationViewModel
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-person-plus"></i>
+                Create Location
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Save" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3">
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="LocationName" class="form-label">Location Name</label>
+                        <input asp-for="LocationName" class="form-control" />
+                        <span asp-validation-for="LocationName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="LocationType" class="form-label">
+                            Location Type
+                        </label>
+                        <select asp-for="LocationType" asp-items="Model.LocationTypeList" class="form-select">
+                            <option value="">-- Select Type --</option>
+                        </select>
+                        <span asp-validation-for="LocationType" class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Prefix" class="form-label">
+                            Location Prefix
+                        </label>
+                        <input asp-for="Prefix" class="form-control" />
+                        <span asp-validation-for="Prefix" class="text-danger">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        Save
+                    </button>
+                    <a asp-action="GetAllLocation"  class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

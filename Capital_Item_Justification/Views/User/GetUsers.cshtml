@@ -40,7 +40,7 @@
                             <th>Employee Code</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Phone</th>
+                           @*  <th>Phone</th> *@
                             <th>Status</th>
                             <th width="150">Action</th>
                         </tr>
@@ -51,26 +51,20 @@
 
                         @foreach (var user in Model)
                         {
-                            <tr>
-
+                            <tr>                            
                                 <td>
                                     @user.EmployeeCode
                                 </td>
-
                                 <td>
                                     @user.FullName
                                 </td>
-
                                 <td>
                                     @user.Email
                                 </td>
-
-                                <td>
+                                @* <td>
                                     @user.PhoneNumber
-                                </td>
-
+                                </td> *@
                                 <td>
-
                                     @if (user.IsActive)
                                     {
                                         <span class="badge bg-success">
@@ -83,7 +77,6 @@
                                             Inactive
                                         </span>
                                     }
-
                                 </td>
 
                                 <td>
