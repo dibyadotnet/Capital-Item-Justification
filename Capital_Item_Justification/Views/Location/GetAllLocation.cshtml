@@ -1,0 +1,70 @@
+﻿@model IEnumerable<Capital_Item_Justification.ViewModels.LocationViewModel>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>
+            <i class="bi bi-people"></i>
+            Location Master
+        </h4>
+        <a asp-action="CreateLocation" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i>
+            Add Location
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="d-none"></th>
+                            <th>Location Name</th>
+                            <th>Location Type</th>
+                            <th>Prefix</th>
+                            <th width="150">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="d-none">@item.LocationId</td>
+                                <td>
+                                    @item.LocationName
+                                </td>
+                                <td>
+                                    @item.LocationType
+                                </td>
+                                <td>
+                                    @item.Prefix
+                                </td>
+                                <td>
+                                    <a asp-action="EditLocation" title="Edit Location" asp-route-id="@item.LocationId"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    <form asp-action="DeleteLocation" onsubmit="return confirm('Are you sure you want to delete this location?');" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.LocationId" />
+
+                                        <button type="submit" title="Delete Location" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>                                 
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

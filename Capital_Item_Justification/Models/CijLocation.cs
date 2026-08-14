@@ -31,4 +31,7 @@ public partial class CijLocation
 
     [Column(TypeName = "datetime")]
     public DateTime? ModifiedDate { get; set; }
+
+    [StringLength(50)]
+    public string? LocationType { get; set; }
 }

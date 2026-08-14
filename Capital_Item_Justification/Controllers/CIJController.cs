@@ -7,9 +7,11 @@ using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Capital_Item_Justification.Models;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Capital_Item_Justification.Controllers
 {
+    [Authorize]
     public class CIJController : Controller
     {
         private readonly ICIJRequestService _service;
