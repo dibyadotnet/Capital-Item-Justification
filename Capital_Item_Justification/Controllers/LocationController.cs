@@ -26,7 +26,8 @@ namespace Capital_Item_Justification.Controllers
             }
             return View(locations);
         }
-        public IActionResult CreateLocation(LocationViewModel model)
+        [HttpGet]
+        public IActionResult CreateLocation()
         {
             try
             {

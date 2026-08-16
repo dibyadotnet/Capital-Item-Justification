@@ -336,6 +336,11 @@ $("#cijForm").on("submit", function (e) {
     if (!validateField("#ddlItemType", "Item type is required.")) {
         isValid = false;
     }
+    if ($("#ddlItemType").val()==="1") {
+        if (!validateField("#txtCommiteeComments", "Equipment Committee Comments is required.")) {
+            isValid = false;
+        }
+    }
     if (!validateField("#CIJRequest_TotalEquipmentCostDisplay", "Equipment Cost is required.")) {
         isValid = false;
     }

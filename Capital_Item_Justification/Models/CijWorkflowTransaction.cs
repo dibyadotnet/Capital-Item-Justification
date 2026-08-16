@@ -17,33 +17,32 @@ public partial class CijWorkflowTransaction
 
     public int WorkflowId { get; set; }
 
-    public int StepId { get; set; }
+    [StringLength(100)]
+    public string? CurrentApproverRole { get; set; }//need to be discussed
 
-    public int ApproverUserId { get; set; }
-
-    public int ApproverRoleId { get; set; }
-
-    public int StatusId { get; set; }
+    public int CurrentStatusId { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime? ActionDate { get; set; }
+    public DateTime? StartDate { get; set; }
 
     [StringLength(1000)]
     public string? Remarks { get; set; }
 
-    public int? PreviousStepId { get; set; }
+    public bool? IsActive { get; set; }//2
 
-    public int? NextStepId { get; set; }
-
-    public bool? IsActive { get; set; }
-
-    public int? CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedOn { get; set; }
 
-    public int? ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? ModifiedOn { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? CompletionDate { get; set; }
+
+    [StringLength(200)]
+    public string? CurrentStep { get; set; }
 }
