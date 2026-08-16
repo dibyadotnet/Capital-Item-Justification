@@ -6,7 +6,7 @@ using Capital_Item_Justification.Data;
 
 namespace Capital_Item_Justification.Models;
 
-public partial class CIJDbContext : IdentityDbContext<ApplicationUser,ApplicationRole,string>
+public partial class CIJDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
 {
     public CIJDbContext()
     {
@@ -27,8 +27,6 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser,Applicatio
     public virtual DbSet<CijEquipment> CijEquipments { get; set; }
 
     public virtual DbSet<CijItemType> CijItemTypes { get; set; }
-
-    public virtual DbSet<CijItemTypeMaster> CijItemTypeMasters { get; set; }
 
     public virtual DbSet<CijJustification> CijJustifications { get; set; }
 
@@ -52,12 +50,40 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser,Applicatio
     public virtual DbSet<CijCostCenter> CijCostCenters { get; set; }
     public virtual DbSet<CijProject> CijProjects { get; set; }
     public virtual DbSet<CijBudgetType> CijBudgetTypes { get; set; }
+    public virtual DbSet<CijWorkflowApprovalHistory> CijWorkflowApprovalHistories { get; set; }
+
+    public virtual DbSet<CijRoleBudgetLimit> CijRoleBudgetLimits { get; set; }
+    public virtual DbSet<CijWorkflowApproval> CijWorkflowApprovals { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CIJConnection");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<CijWorkflowApproval>(entity =>
+        {
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+        });
+
+        modelBuilder.Entity<CijRoleBudgetLimit>(entity =>
+        {
+            entity.HasKey(e => e.RoleBudgetLimitId).HasName("PK_RoleBudgetLimit");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+
+        entity.HasOne(e => e.Role)
+        .WithMany()
+        .HasForeignKey(e => e.RoleId)
+        .HasPrincipalKey(e => e.Id)
+        .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CijWorkflowApprovalHistory>(entity =>
+        {
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+        });
 
         modelBuilder.Entity<CijBudgetType>(entity =>
         {

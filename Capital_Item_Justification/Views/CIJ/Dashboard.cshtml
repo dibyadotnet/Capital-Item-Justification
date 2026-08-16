@@ -1,9 +1,12 @@
 ﻿@model IEnumerable<Capital_Item_Justification.ViewModels.DashboardViewModel>
 <div class="container-fluid">
     <div class="d-flex justify-content-end mb-1">
-        <a asp-controller="CIJ" asp-action="CreateCIJ" class="btn btn-primary custom-btn">
-            <i class="bi bi-plus-circle"></i> Create CIJ
-        </a>
+        @if (User.IsInRole("Requester"))
+        {
+            <a asp-controller="CIJ" asp-action="CreateCIJ" class="btn btn-primary custom-btn">
+                <i class="bi bi-plus-circle"></i> Create CIJ
+            </a>
+        }
     </div>
     <div class="card shadow-sm">
         <div class="card-body">
@@ -36,7 +39,10 @@
                                 <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
                                 <td>
                                     <a asp-action="Details" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a>
-                                    <a asp-action="Edit" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-warning">Edit</a>
+                                    @if (User.IsInRole("Requester"))
+                                    {
+                                        <a asp-action="Edit" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-warning">Edit</a>
+                                    }
                                 </td>
                             </tr>
                         }

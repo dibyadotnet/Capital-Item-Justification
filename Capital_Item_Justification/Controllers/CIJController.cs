@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Capital_Item_Justification.Models;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -15,9 +16,15 @@ namespace Capital_Item_Justification.Controllers
     public class CIJController : Controller
     {
         private readonly ICIJRequestService _service;
-        public CIJController(ICIJRequestService service)
+        private readonly ILogger<WorkFlowController> _logger;
+        private readonly IWorkflowService _workflowService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        public CIJController(ICIJRequestService service, ILogger<WorkFlowController> logger, IWorkflowService workflowService, UserManager<ApplicationUser> userManager)
         {
             _service = service;
+            _logger = logger;
+            _workflowService = workflowService;
+            _userManager = userManager;
         }
         public async Task<IActionResult> Dashboard()
         {
@@ -33,6 +40,7 @@ namespace Capital_Item_Justification.Controllers
             }
             return View(list);
         }
+        [Authorize(Roles = "Requester")]
         public async Task<IActionResult> CreateCIJ()
         {
             CIJMainViewModel vm = new();
@@ -63,7 +71,6 @@ namespace Capital_Item_Justification.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
 
@@ -131,6 +138,7 @@ namespace Capital_Item_Justification.Controllers
             }
         }
 
+        [Authorize(Roles = "Requester")]
         [HttpGet]
         public async Task<IActionResult> Edit(int cijId)
         {
@@ -350,6 +358,33 @@ namespace Capital_Item_Justification.Controllers
             {
 
                 throw;
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> SubmitRequest(CIJMainViewModel cIJMainViewModel)
+        {
+            try
+            {
+                var formData = Request.Form
+        .ToDictionary(x => x.Key, x => x.Value.ToString());
+
+             
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+
+                await _workflowService.SubmitCIJAsync(cIJMainViewModel, user?.Id);
+                TempData["SuccessMessage"] = "CIJ request submitted successfully.";
+
+                return RedirectToAction("Dashboard", "CIJ");
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "Unable to submit the CIJ request.";
+                return RedirectToAction("Dashboard", "CIJ");
             }
         }
     }

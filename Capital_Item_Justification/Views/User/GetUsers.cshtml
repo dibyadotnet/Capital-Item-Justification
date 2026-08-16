@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Capital_Item_Justification.Models.ApplicationUser>
+﻿@model IEnumerable<Capital_Item_Justification.ViewModels.UserViewModel>
 
 <div class="container-fluid">
 
@@ -40,7 +40,8 @@
                             <th>Employee Code</th>
                             <th>Name</th>
                             <th>Email</th>
-                           @*  <th>Phone</th> *@
+                           <th>Department</th>
+                            <th>Location</th>
                             <th>Status</th>
                             <th width="150">Action</th>
                         </tr>
@@ -61,9 +62,12 @@
                                 <td>
                                     @user.Email
                                 </td>
-                                @* <td>
-                                    @user.PhoneNumber
-                                </td> *@
+                                <td>
+                                    @user.DepartmentName
+                                </td>
+                                <td>
+                                    @user.LocationName
+                                </td>
                                 <td>
                                     @if (user.IsActive)
                                     {

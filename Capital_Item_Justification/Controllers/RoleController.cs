@@ -120,7 +120,7 @@ namespace Capital_Item_Justification.Controllers
                 //_logger.LogError(ex,"Error while changing status for role {RoleId}", id);
                 TempData["ToastMessage"] ="Unable to change role status.";
                 TempData["ToastType"] = "Error";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(GetRoles));
             }
         }
         [HttpPost]

@@ -79,7 +79,7 @@ namespace Capital_Item_Justification.Controllers
                     return Redirect(returnUrl);
                 }
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Dashboard", "CIJ");
             }
 
             if (result.IsLockedOut)

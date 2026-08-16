@@ -1,11 +1,14 @@
 ﻿
 using Capital_Item_Justification.Models;
 using Capital_Item_Justification.Models;
+using Capital_Item_Justification.Services.Interfaces;
 using Capital_Item_Justification.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.Intrinsics.Arm;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -14,24 +17,66 @@ namespace Capital_Item_Justification.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
-        public UserController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        private readonly ICIJRequestService _service;
+        public UserController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager,
+            ICIJRequestService service)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _service = service;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _userManager.Users.OrderBy(x => x.FullName).ToListAsync();
+            var users = await _userManager.Users.ToListAsync();
+            var depts = await _service.GetDepartment();
+            var locss = await _service.GetLocation();
 
-            return View(users);
+            List<UserViewModel> vm = (from user in users
+                                      join dept in depts
+                                          on user.DepartmentId equals dept.DepartmentId into departmentGroup
+                                      from dept in departmentGroup.DefaultIfEmpty()
+
+                                      join location in locss
+                                          on user.LocationId equals location.LocationId into locationGroup
+                                      from location in locationGroup.DefaultIfEmpty()
+                                      select new UserViewModel
+                                      {
+                                          Id = user.Id,
+                                          FullName = user.FullName ?? "",
+                                          EmployeeCode = user.EmployeeCode ?? "",
+                                          Email = user.Email ?? "",
+                                          DepartmentName = dept != null ? dept.DepartmentName : null,
+                                          LocationName = location != null ? location.LocationName : null,
+                                          IsActive = user.IsActive,
+                                      }).OrderBy(x => x.FullName).ToList();
+            return View(vm);
         }
 
         [HttpGet]
-        public IActionResult CreateUser()
+        public async Task<IActionResult> CreateUser()
         {
-            return View(new UserViewModel());
+            UserViewModel userViewModel = new UserViewModel();
+
+            var departmentsList = await _service.GetDepartment();
+            var departmentItems = departmentsList.Select(x => new SelectListItem
+            {
+                Value = x.DepartmentId.ToString(),
+                Text = x.DepartmentName
+            }).ToList();
+
+
+            var locationList = await _service.GetLocation();
+            var locationItems = locationList.Select(x => new SelectListItem
+            {
+                Value = x.LocationId.ToString(),
+                Text = x.LocationName
+            }).ToList();
+
+            userViewModel.Departments = departmentItems;
+            userViewModel.Locations = locationItems;
+            return View(userViewModel);
         }
 
         [HttpPost]
@@ -103,6 +148,21 @@ namespace Capital_Item_Justification.Controllers
                 return NotFound();
             }
 
+            var departmentsList = await _service.GetDepartment();
+            var departmentItems = departmentsList.Select(x => new SelectListItem
+            {
+                Value = x.DepartmentId.ToString(),
+                Text = x.DepartmentName
+            }).ToList();
+
+
+            var locationList = await _service.GetLocation();
+            var locationItems = locationList.Select(x => new SelectListItem
+            {
+                Value = x.LocationId.ToString(),
+                Text = x.LocationName
+            }).ToList();
+
             var model = new UserViewModel
             {
                 Id = user.Id,
@@ -110,11 +170,11 @@ namespace Capital_Item_Justification.Controllers
                 FullName = user.FullName ?? "",
                 Email = user.Email ?? "",
                 PhoneNumber = user.PhoneNumber,
-
                 DepartmentId = user.DepartmentId,
                 LocationId = user.LocationId,
-
-                IsActive = user.IsActive
+                IsActive = user.IsActive,
+                Departments = departmentItems,
+                Locations = locationItems
             };
 
             return View(model);
@@ -145,14 +205,10 @@ namespace Capital_Item_Justification.Controllers
             user.FullName = model.FullName;
             user.Email = model.Email;
             user.UserName = model.Email;
-
             user.PhoneNumber = model.PhoneNumber;
-
             user.DepartmentId = model.DepartmentId;
             user.LocationId = model.LocationId;
-
             user.IsActive = model.IsActive;
-
             user.ModifiedOn = DateTime.UtcNow;
             user.ModifiedBy = User.Identity?.Name;
 
@@ -280,7 +336,7 @@ namespace Capital_Item_Justification.Controllers
                 {
                     foreach (var error in addResult.Errors)
                     {
-                        ModelState.AddModelError( string.Empty,error.Description);
+                        ModelState.AddModelError(string.Empty, error.Description);
                     }
 
                     return RedirectToAction(nameof(ManageRoles), new { id = userId });

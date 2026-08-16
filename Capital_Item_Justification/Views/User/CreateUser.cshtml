@@ -68,6 +68,22 @@
                         </span>
 
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label required">Location</label>
+                        <select asp-for="LocationId" asp-items="Model.Locations" class="form-select">
+                            <option value="">-- Select Location--</option>
+                        </select>
+                        <span asp-validation-for="LocationId" class="text-danger">
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label required">Department</label>
+                        <select asp-for="DepartmentId" asp-items="Model.Departments" class="form-select">
+                            <option value="">-- Select Dept--</option>
+                        </select>
+                        <span asp-validation-for="DepartmentId" class="text-danger">
+                        </span>
+                    </div>
 
                    @*  <div class="col-md-6">
 

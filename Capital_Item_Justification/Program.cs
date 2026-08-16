@@ -58,6 +58,9 @@ builder.Services.AddScoped<ICIJRequestService, CIJRequestService>();
 builder.Services.AddScoped<ICIJMainRepository, CIJMainRepository>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<IWorkflowService, WorkflowService>();
+builder.Services.AddScoped<IWorkflowRepository, WorkflowRepository>();
+
 
 
 var app = builder.Build();

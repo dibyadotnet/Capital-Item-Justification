@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace Capital_Item_Justification.ViewModels
 {
@@ -21,12 +22,17 @@ namespace Capital_Item_Justification.ViewModels
         [Phone]
         public string? PhoneNumber { get; set; }
 
+        [Required(ErrorMessage ="The Department field is required")]
         public int? DepartmentId { get; set; }
-
+        [Required(ErrorMessage = "The Location field is required")]
         public int? LocationId { get; set; }
 
         public bool IsActive { get; set; } = true;
 
         public string? Password { get; set; }
+        public string? DepartmentName { get; set; }
+        public string? LocationName { get; set; }
+        public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
+        public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
     }
 }
