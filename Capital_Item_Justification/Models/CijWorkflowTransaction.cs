@@ -45,4 +45,5 @@ public partial class CijWorkflowTransaction
 
     [StringLength(200)]
     public string? CurrentStep { get; set; }
+    public int? StepId { get; set; }
 }

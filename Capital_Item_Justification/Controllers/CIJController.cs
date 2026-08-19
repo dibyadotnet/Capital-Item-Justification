@@ -81,6 +81,16 @@ namespace Capital_Item_Justification.Controllers
         {
             try
             {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles == null)
+                {
+                    throw new UnauthorizedAccessException("User does not have any assigned role.");
+                }
                 string beneficieryDept = string.Empty;
                 string beneficieryLoc = string.Empty;
                 int cijId = 0;
@@ -97,6 +107,8 @@ namespace Capital_Item_Justification.Controllers
                 }
                 cIJMainViewModel.CIJRequest.BeneficiaryDepartment = beneficieryDept;
                 cIJMainViewModel.CIJRequest.BeneficiaryLocation = beneficieryLoc;
+                cIJMainViewModel.userId = user.Id;
+                cIJMainViewModel.userRoles = roles.ToList();
                 if (cIJMainViewModel?.CIJRequest?.Cijid > 0)
                 {
                     cijId = cIJMainViewModel.CIJRequest.Cijid;
@@ -365,25 +377,26 @@ namespace Capital_Item_Justification.Controllers
         {
             try
             {
-                var formData = Request.Form
-        .ToDictionary(x => x.Key, x => x.Value.ToString());
-
-             
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
                     return Unauthorized();
                 }
                 var roles = await _userManager.GetRolesAsync(user);
+                cIJMainViewModel.userId=user.Id;
+                cIJMainViewModel.userRoles = roles.ToList();
+                await _workflowService.SubmitCIJAsync(cIJMainViewModel);
 
-                await _workflowService.SubmitCIJAsync(cIJMainViewModel, user?.Id);
-                TempData["SuccessMessage"] = "CIJ request submitted successfully.";
-
+                TempData["ToastMessage"] = "CIJ request submitted successfully.";
+                TempData["ToastType"] = "success";
+            
                 return RedirectToAction("Dashboard", "CIJ");
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "Unable to submit the CIJ request.";
+                TempData["ToastMessage"] = "Unable to submit the CIJ request.";
+                TempData["ToastType"] = "error";
+
                 return RedirectToAction("Dashboard", "CIJ");
             }
         }

@@ -11,7 +11,7 @@ $(document).ready(function () {
         allowClear: true,
         width: '100%'
     });
-
+   
     var equipmentJson = $("#EquipmentJson").val();
     if (equipmentJson && equipmentJson !== "") {
         equipments = JSON.parse(equipmentJson);
