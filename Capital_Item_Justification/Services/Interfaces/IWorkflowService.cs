@@ -4,7 +4,9 @@ namespace Capital_Item_Justification.Services.Interfaces
 {
     public interface IWorkflowService
     {
-        Task<bool> SubmitCIJAsync(CIJMainViewModel model, string userId);
-        Task<List<MyApprovalViewModel>> GetMyApproval(string userId, string roleId);
+        Task<bool> SubmitCIJAsync(CIJMainViewModel model);
+        Task<List<MyApprovalViewModel>> GetMyApprovalAsync(string userId, List<string> roleIds);
+        Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int id);
+        Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm);
     }
 }

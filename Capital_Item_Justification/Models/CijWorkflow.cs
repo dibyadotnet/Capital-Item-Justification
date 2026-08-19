@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Capital_Item_Justification.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Capital_Item_Justification.Models;
@@ -31,6 +32,6 @@ public partial class CijWorkflow
     [Column(TypeName = "datetime")]
     public DateTime? ModifiedDate { get; set; }
 
-    [InverseProperty("Workflow")]
+    [InverseProperty("CijWorkflow")]
     public virtual ICollection<CijWorkflowStep> CijWorkflowSteps { get; set; } = new List<CijWorkflowStep>();
 }

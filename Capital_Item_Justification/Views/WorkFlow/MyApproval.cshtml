@@ -1,0 +1,148 @@
+﻿@model IEnumerable<Capital_Item_Justification.ViewModels.MyApprovalViewModel>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+      @*   <div>
+            <h4 class="mb-1">
+                <i class="bi bi-check2-square me-2"></i>
+                My Approvals
+            </h4>
+
+            <small class="text-muted">
+                CIJ requests pending for your approval
+            </small>
+        </div> *@
+    </div>
+    <!-- Approval Card -->
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <strong class="bi bi-check2-square me-2">
+                Pending Approval
+            </strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>CIJ Number</th>
+                            <th>Approval Step</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Assigned Date</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            var index = 1;
+
+                            foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @index
+                                    </td>
+
+                                    <td>
+                                        <strong>
+                                            @item.CIJNumber
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @item.StepName
+                                    </td>
+
+                                    <td>
+                                        @item.ApproverRole
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.DepartmentName))
+                                        {
+                                            @item.DepartmentName
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @item.AssignedDate?.ToString("dd-MMM-yyyy hh:mm tt")
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-warning text-dark">
+                                            Pending
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+
+                                        <a asp-controller="WorkFlow"
+                                           asp-action="ApprovalDetail"
+                                           asp-route-id="@item.ApprovalId"
+                                           class="btn btn-sm btn-primary">
+
+                                            <i class="bi bi-eye me-1"></i>
+                                            View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="8"
+                                    class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+
+                                        <h6>No pending approvals</h6>
+
+                                        <small>
+                                            You currently have no CIJ requests waiting for your approval.
+                                        </small>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

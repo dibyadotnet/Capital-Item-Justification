@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Capital_Item_Justification.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Capital_Item_Justification.Models;
+namespace Capital_Item_Justification.Data;
 
-[Table("CIJ_Workflow_Step")]
+[Table("CIJ_WorkflowStep")]
 public partial class CijWorkflowStep
 {
     [Key]
@@ -14,32 +15,37 @@ public partial class CijWorkflowStep
 
     public int WorkflowId { get; set; }
 
-    public int StepOrder { get; set; }
+    public int StepNo { get; set; }
 
-    [StringLength(200)]
+    [StringLength(50)]
+    [Unicode(false)]
+    public string StepCode { get; set; } = null!;
+
+    [StringLength(150)]
+    [Unicode(false)]
     public string StepName { get; set; } = null!;
 
-    public int? RoleId { get; set; }
-
-    [StringLength(20)]
+    [StringLength(100)]
     [Unicode(false)]
-    public string ApprovalType { get; set; } = null!;
+    public string? RoleName { get; set; }
 
-    public int? ReturnStepId { get; set; }
+    public bool IsInitialStep { get; set; }
 
-    public bool? CanApprove { get; set; }
+    public bool IsFinalStep { get; set; }
 
-    public bool? CanReject { get; set; }
+    public bool IsActive { get; set; }
 
-    public bool? CanReturn { get; set; }
+    [StringLength(450)]
+    public string? CreatedBy { get; set; }
 
-    public bool? CanSkip { get; set; }
+    [Column(TypeName = "datetime")]
+    public DateTime CreatedOn { get; set; }
 
-    public bool? IsFinalStep { get; set; }
+    [StringLength(450)]
+    public string? ModifiedBy { get; set; }
 
-    public bool? IsActive { get; set; }
-
-    [ForeignKey("WorkflowId")]
-    [InverseProperty("CijWorkflowSteps")]
-    public virtual CijWorkflow Workflow { get; set; } = null!;
+    [Column(TypeName = "datetime")]
+    public DateTime? ModifiedOn { get; set; }
+    [ForeignKey(nameof(WorkflowId))]
+    public virtual CijWorkflow CijWorkflow { get; set; } = null!;
 }

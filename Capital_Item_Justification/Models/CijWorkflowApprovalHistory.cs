@@ -17,10 +17,9 @@ public partial class CijWorkflowApprovalHistory
     [Column("CIJId")]
     public int Cijid { get; set; }
 
-    [StringLength(100)]
-    public string StepName { get; set; } = null!;
+    public int? FromStatusId { get; set; }
 
-    public int? DepartmentId { get; set; }
+    public long? ApprovalId { get; set; }
 
     [StringLength(450)]
     public string? ApproverUserId { get; set; }
@@ -28,21 +27,17 @@ public partial class CijWorkflowApprovalHistory
     [StringLength(100)]
     public string? ApproverRole { get; set; }
 
-    public int? StatusId { get; set; }
+    public int? ToStatusId { get; set; }
 
     [StringLength(1000)]
-    public string? Comments { get; set; }
+    public string? Remarks { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? ActionOn { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedOn { get; set; }
-
-    public int? ModifiedBy { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime? ModifiedOn { get; set; }
+    public int? StepId { get; set; }
 }

@@ -58,14 +58,11 @@ public partial class CijRequest
     public int StatusId { get; set; }
 
     public int? CurrentWorkflowStepId { get; set; }
-
-    [StringLength(50)]
     public string? CreatedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedDate { get; set; }
 
-    [StringLength(50)]
     public string? ModifiedBy { get; set; }
 
     [Column(TypeName = "datetime")]

@@ -50,4 +50,6 @@ public partial class CijWorkflowApproval
 
     [Column(TypeName = "datetime")]
     public DateTime? ModifiedOn { get; set; }
+    public string? ApproverRoleId { get; set; }
+    public int? StepId { get; set; }
 }

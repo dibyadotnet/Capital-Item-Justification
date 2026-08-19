@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Text.Json;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -97,8 +98,9 @@ namespace Capital_Item_Justification.Repository
                 CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId,
                 BeneficiaryDepartment = model.CIJRequest.BeneficiaryDepartment,
                 BeneficiaryLocation = model.CIJRequest.BeneficiaryLocation,
-                LocationId=model.CIJRequest.LocationId,
-                BudgetTypeId= model.CIJRequest.BudgetTypeId,
+                LocationId = model.CIJRequest.LocationId,
+                BudgetTypeId = model.CIJRequest.BudgetTypeId,
+                CreatedBy = model.userId,
             };
             _context.CijRequests.Add(request);
             int row = await _context.SaveChangesAsync();
@@ -119,7 +121,7 @@ namespace Capital_Item_Justification.Repository
                         EquipmentCost = item.EquipmentCost,
                         PreferenceOrder = item.PreferenceOrder,
                         IsActive = true,
-                        CreatedBy = "Dibya"
+                        CreatedBy = model.userId,
                     };
                     _context.CijEquipments.Add(cijEquipment);
                 }
@@ -135,6 +137,7 @@ namespace Capital_Item_Justification.Repository
                     IsPurchasedEarlier = model.Justification.IsPurchasedEarlier,
                     Justification = model.Justification.Justification,
                     Remarks = model.Justification.Remarks,
+                    CreatedBy = model.userId
                 };
                 _context.CijJustifications.Add(cijJustification);
 
@@ -146,7 +149,9 @@ namespace Capital_Item_Justification.Repository
                 {
                     Cijid = cijId,
                     CommentDate = DateTime.Now,
-                    Comments = model.CommitteeComment.Comments
+                    Comments = model.CommitteeComment.Comments,
+                    IsActive = true,
+                    CreatedBy = model.userId,
                 };
                 _context.CijCommitteeComments.Add(cijCommittee);
 
@@ -156,11 +161,11 @@ namespace Capital_Item_Justification.Repository
             // 2. Save attachments
             if (model?.JustificationAttachment != null && model.JustificationAttachment.Count > 0)
             {
-                await SaveAttachmentsAsync(cijId, model.JustificationAttachment,"justification");
+                await SaveAttachmentsAsync(cijId, model.JustificationAttachment, "justification", model.userId);
             }
             if (model?.VendorAttachments != null && model.VendorAttachments.Count > 0)
             {
-                await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor");
+                await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor", model.userId);
             }
 
             return cijId;
@@ -199,7 +204,8 @@ namespace Capital_Item_Justification.Repository
                 request.BeneficiaryDepartment = model.CIJRequest.BeneficiaryDepartment;
                 request.BeneficiaryLocation = model.CIJRequest.BeneficiaryLocation;
                 request.BudgetTypeId = model.CIJRequest.BudgetTypeId;
-
+                request.ModifiedBy = model.userId;
+                request.ModifiedDate = DateTime.Now;
                 await _context.SaveChangesAsync();
 
                 int cijId = request.Cijid;
@@ -223,7 +229,7 @@ namespace Capital_Item_Justification.Repository
                         {
                             equipment.IsActive = false;
                             equipment.ModifiedDate = DateTime.Now;
-                            equipment.ModifiedBy = "Dibya";
+                            equipment.ModifiedBy = model.userId;
                         }
                         _context.CijEquipments.UpdateRange(removedEquipments);
                     }
@@ -243,7 +249,7 @@ namespace Capital_Item_Justification.Repository
                             existingEquipment.Model = item.Model;
                             existingEquipment.EquipmentCost = item.EquipmentCost;
                             existingEquipment.PreferenceOrder = item.PreferenceOrder;
-                            existingEquipment.ModifiedBy = "Dibya";
+                            existingEquipment.ModifiedBy = model.userId;
                             existingEquipment.ModifiedDate = DateTime.Now;
                         }
                     }
@@ -259,7 +265,7 @@ namespace Capital_Item_Justification.Repository
                             EquipmentCost = item.EquipmentCost,
                             PreferenceOrder = item.PreferenceOrder,
                             IsActive = true,
-                            CreatedBy = "Dibya"
+                            CreatedBy = model.userId
                         };
                         _context.CijEquipments.Add(cijEquipment);
                     }
@@ -285,7 +291,8 @@ namespace Capital_Item_Justification.Repository
                 justification.IsPurchasedEarlier = model.Justification.IsPurchasedEarlier;
                 justification.Justification = model.Justification.Justification;
                 justification.Remarks = model.Justification.Remarks;
-
+                justification.ModifiedBy = model.userId;
+                justification.ModifiedDate = DateTime.Now;
                 await _context.SaveChangesAsync();
 
                 //Update Committee Comment
@@ -304,17 +311,18 @@ namespace Capital_Item_Justification.Repository
 
                 committeeComment.CommentDate = DateTime.Now;
                 committeeComment.Comments = model.CommitteeComment.Comments;
-
+                committeeComment.ModifiedBy = model.userId;
+                committeeComment.ModifiedDate = DateTime.Now;
                 await _context.SaveChangesAsync();
 
                 // 2. Save attachments
                 if (model?.JustificationAttachment != null && model.JustificationAttachment.Count > 0)
                 {
-                    await SaveAttachmentsAsync(cijId, model.JustificationAttachment, "justification");
+                    await SaveAttachmentsAsync(cijId, model.JustificationAttachment, "justification", model.userId);
                 }
                 if (model?.VendorAttachments != null && model.VendorAttachments.Count > 0)
                 {
-                    await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor");
+                    await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor", model.userId);
                 }
 
                 return "Updated Successfully";
@@ -328,7 +336,7 @@ namespace Capital_Item_Justification.Repository
         public async Task<List<DashboardViewModel>> GetDashboard()
         {
             List<DashboardViewModel> dashboardViewModels = new();
-
+            int? draftStatusId = _context.CijStatuses.Where(x => x.StatusName == "Draft").Select(x => x.StatusId).FirstOrDefault();
             dashboardViewModels = await (
                        from r in _context.CijRequests
 
@@ -347,7 +355,7 @@ namespace Capital_Item_Justification.Repository
                        join st in _context.CijStatuses
                       on r.StatusId equals st.StatusId into stGroup
                        from st in stGroup.DefaultIfEmpty()
-
+                       where r.IsActive == true
                        select new DashboardViewModel
                        {
                            CIJId = r.Cijid,
@@ -410,8 +418,8 @@ namespace Capital_Item_Justification.Repository
                 CurrentWorkflowStepId = request.CurrentWorkflowStepId,
                 BeneficiaryDepartment = request.BeneficiaryDepartment,
                 BeneficiaryLocation = request.BeneficiaryLocation,
-                LocationId=request.LocationId,
-                BudgetTypeId=request.BudgetTypeId
+                LocationId = request.LocationId,
+                BudgetTypeId = request.BudgetTypeId
             };
 
             model.Equipments = await _context.CijEquipments
@@ -494,7 +502,7 @@ namespace Capital_Item_Justification.Repository
             return projects;
         }
 
-        public async Task SaveAttachmentsAsync(int cijId, List<IFormFile> files,string moduleName)
+        public async Task SaveAttachmentsAsync(int cijId, List<IFormFile> files, string moduleName, string userId)
         {
             if (files == null || files.Count == 0)
                 return;
@@ -569,9 +577,9 @@ namespace Capital_Item_Justification.Repository
                     UploadedBy = 1,
                     UploadedDate = DateTime.Now,
                     IsActive = true,
-                    CreatedBy = 1,
+                    CreatedBy = userId,
                     CreatedDate = DateTime.Now,
-                    ModuleName=moduleName
+                    ModuleName = moduleName
                 };
                 _context.CijAttachments.Add(attachment);
             }
@@ -586,7 +594,7 @@ namespace Capital_Item_Justification.Repository
                 Cijid = a.Cijid,
                 FileName = a.FileName,
                 FilePath = a.FilePath,
-                ModuleName=a.ModuleName
+                ModuleName = a.ModuleName
             }).ToListAsync();
 
             return attachments;

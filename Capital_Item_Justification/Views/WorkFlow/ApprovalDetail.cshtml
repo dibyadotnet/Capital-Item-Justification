@@ -1,0 +1,504 @@
+﻿@model Capital_Item_Justification.ViewModels.ApprovalDetailViewModel
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-1">
+                        <i class="bi bi-check2-square me-2"></i>
+                        CIJ Approval Detail
+                    </h3>
+                    <small class="text-muted">
+                        Review the CIJ request and take an approval action.
+                    </small>
+                </div>
+
+                <a asp-action="MyApproval" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back to My Approval
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- CIJ Summary -->
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-file-earmark-text me-2"></i>
+                CIJ Request Information
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="border rounded p-3 bg-light">
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                CIJ Number
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.CIJSNumber
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Request Date
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.RequestDate
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Department
+                            </div>
+                            <div class="col-sm-7">
+                                : @* @Model.CIJRequest.DepartmentName *@
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                Location
+                            </div>
+                            <div class="col-sm-7">
+                                : @* @Model.CIJRequest.LocationName *@
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <div class="border rounded p-3 bg-light">
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Requestor
+                            </div>
+                            <div class="col-sm-7">
+                                : @* @Model.CIJRequest.RequestorName *@
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Item Type
+                            </div>
+                            <div class="col-sm-7">
+                                : @* @Model.CIJRequest.ItemTypeName *@
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                Current Status
+                            </div>
+                            <div class="col-sm-7">
+                                :
+                                <span class="badge bg-warning text-dark">
+                                    @* @Model.CIJRequest.StatusName *@
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Details -->
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-pc-display me-2"></i>
+                Equipment Details
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model.Equipments != null && Model.Equipments.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>Equipment</th>
+                                <th>Quantity</th>
+                                <th>Make</th>
+                                <th>Model</th>
+                                <th class="text-end">Estimated Cost</th>
+                                <th>Preference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int equipmentIndex = 1;
+                                decimal equipmentTotal = 0;
+                            }
+                            @foreach (var equipment in Model.Equipments)
+                            {
+                                @* equipmentTotal += equipment.EquipmentCost ?? 0; *@
+                                <tr>
+                                    <td>
+                                        @equipmentIndex
+                                    </td>
+                                    <td>
+                                        @equipment.EquipmentName
+                                    </td>
+                                    <td>
+                                        @equipment.EquipmentQty
+                                    </td>
+                                    <td>
+                                        @equipment.Make
+                                    </td>
+                                    <td>
+                                        @equipment.Model
+                                    </td>
+
+                                    <td class="text-end">
+                                        @* @((equipment.EquipmentCost ?? 0).ToString("N2")) *@
+                                    </td>
+                                    <td>
+                                        @equipment.PreferenceOrder
+                                    </td>
+                                </tr>
+
+                                equipmentIndex++;
+                            }
+
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light fw-bold">
+                                <td colspan="5" class="text-end">
+                                    Total Estimated Cost
+                                </td>
+                                <td class="text-end">
+                                    @equipmentTotal.ToString("N2")
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No equipment details available.
+                </div>
+            }
+
+        </div>
+    </div>
+
+    <!-- Justification -->
+    <div class="card card-primary card-outline mb-3">
+
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-chat-left-text me-2"></i>
+                Justification
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.Justification != null)
+            {
+                <div class="mb-3">
+
+                    <label class="form-label fw-bold">
+                        Business Justification
+                    </label>
+
+                    <div class="border rounded p-3 bg-light"
+                         style="min-height:100px; white-space:pre-wrap;">
+                        @Model.Justification.Justification
+                    </div>
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No justification available.
+                </div>
+            }
+
+        </div>
+    </div>
+    <!-- Attachments -->
+    <div class="card card-primary card-outline mb-3">
+
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-paperclip me-2"></i>
+                Attachments
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.VendorAttachments != null && Model.VendorAttachments.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>File Name</th>
+                                <th>Uploaded By</th>
+                                <th>Uploaded Date</th>
+                                <th style="width:100px;">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var attachment in Model.VendorAttachments)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                        @attachment.FileName
+                                    </td>
+
+                                    <td>
+                                        @* @attachment.UploadedBy *@
+                                    </td>
+
+                                    <td>
+                                        @* @attachment.UploadedDate *@
+                                    </td>
+
+                                    <td>
+                                        <a asp-controller="CIJ"
+                                           asp-action="DownloadAttachment"
+                                           asp-route-id=""
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Download">
+
+                                            <i class="bi bi-download"></i>
+
+                                        </a>
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No attachments available.
+                </div>
+            }
+
+        </div>
+    </div>
+    <!-- Approval History -->
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-clock-history me-2"></i>
+                Approval History
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model.ApprovalHistory != null &&
+            Model.ApprovalHistory.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Role</th>
+                                <th>Action By</th>
+                                <th>Action</th>
+                                <th>From Status</th>
+                                <th>To Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var history in Model.ApprovalHistory)
+                            {
+                                <tr>
+                                    <td>
+                                        @*  @history.ActionDate.ToString("dd-MMM-yyyy HH:mm") *@
+                                    </td>
+                                    <td>
+                                        @* @history.ActionRole *@
+                                    </td>
+                                    <td>
+                                        @* @history.ActionBy *@
+                                    </td>
+                                    <td>
+                                        @* @if (history.ToStatusName == "Approved")
+                                {
+                                <span class="badge bg-success">
+                                Approved
+                                </span>
+                                }
+                                else if (history.ToStatusName == "Rejected")
+                                {
+                                <span class="badge bg-danger">
+                                Rejected
+                                </span>
+                                }
+                                else if (history.ToStatusName == "Clarification Required")
+                                {
+                                <span class="badge bg-warning text-dark">
+                                Clarification Required
+                                </span>
+                                }
+                                else
+                                {
+                                <span class="badge bg-secondary">
+                                @history.ToStatusName
+                                </span>
+                                } *@
+                                    </td>
+
+                                    <td>
+                                        @*  @history.FromStatusName *@
+                                    </td>
+
+                                    <td>
+                                        @*  @history.ToStatusName *@
+                                    </td>
+
+                                    <td>
+                                        @* @history.Remarks *@
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No approval history available.
+                </div>
+            }
+
+        </div>
+    </div>
+    <!-- Approval Action -->
+    <div class="card card-warning card-outline mb-4">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-person-check me-2"></i>
+                Approval Action
+            </h3>
+        </div>
+        <div class="card-body">
+            <form id="approvalForm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="cijId" value="@Model.CIJRequest.Cijid" />
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label">Assigned Department</label>
+                        <span class="text-danger">*</span>
+                        <select id="assignedDept" name="assignedDept" asp-items="Model.Departments" class="form-select" multiple>
+                            <option value="">-- Select Dept--</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="remarks" class="form-label fw-bold">
+                            Remarks
+                            <span class="text-danger">*</span>
+                        </label>
+                        <textarea id="remarks" name="remarks" class="form-control custom-textarea" rows="6" placeholder="Enter your remarks..."></textarea>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="MyApproval"class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </a>
+                    <!-- Return for Clarification -->
+                    <button type="submit"
+                            formaction="@Url.Action("ReturnForClarification", "CIJ")"
+                            class="btn btn-warning"
+                            onclick="return validateRemarks('Return for Clarification');">
+
+                        <i class="bi bi-arrow-return-left me-1"></i>
+                        Return for Clarification
+                    </button>
+                    <!-- Reject -->
+                    <button type="submit"
+                            formaction="@Url.Action("Reject", "CIJ")"
+                            class="btn btn-danger"
+                            onclick="return validateRemarks('Reject');">
+
+                        <i class="bi bi-x-lg me-1"></i>
+                        Reject
+
+                    </button>
+                    <!-- Approve -->
+                    <button type="submit"
+                            formaction="@Url.Action("WorkFlowApproval", "WorkFlow")"
+                            class="btn btn-success" onclick="return validateApprove();">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Approve
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        function validateRemarks(action) {
+            var remarks = document.getElementById("remarks").value.trim();
+            if (remarks === "") {
+                alert("Please enter remarks before " + action + ".");
+                document.getElementById("remarks").focus();
+                return false;
+            }
+            return confirm(
+                "Are you sure you want to " +
+                action.toLowerCase() +
+                " this CIJ?"
+            );
+        }
+        function validateApprove() {
+            return confirm(
+                "Are you sure you want to approve this CIJ?"
+            );
+        }
+
+        $('#assignedDept').select2({
+            placeholder: '-- Select --',
+            allowClear: true,
+            width: '100%'
+        });
+    </script>
+}

@@ -23,9 +23,9 @@ namespace Capital_Item_Justification.ViewModels
         public string? PhoneNumber { get; set; }
 
         [Required(ErrorMessage ="The Department field is required")]
-        public int? DepartmentId { get; set; }
+        public int DepartmentId { get; set; }
         [Required(ErrorMessage = "The Location field is required")]
-        public int? LocationId { get; set; }
+        public int LocationId { get; set; }
 
         public bool IsActive { get; set; } = true;
 

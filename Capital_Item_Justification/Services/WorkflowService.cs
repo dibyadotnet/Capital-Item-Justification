@@ -12,14 +12,22 @@ namespace Capital_Item_Justification.Services
         {
             _repository = repository;
         }
-        public async Task<bool> SubmitCIJAsync(CIJMainViewModel model, string userId)
+        public async Task<bool> SubmitCIJAsync(CIJMainViewModel model)
         {
-           return await _repository.SubmitCIJAsync(model, userId);
+           return await _repository.SubmitCIJAsync(model);
         }
 
-        public async Task<List<MyApprovalViewModel>> GetMyApproval(string userId, string roleId)
+        public async Task<List<MyApprovalViewModel>> GetMyApprovalAsync(string userId, List<string> roleIds)
         {
-            return await _repository.GetMyApproval(userId, roleId);
+            return await _repository.GetMyApprovalAsync(userId, roleIds);
+        }
+        public async Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int id)
+        {
+            return await _repository.GetApprovalDetailAsync(id);
+        }
+        public async Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm)
+        {
+            return await _repository.ApproveRequestAsync(vm);
         }
     }
 }

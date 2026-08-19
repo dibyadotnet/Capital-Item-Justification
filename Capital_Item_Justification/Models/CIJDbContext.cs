@@ -225,18 +225,10 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
 
         modelBuilder.Entity<CijWorkflowStep>(entity =>
         {
-            entity.HasKey(e => e.WorkflowStepId).HasName("PK__Workflow__36121461ED6EB169");
+            entity.HasKey(e => e.WorkflowStepId).HasName("PK_CIJ_WorkflowStepMaster");
 
-            entity.Property(e => e.CanApprove).HasDefaultValue(true);
-            entity.Property(e => e.CanReject).HasDefaultValue(true);
-            entity.Property(e => e.CanReturn).HasDefaultValue(true);
-            entity.Property(e => e.CanSkip).HasDefaultValue(false);
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
-            entity.Property(e => e.IsFinalStep).HasDefaultValue(false);
-
-            entity.HasOne(d => d.Workflow).WithMany(p => p.CijWorkflowSteps)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Workflow___Workf__797309D9");
         });
 
         modelBuilder.Entity<CijWorkflowTransaction>(entity =>
