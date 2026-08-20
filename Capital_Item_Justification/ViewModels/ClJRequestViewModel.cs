@@ -41,7 +41,7 @@ namespace Capital_Item_Justification.ViewModels
 
         public int StatusId { get; set; }
         public int LocationId { get; set; }
-        public int? CurrentWorkflowStepId { get; set; }
+        public int? WorkflowId { get; set; }
         public string? TotalEquipmentCostDisplay { get; set; }
         public int? BudgetTypeId { get; set; }
         public List<SelectListItem> ItemTypes { get; set; } = new();

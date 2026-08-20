@@ -31,17 +31,24 @@ namespace Capital_Item_Justification.Controllers
             List<MyApprovalViewModel> vm = new();
             try
             {
-                var userId = _userManager.GetUserId(User);
-
-                if (string.IsNullOrEmpty(userId))
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
                     return Unauthorized();
-
-                var user = await _userManager.FindByIdAsync(userId);
-
+                }
                 var roles = await _userManager.GetRolesAsync(user);
+                List<string> roleIds = new();
 
-                var roleIds = await _roleManager.Roles.Where(r => roles.Contains(r.Name!)).Select(r => r.Id).ToListAsync();
-                vm = await _service.GetMyApprovalAsync(userId, roleIds);
+                foreach (var roleName in roles)
+                {
+                    var role = await _roleManager.FindByNameAsync(roleName);
+
+                    if (role != null)
+                    {
+                        roleIds.Add(role.Id);
+                    }
+                }
+                vm = await _service.GetMyApprovalAsync(user, roleIds);
             }
             catch (Exception)
             {
@@ -66,13 +73,17 @@ namespace Capital_Item_Justification.Controllers
                 model.userId = user.Id;
                 model.userRoles = roles.ToList();
                 await _service.SubmitCIJAsync(model);
-                TempData["SuccessMessage"] = "CIJ request submitted successfully.";
+
+                TempData["ToastMessage"] = "CIJ request submitted successfully.";
+                TempData["ToastType"] = "success";
 
                 return RedirectToAction("Dashboard", "CIJ");
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "Unable to submit the CIJ request.";
+                TempData["ToastMessage"] = "Unable to submit the CIJ request.";
+                TempData["ToastType"] = "error";
+
                 return RedirectToAction("Dashboard", "CIJ");
             }
         }
@@ -101,7 +112,7 @@ namespace Capital_Item_Justification.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> WorkFlowApproval(int approvalId,int cijId, List<int> assignedDept, string remarks)
+        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks)
         {
             try
             {
@@ -114,21 +125,32 @@ namespace Capital_Item_Justification.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 vm = new ApproveRejectViewModel()
                 {
-                    userId=user.Id,
-                    userRoles=roles.ToList(),
-                    cijId=cijId,
-                    assignedDept=assignedDept,
-                    remarks=remarks,
-                    workflowApprovalId=approvalId,
-
+                    userId = user.Id,
+                    userRoles = roles.ToList(),
+                    cijId = cijId,
+                    assignedDept = assignedDept,
+                    remarks = remarks,
+                    workflowApprovalId = workflowApprovalId,
+                    userDepartmentId = user.DepartmentId
                 };
-                await _service.ApproveRequestAsync(vm);
-                return View();
+               bool? approved= await _service.ApproveRequestAsync(vm);
+                if (approved==true)
+                {
+                    TempData["ToastMessage"] = "CIJ request is approved.";
+                    TempData["ToastType"] = "success";
+                }
+                else
+                {
+                    TempData["ToastMessage"] = "CIJ request failed to approve.";
+                    TempData["ToastType"] = "error";
+                }
+                return RedirectToAction("MyApproval");
             }
 
             catch (Exception)
             {
-
+                TempData["ToastMessage"] = "CIJ request failed to approve.";
+                TempData["ToastType"] = "error";
                 throw;
             }
         }

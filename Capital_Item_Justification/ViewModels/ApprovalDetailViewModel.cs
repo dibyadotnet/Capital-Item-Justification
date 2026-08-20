@@ -13,5 +13,7 @@ namespace Capital_Item_Justification.ViewModels
         public List<AttachmentViewModel> AttachmentVm { get; set; } = new();
         public List<CIJVendorViewModel>? ApprovalHistory { get; set; } = new();
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
+        public long workflowApprovalId { get; set; }
+        public string workFlowStepName { get; set; } = string.Empty;
     }
 }

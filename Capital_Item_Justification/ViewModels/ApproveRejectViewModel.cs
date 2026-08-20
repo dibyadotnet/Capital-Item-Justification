@@ -9,5 +9,6 @@
         public string remarks { get; set; } = string.Empty;
         public string? userId { get; set; } = string.Empty;
         public List<string> userRoles { get; set; } = new();
+        public int? userDepartmentId { get; set; }
     }
 }
