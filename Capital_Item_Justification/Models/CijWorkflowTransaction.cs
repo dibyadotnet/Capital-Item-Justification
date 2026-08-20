@@ -15,7 +15,7 @@ public partial class CijWorkflowTransaction
     [Column("CIJId")]
     public int Cijid { get; set; }
 
-    public int WorkflowId { get; set; }
+    public int? WorkflowId { get; set; }
 
     [StringLength(100)]
     public string? CurrentApproverRole { get; set; }//need to be discussed

@@ -95,7 +95,7 @@ namespace Capital_Item_Justification.Repository
                 OldEquipmentCost = model.CIJRequest.OldEquipmentCost,
                 WaitingPeriod = model.CIJRequest.WaitingPeriod,
                 StatusId = statusId, //model.CIJRequest.StatusId, 1- Draft
-                CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId,
+                //CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId,//Update on submit
                 BeneficiaryDepartment = model.CIJRequest.BeneficiaryDepartment,
                 BeneficiaryLocation = model.CIJRequest.BeneficiaryLocation,
                 LocationId = model.CIJRequest.LocationId,
@@ -200,7 +200,7 @@ namespace Capital_Item_Justification.Repository
                 request.OldEquipmentCost = model.CIJRequest.OldEquipmentCost;
                 request.WaitingPeriod = model.CIJRequest.WaitingPeriod;
                 request.LocationId = model.CIJRequest.LocationId;
-                request.CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId;
+                //request.CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId;
                 request.BeneficiaryDepartment = model.CIJRequest.BeneficiaryDepartment;
                 request.BeneficiaryLocation = model.CIJRequest.BeneficiaryLocation;
                 request.BudgetTypeId = model.CIJRequest.BudgetTypeId;
@@ -415,7 +415,7 @@ namespace Capital_Item_Justification.Repository
                 OldEquipmentCost = request.OldEquipmentCost,
                 WaitingPeriod = request.WaitingPeriod,
                 StatusId = request.StatusId,
-                CurrentWorkflowStepId = request.CurrentWorkflowStepId,
+                WorkflowId = request.WorkflowId,
                 BeneficiaryDepartment = request.BeneficiaryDepartment,
                 BeneficiaryLocation = request.BeneficiaryLocation,
                 LocationId = request.LocationId,
