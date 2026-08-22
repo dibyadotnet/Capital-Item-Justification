@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Diagnostics;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -88,19 +89,63 @@ namespace Capital_Item_Justification.Controllers
             }
         }
 
-        public async Task<IActionResult> ApprovalDetail(int id)
+        public async Task<IActionResult> ApprovalDetail(int approvalId, int cijId)
         {
             ApprovalDetailViewModel? vm = new();
             try
             {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+
+                vm = await _service.GetApprovalDetailAsync(approvalId, cijId);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return View(vm);
+        }
+
+        public async Task<IActionResult> ApprovalAction(int approvalId, int cijId)
+        {
+            ApprovalDetailViewModel? vm = new();
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+
                 var departmentsList = await _cijService.GetDepartment();
                 var departmentItems = departmentsList.Select(x => new SelectListItem
                 {
                     Value = x.DepartmentId.ToString(),
                     Text = x.DepartmentName
                 }).ToList();
-                vm = await _service.GetApprovalDetailAsync(id);
-                vm.Departments = departmentItems;
+                vm = await _service.GetApprovalDetailAsync(approvalId, cijId);
+
+                var isHod = roles.Any(x => x.Equals("HOD", StringComparison.OrdinalIgnoreCase));
+                var hasPendingClarification = vm.Clarifications.Any(x => x.StatusName == "Query"
+                                                && x.TargetRoleName != null
+                                                && x.TargetRoleName.Equals("HOD", StringComparison.OrdinalIgnoreCase));
+
+                vm.CanAnswerClarification = isHod && hasPendingClarification;
+
+                vm.CanRaiseClarification = true;
+
+                List<string> workflowStepItem = new List<string>() { "HOD Initial Approval", "Function Head Approval" };
+                if (vm != null)
+                {
+                    vm.Departments = departmentItems;
+                    vm.workflowStepList = workflowStepItem;
+                }
 
             }
             catch (Exception)
@@ -110,9 +155,10 @@ namespace Capital_Item_Justification.Controllers
             }
             return View(vm);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks)
+        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks, string action)
         {
             try
             {
@@ -131,12 +177,13 @@ namespace Capital_Item_Justification.Controllers
                     assignedDept = assignedDept,
                     remarks = remarks,
                     workflowApprovalId = workflowApprovalId,
-                    userDepartmentId = user.DepartmentId
+                    userDepartmentId = user.DepartmentId,
+                    Action = action,
                 };
-               bool? approved= await _service.ApproveRequestAsync(vm);
-                if (approved==true)
+                bool? approved = await _service.ApproveRequestAsync(vm);
+                if (approved == true)
                 {
-                    TempData["ToastMessage"] = "CIJ request is approved.";
+                    TempData["ToastMessage"] = "CIJ request is approved successfully.";
                     TempData["ToastType"] = "success";
                 }
                 else
@@ -150,6 +197,140 @@ namespace Capital_Item_Justification.Controllers
             catch (Exception)
             {
                 TempData["ToastMessage"] = "CIJ request failed to approve.";
+                TempData["ToastType"] = "error";
+                throw;
+            }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendClarification(int workflowApprovalId, int cijId, string clarificationPoint)
+        {
+            try
+            {
+                ApproveRejectViewModel vm = new();
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+                string action = "Query";
+                vm = new ApproveRejectViewModel()
+                {
+                    userId = user.Id,
+                    userRoles = roles.ToList(),
+                    cijId = cijId,
+                    workflowApprovalId = workflowApprovalId,
+                    userDepartmentId = user.DepartmentId,
+                    Action = action,
+                    ClarificationPoint = clarificationPoint
+                };
+                bool? approved = await _service.ApproveRequestAsync(vm);
+                if (approved == true)
+                {
+                    TempData["ToastMessage"] = "Clarification Query submitted successfully.";
+                    TempData["ToastType"] = "success";
+                }
+                else
+                {
+                    TempData["ToastMessage"] = "Clarification Query failed to Submit.";
+                    TempData["ToastType"] = "error";
+                }
+                return RedirectToAction("MyApproval");
+            }
+            catch (Exception)
+            {
+                TempData["ToastMessage"] = "Clarification Query failed to Submit.";
+                TempData["ToastType"] = "error";
+                throw;
+            }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AnswerClarification(int cijId, int clarificationId, string answer)
+        {
+            try
+            {
+                ApproveRejectViewModel vm = new();
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+                string action = "Answer";
+                vm = new ApproveRejectViewModel()
+                {
+                    userId = user.Id,
+                    userRoles = roles.ToList(),
+                    cijId = cijId,
+                    ClarificationId=clarificationId,
+                    userDepartmentId = user.DepartmentId,
+                    Action = action,
+                    Answer = answer
+                };
+                bool? approved = await _service.ApproveRequestAsync(vm);
+                if (approved == true)
+                {
+                    TempData["ToastMessage"] = "Clarification answer submitted successfully..";
+                    TempData["ToastType"] = "success";
+                }
+                else
+                {
+                    TempData["ToastMessage"] = "Clarification answer failed to Submit.";
+                    TempData["ToastType"] = "error";
+                }
+                return RedirectToAction("MyApproval");
+            }
+            catch (Exception)
+            {
+                TempData["ToastMessage"] = "Clarification answer failed to Submit.";
+                TempData["ToastType"] = "error";
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectWorkFlow(int workflowApprovalId, int cijId, string remarks)
+        {
+            try
+            {
+                ApproveRejectViewModel vm = new();
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+                string action = "Rejected";
+                vm = new ApproveRejectViewModel()
+                {
+                    userId = user.Id,
+                    userRoles = roles.ToList(),
+                    cijId = cijId,
+                    remarks = remarks,
+                    workflowApprovalId = workflowApprovalId,
+                    userDepartmentId = user.DepartmentId,
+                    Action = action,
+                };
+                bool? approved = await _service.ApproveRequestAsync(vm);
+                if (approved == true)
+                {
+                    TempData["ToastMessage"] = "CIJ request is Rejected successfully.";
+                    TempData["ToastType"] = "success";
+                }
+                else
+                {
+                    TempData["ToastMessage"] = "CIJ request failed to reject.";
+                    TempData["ToastType"] = "error";
+                }
+                return RedirectToAction("MyApproval");
+            }
+
+            catch (Exception)
+            {
+                TempData["ToastMessage"] = "CIJ request failed to reject.";
                 TempData["ToastType"] = "error";
                 throw;
             }

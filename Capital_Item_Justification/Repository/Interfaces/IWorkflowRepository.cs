@@ -7,7 +7,7 @@ namespace Capital_Item_Justification.Repository.Interfaces
     {
         Task<bool> SubmitCIJAsync(CIJMainViewModel model);
         Task<List<MyApprovalViewModel>> GetMyApprovalAsync(ApplicationUser user, List<string> roleIds);
-        Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int id);
+        Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int approvalId, int cijId);
         Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm);
     }
 }

@@ -4,15 +4,15 @@
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
 
-      @*   <div>
-            <h4 class="mb-1">
-                <i class="bi bi-check2-square me-2"></i>
-                My Approvals
-            </h4>
+        @*   <div>
+        <h4 class="mb-1">
+        <i class="bi bi-check2-square me-2"></i>
+        My Approvals
+        </h4>
 
-            <small class="text-muted">
-                CIJ requests pending for your approval
-            </small>
+        <small class="text-muted">
+        CIJ requests pending for your approval
+        </small>
         </div> *@
     </div>
     <!-- Approval Card -->
@@ -31,18 +31,14 @@
                 <table class="table table-bordered table-hover align-middle mb-0">
 
                     <thead class="table-light">
-
                         <tr>
-                            <th style="width: 50px;">#</th>
                             <th>CIJ Number</th>
-                            <th>Approval Step</th>
                             <th>Role</th>
                             <th>Department</th>
                             <th>Assigned Date</th>
                             <th>Status</th>
                             <th class="text-center">Action</th>
                         </tr>
-
                     </thead>
 
                     <tbody>
@@ -56,19 +52,10 @@
                                 <tr>
 
                                     <td>
-                                        @index
-                                    </td>
-
-                                    <td>
                                         <strong>
                                             @item.CIJNumber
                                         </strong>
                                     </td>
-
-                                    <td>
-                                        @item.StepName
-                                    </td>
-
                                     <td>
                                         @item.ApproverRole
                                     </td>
@@ -89,18 +76,38 @@
                                     </td>
 
                                     <td>
-                                        <span class="badge bg-warning text-dark">
-                                            Pending
-                                        </span>
+                                        <a asp-controller="WorkFlow" asp-action="ApprovalAction"
+                                           asp-route-approvalId="@item.ApprovalId"
+                                           asp-route-cijId="@item.CIJId"
+                                           class="text-decoration-none">
+                                            @if (item.StatusName == "Pending")
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    @item.StatusName
+                                                </span>
+                                            }
+                                            else if (item.StatusName == "Query")
+                                            {
+                                                <span class="badge bg-info text-dark">
+                                                    @item.StatusName
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary text-dark">
+                                                    @item.StatusName
+                                                </span>
+                                            }
+                                        </a>
                                     </td>
 
                                     <td class="text-center">
 
                                         <a asp-controller="WorkFlow"
                                            asp-action="ApprovalDetail"
-                                           asp-route-id="@item.ApprovalId"
+                                           asp-route-approvalId="@item.ApprovalId"
+                                           asp-route-cijId="@item.CIJId"
                                            class="btn btn-sm btn-primary">
-
                                             <i class="bi bi-eye me-1"></i>
                                             View
                                         </a>

@@ -10,5 +10,9 @@
         public string? userId { get; set; } = string.Empty;
         public List<string> userRoles { get; set; } = new();
         public int? userDepartmentId { get; set; }
+        public string? Action { get; set; }
+        public string? ClarificationPoint { get; set; }
+        public long? ClarificationId { get; set; }
+        public string? Answer { get; set; }
     }
 }

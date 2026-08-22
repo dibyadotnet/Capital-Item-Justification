@@ -15,5 +15,9 @@ namespace Capital_Item_Justification.ViewModels
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
         public long workflowApprovalId { get; set; }
         public string workFlowStepName { get; set; } = string.Empty;
+        public List<ClarificationViewModel> Clarifications { get; set; }= new();
+        public bool CanAnswerClarification { get; set; }
+        public bool CanRaiseClarification { get; set; }
+        public List<string> workflowStepList { get; set; } = new();
     }
 }

@@ -1,0 +1,100 @@
+﻿@model Capital_Item_Justification.ViewModels.ApprovalDetailViewModel
+
+<!-- Clarification History -->
+<div class="card card-warning card-outline mb-3">
+
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="bi bi-question-circle me-2"></i>
+            Clarification History
+        </h3>
+    </div>
+    <div class="card-body">
+        @if (Model.Clarifications != null && Model.Clarifications.Any())
+        {
+            @foreach (var clarification in Model.Clarifications)
+            {
+                <div class="border rounded p-3 mb-3">
+                    <div class="mb-2">
+                        <strong>Raised By:</strong>
+                        <span class="ms-1">@clarification.RaisedByRole</span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Assigned Date:</strong>
+                        <span class="ms-1 text-muted">
+                            @clarification.RaisedOn.ToString("dd-MMM-yyyy HH:mm")
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Query:</strong>
+                        <div class="mt-1">
+                            @clarification.ClarificationPoint
+                        </div>
+                    </div>
+                    <!-- Answer -->
+                    @if (!string.IsNullOrWhiteSpace(clarification.Answer))
+                    {
+                        <div class="mb-2">
+                            <strong>Answer:</strong>
+                            <div class="mt-1">
+                                @clarification.Answer
+                            </div>
+                        </div>
+
+                        @if (clarification.AnsweredOn.HasValue)
+                        {
+                            <div class="text-muted small">
+                                Answered Date:
+                                @clarification.AnsweredOn.Value.ToString("dd-MMM-yyyy HH:mm")
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <!-- HOD Answer -->
+                        @if (Model.CanAnswerClarification && clarification.StatusName == "Query")
+                        {
+                            <form asp-action="AnswerClarification" asp-controller="WorkFlow" method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="cijId"
+                                       value="@Model.CIJRequest.Cijid" />
+
+                                <input type="hidden"
+                                       name="clarificationId"
+                                       value="@clarification.ClarificationId" />
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        Answer
+                                    </label>
+
+                                    <textarea name="answer" class="form-control custom-textarea"
+                                              rows="3"
+                                              required
+                                              placeholder="Enter your answer..."></textarea>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        Submit Answer
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                No clarification history available.
+            </div>
+        }
+
+    </div>
+</div>

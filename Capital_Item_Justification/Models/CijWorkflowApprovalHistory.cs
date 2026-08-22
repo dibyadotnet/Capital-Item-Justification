@@ -12,7 +12,7 @@ public partial class CijWorkflowApprovalHistory
     [Key]
     public int WorkflowApprovalHistoryId { get; set; }
 
-    public long TransactionId { get; set; }
+    public long? TransactionId { get; set; }
 
     [Column("CIJId")]
     public int Cijid { get; set; }
