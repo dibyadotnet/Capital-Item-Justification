@@ -11,7 +11,7 @@ namespace Capital_Item_Justification.Services.Interfaces
         Task<List<CijPurchasePurpose>> GetPurchasePurpose();
         Task<List<CijOldEquipmemtTreatment>> GetOldEquipmentTreatment();
         Task<int> SaveCIJ(CIJMainViewModel cIJMainViewModel);
-        Task<List<DashboardViewModel>> GetDashboard();
+        Task<List<DashboardViewModel>> GetDashboard(string userId);
         Task<List<CijLocation>> GetLocation();
         Task<List<CijDepartment>> GetDepartment();
         Task<CIJMainViewModel> GetCIJById(int cijId);

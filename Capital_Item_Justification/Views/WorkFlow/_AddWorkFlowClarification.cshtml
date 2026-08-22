@@ -1,0 +1,46 @@
+﻿@model Capital_Item_Justification.ViewModels.ApprovalDetailViewModel
+
+<div class="modal fade" id="queryModal" tabindex="-1" aria-labelledby="queryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-action="SendClarification" asp-controller="WorkFlow" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="queryModalLabel">
+                        <i class="bi bi-question-circle me-2"></i>
+                        Send for Clarification
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="cijId" value="@Model.CIJRequest.Cijid" />
+                    <input type="hidden" name="workflowApprovalId" value="@Model.workflowApprovalId" />
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                        <label class="form-label fw-bold">
+                            Clarification Point
+                            <span class="text-danger">*</span>
+                        </label>
+                            <textarea name="clarificationPoint" id="clarificationPoint" class="form-control custom-textarea" rows="6" required
+                                  placeholder="Enter your clarification point..."></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" value="Query" class="btn btn-warning">
+                        <i class="bi bi-send me-1"></i>
+                        Send Query
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

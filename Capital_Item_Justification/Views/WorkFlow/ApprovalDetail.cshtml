@@ -11,7 +11,7 @@
                         CIJ Approval Detail
                     </h3>
                     <small class="text-muted">
-                        Review the CIJ request and take an approval action.
+                        Review the CIJ request
                     </small>
                 </div>
 
@@ -58,7 +58,8 @@
                                 Department
                             </div>
                             <div class="col-sm-7">
-                                : @* @Model.CIJRequest.DepartmentName *@
+                                :
+                                @* @Model.CIJRequest.DepartmentName *@
                             </div>
                         </div>
 
@@ -408,108 +409,13 @@
 
         </div>
     </div>
-    <!-- Approval Action -->
-    <div class="card card-warning card-outline mb-4">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="bi bi-person-check me-2"></i>
-                Approval Action
-            </h3>
-        </div>
-        <div class="card-body">
-            <form id="approvalForm" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="cijId" value="@Model.CIJRequest.Cijid" />
-                <input type="hidden" name="workflowApprovalId" value="@Model.workflowApprovalId" />
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="remarks" class="form-label fw-bold">
-                            Remarks
-                            <span class="text-danger">*</span>
-                        </label>
-                        <textarea id="remarks" name="remarks" class="form-control custom-textarea" rows="6" placeholder="Enter your remarks..."></textarea>
-                    </div>
-                    @if (Model.workFlowStepName == "HOD Initial Approval")
-                    {
-                        <div class="col-md-6">
-                            <label class="form-label">Assigned Department</label>
-                            <span class="text-danger">*</span>
-                            <select id="assignedDept" name="assignedDept" asp-items="Model.Departments" class="form-select" multiple>
-                                <option value="">-- Select Dept--</option>
-                            </select>
-                        </div>
-                    }
-                </div>
-                <div class="row button-margin">
-                    <div class="d-flex justify-content-end gap-2 ">
-                        <a asp-action="MyApproval" class="btn btn-secondary">
-                            <i class="bi bi-x-circle me-1"></i>
-                            Cancel
-                        </a>
-                        <!-- Return for Clarification -->
-                        <button type="submit"
-                                formaction="@Url.Action("ReturnForClarification", "CIJ")"
-                                class="btn btn-warning"
-                                onclick="return validateRemarks('Return for Clarification');">
 
-                            <i class="bi bi-arrow-return-left me-1"></i>
-                            Clarification
-                        </button>
-                        <!-- Reject -->
-                        <button type="submit"
-                                formaction="@Url.Action("Reject", "CIJ")"
-                                class="btn btn-danger"
-                                onclick="return validateRemarks('Reject');">
-
-                            <i class="bi bi-x-lg me-1"></i>
-                            Reject
-
-                        </button>
-                        <!-- Approve -->
-                        <button type="submit"
-                                formaction="@Url.Action("WorkFlowApproval", "WorkFlow")"
-                                class="btn btn-success" onclick="return validateApprove();">
-                            <i class="bi bi-check-lg me-1"></i>
-                            Approve
-                        </button>
-                    </div>
-                </div>
-            </form>
+    <div class="row button-margin">
+        <div class="d-flex justify-content-end gap-2 ">
+            <a asp-action="MyApproval" class="btn btn-secondary">
+                <i class="bi bi-x-circle me-1"></i>
+                Cancel
+            </a>
         </div>
     </div>
 </div>
-<style>
-    .button-margin{
-        margin-top:1%;
-    }
-</style>
-
-@section Scripts {
-    <script>
-
-        function validateRemarks(action) {
-            var remarks = document.getElementById("remarks").value.trim();
-            if (remarks === "") {
-                alert("Please enter remarks before " + action + ".");
-                document.getElementById("remarks").focus();
-                return false;
-            }
-            return confirm(
-                "Are you sure you want to " +
-                action.toLowerCase() +
-                " this CIJ?"
-            );
-        }
-        function validateApprove() {
-            return confirm(
-                "Are you sure you want to approve this CIJ?"
-            );
-        }
-
-        $('#assignedDept').select2({
-            placeholder: '-- Select --',
-            allowClear: true,
-            width: '100%'
-        });
-    </script>
-}

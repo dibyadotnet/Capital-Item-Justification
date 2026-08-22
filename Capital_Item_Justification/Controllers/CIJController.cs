@@ -26,12 +26,18 @@ namespace Capital_Item_Justification.Controllers
             _workflowService = workflowService;
             _userManager = userManager;
         }
+        [Authorize(Roles = "Requester")]
         public async Task<IActionResult> Dashboard()
         {
             List<DashboardViewModel> list = new();
             try
             {
-                list = await _service.GetDashboard();
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                list = await _service.GetDashboard(user.Id);
             }
             catch (Exception)
             {

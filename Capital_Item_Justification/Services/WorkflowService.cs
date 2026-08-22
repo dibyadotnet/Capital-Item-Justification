@@ -22,9 +22,9 @@ namespace Capital_Item_Justification.Services
         {
             return await _repository.GetMyApprovalAsync(user, roleIds);
         }
-        public async Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int id)
+        public async Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int approvalId, int cijId)
         {
-            return await _repository.GetApprovalDetailAsync(id);
+            return await _repository.GetApprovalDetailAsync(approvalId, cijId);
         }
         public async Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm)
         {

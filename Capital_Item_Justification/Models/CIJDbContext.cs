@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Capital_Item_Justification.Models;
 using Capital_Item_Justification.Data;
+using Capital_Item_Justification.ViewModels;
 
 namespace Capital_Item_Justification.Models;
 
@@ -15,7 +16,7 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
            : base(options)
     {
     }
-
+    public virtual DbSet<CijWorkflowClarification> CijWorkflowClarifications { get; set; }
     public virtual DbSet<CijApprovalHistory> CijApprovalHistories { get; set; }
 
     public virtual DbSet<CijAttachment> CijAttachments { get; set; }
@@ -60,6 +61,16 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<MyApprovalViewModel>()
+        .HasNoKey()
+        .ToView(null);
+
+        modelBuilder.Entity<CijWorkflowClarification>(entity =>
+        {
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.RaisedOn).HasDefaultValueSql("(sysutcdatetime())");
+        });
 
         modelBuilder.Entity<CijWorkflowApproval>(entity =>
         {

@@ -333,10 +333,10 @@ namespace Capital_Item_Justification.Repository
                 throw;
             }
         }
-        public async Task<List<DashboardViewModel>> GetDashboard()
+        public async Task<List<DashboardViewModel>> GetDashboard(string userId)
         {
             List<DashboardViewModel> dashboardViewModels = new();
-            int? draftStatusId = _context.CijStatuses.Where(x => x.StatusName == "Draft").Select(x => x.StatusId).FirstOrDefault();
+            int? draftStatusId = _context.CijStatuses.Where(x => x.StatusName == "Draft" && x.IsActive).Select(x => x.StatusId).FirstOrDefault();
             dashboardViewModels = await (
                        from r in _context.CijRequests
 
@@ -355,7 +355,8 @@ namespace Capital_Item_Justification.Repository
                        join st in _context.CijStatuses
                       on r.StatusId equals st.StatusId into stGroup
                        from st in stGroup.DefaultIfEmpty()
-                       where r.IsActive == true
+                       where r.IsActive == true && r.StatusId==draftStatusId
+                       && r.CreatedBy== userId
                        select new DashboardViewModel
                        {
                            CIJId = r.Cijid,
@@ -474,21 +475,16 @@ namespace Capital_Item_Justification.Repository
             string? locPrefix = locations.Where(a => a.LocationId == locationId).Select(a => a.Prefix).FirstOrDefault();
 
             // Last CIJ Number for this location and FY
-            var lastCIJ = await _context.CijRequests
-                .Where(x => x.Cijnumber.StartsWith($"{locPrefix}/{financialYear}/"))
-                .OrderByDescending(x => x.Cijnumber)
-                .Select(x => x.Cijnumber)
-                .FirstOrDefaultAsync();
 
-            int nextSequence = 1;
+            //var lastCIJ = await _context.CijRequests
+            //    .Where(x => x.Cijnumber.StartsWith($"{locPrefix}/{financialYear}/") && x.IsActive == true)
+            //    .OrderByDescending(x => x.Cijnumber)
+            //    .Select(x => x.Cijnumber)
+            //    .FirstOrDefaultAsync();
 
-            if (!string.IsNullOrEmpty(lastCIJ))
-            {
-                string lastSeq = lastCIJ.Split('/').Last();
-                nextSequence = int.Parse(lastSeq) + 1;
-            }
-
-            return $"{"CIJ"}/{locPrefix}/{financialYear}/{nextSequence:D5}";
+            int locationTotal = _context.CijRequests.Where(x => x.LocationId == locationId).Count();
+            locationTotal = locationTotal+1;
+            return $"{"CIJ"}/{locPrefix}/{financialYear}/{locationTotal:D5}";
         }
         public async Task<List<CijProject>> GetProjectCode()
         {

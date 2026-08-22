@@ -31,9 +31,9 @@ namespace Capital_Item_Justification.Services
         {
             return await _cijMainRepository.SaveCIJ(cIJMainViewModel);
         }
-        public async Task<List<DashboardViewModel>> GetDashboard()
+        public async Task<List<DashboardViewModel>> GetDashboard(string userId)
         {
-            return await _cijMainRepository.GetDashboard();
+            return await _cijMainRepository.GetDashboard(userId);
         }
         public async Task<List<CijLocation>> GetLocation()
         {
