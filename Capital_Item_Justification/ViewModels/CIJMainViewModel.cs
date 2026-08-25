@@ -21,5 +21,7 @@ namespace Capital_Item_Justification.ViewModels
         public string? roleId { get; set; } = string.Empty;
         public string? roleName { get; set; } = string.Empty;
         public List<string> userRoles { get; set; } = new();
+        public int? userDepartmentId { get; set; }
+
     }
 }

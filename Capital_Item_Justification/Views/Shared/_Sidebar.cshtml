@@ -31,196 +31,172 @@
                 data-accordion="false">
 
                 <!-- Dashboard -->
-                <li class="nav-item">
+                @if (User.IsInRole("Requester"))
+                {
+                    <li class="nav-item">
 
-                    <a asp-controller="CIJ"
-                       asp-action="Dashboard"
-                       class="nav-link">
-
-                        <i class="nav-icon bi bi-speedometer2"></i>
-
-                        <p>
-                            My Dashboard
-                        </p>
-
-                    </a>
-
-                </li>
+                        <a asp-controller="CIJ"
+                           asp-action="Dashboard"
+                           class="nav-link">
+                            <i class="nav-icon bi bi-speedometer2"></i>
+                            <p>
+                                My Dashboard
+                            </p>
+                        </a>
+                    </li>
+                }
                 <li class="nav-item">
                     <a asp-controller="WorkFlow"
                        asp-action="MyApproval"
                        class="nav-link">
                         <i class="nav-icon bi bi-check2-square me-2"></i>
                         <p>
-                           Pending Approval
+                            Pending Approval
                         </p>
                     </a>
                 </li>
 
+                 @if (User.IsInRole("Requester"))
+                {
+                    <!-- CIJ Request -->
+                    <li class="nav-item">
 
-                <!-- CIJ Request -->
-                <li class="nav-item">
+                        <a href="#"
+                        class="nav-link">
 
-                    <a href="#"
-                       class="nav-link">
+                            <i class="nav-icon bi bi-file-earmark-text"></i>
 
-                        <i class="nav-icon bi bi-file-earmark-text"></i>
+                            <p>
+                                CIJ Request
 
-                        <p>
-                            CIJ Request
+                                <i class="nav-arrow bi bi-chevron-right"></i>
+                            </p>
 
-                            <i class="nav-arrow bi bi-chevron-right"></i>
-                        </p>
-
-                    </a>
-
-
-                    <!-- CIJ Sub Menu -->
-                    <ul class="nav nav-treeview">
-
-                        <!-- Create CIJ -->
-                        <li class="nav-item">
-
-                            <a asp-controller="CIJ"
-                               asp-action="CreateCIJ"
-                               class="nav-link">
-
-                                <i class="nav-icon bi bi-circle"></i>
-
-                                <p>
-                                    Create CIJ
-                                </p>
-
-                            </a>
-
-                        </li>
+                        </a>
 
 
-                        <!-- CIJ Requests -->
-                        <li class="nav-item">
+                        <!-- CIJ Sub Menu -->
+                        <ul class="nav nav-treeview">
 
-                            <a asp-controller="CIJ"
-                               asp-action="Index"
-                               class="nav-link">
+                            <!-- Create CIJ -->
+                            <li class="nav-item">
 
-                                <i class="nav-icon bi bi-circle"></i>
+                                <a asp-controller="CIJ"
+                                asp-action="CreateCIJ"
+                                class="nav-link">
 
-                                <p>
-                                    CIJ Requests
-                                </p>
+                                    <i class="nav-icon bi bi-circle"></i>
 
-                            </a>
+                                    <p>
+                                        Create CIJ
+                                    </p>
 
-                        </li>
+                                </a>
 
-                    </ul>
+                            </li>
+                        </ul>
 
-                </li>
+                    </li>
+                }
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon bi bi-database"></i>
+                            <p>
+                                Masters
+                                <i class="nav-arrow bi bi-chevron-right"></i>
+                            </p>
+                        </a>
 
 
-                <!-- Masters -->
-                <li class="nav-item">
+                        <!-- Masters Sub Menu -->
+                        <ul class="nav nav-treeview">
 
-                    <a href="#"
-                       class="nav-link">
+                            <!-- Department -->
+                            @* <li class="nav-item">
 
-                        <i class="nav-icon bi bi-database"></i>
+                        <a href="#"
+                        class="nav-link">
+
+                        <i class="nav-icon bi bi-circle"></i>
 
                         <p>
-                            Masters
-
-                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        Department
                         </p>
 
-                    </a>
-
-
-                    <!-- Masters Sub Menu -->
-                    <ul class="nav nav-treeview">
-
-                        <!-- Department -->
-                        @* <li class="nav-item">
-
-                            <a href="#"
-                               class="nav-link">
-
-                                <i class="nav-icon bi bi-circle"></i>
-
-                                <p>
-                                    Department
-                                </p>
-
-                            </a>
+                        </a>
 
                         </li> *@
 
 
-                        <!-- Location -->
-                        <li class="nav-item">
+                            <!-- Location -->
+                            <li class="nav-item">
 
-                            <a href="@Url.Action("GetAllLocation","Location")"
-                               class="nav-link">
+                                <a href="@Url.Action("GetAllLocation","Location")"
+                                   class="nav-link">
 
-                                <i class="nav-icon bi bi-circle"></i>
+                                    <i class="nav-icon bi bi-circle"></i>
 
-                                <p>
-                                    Location
-                                </p>
+                                    <p>
+                                        Location
+                                    </p>
 
-                            </a>
+                                </a>
 
-                        </li>
+                            </li>
 
 
-                        <!-- Project -->
-                       @*  <li class="nav-item">
+                            <!-- Project -->
+                            @*  <li class="nav-item">
 
-                            <a href="#"
-                               class="nav-link">
+                        <a href="#"
+                        class="nav-link">
 
-                                <i class="nav-icon bi bi-circle"></i>
+                        <i class="nav-icon bi bi-circle"></i>
 
-                                <p>
-                                    Project
-                                </p>
+                        <p>
+                        Project
+                        </p>
 
-                            </a>
+                        </a>
 
                         </li> *@
-                        <li class="nav-item">
-                            <a href="@Url.Action("GetUsers","User")"
-                               class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>
-                                    User
-                                </p>
+                            <li class="nav-item">
+                                <a href="@Url.Action("GetUsers","User")"
+                                   class="nav-link">
+                                    <i class="nav-icon bi bi-circle"></i>
+                                    <p>
+                                        User
+                                    </p>
 
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("GetRoles","Role")"
-                               class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>
-                                    Role
-                                </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("GetRoles","Role")"
+                                   class="nav-link">
+                                    <i class="nav-icon bi bi-circle"></i>
+                                    <p>
+                                        Role
+                                    </p>
 
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("GeRoleBudgetLimit","RoleBudgetLimit")"
-                               class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>
-                                    Role BudgetLimit
-                                </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("GeRoleBudgetLimit","RoleBudgetLimit")"
+                                   class="nav-link">
+                                    <i class="nav-icon bi bi-circle"></i>
+                                    <p>
+                                        Role BudgetLimit
+                                    </p>
 
-                            </a>
-                        </li>
-                    </ul>
+                                </a>
+                            </li>
+                        </ul>
 
-                </li>
-
+                    </li>
+                }
             </ul>
 
         </nav>

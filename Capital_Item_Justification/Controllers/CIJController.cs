@@ -26,7 +26,7 @@ namespace Capital_Item_Justification.Controllers
             _workflowService = workflowService;
             _userManager = userManager;
         }
-        [Authorize(Roles = "Requester")]
+        //[Authorize(Roles = "Requester")]
         public async Task<IActionResult> Dashboard()
         {
             List<DashboardViewModel> list = new();
@@ -114,6 +114,7 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.CIJRequest.BeneficiaryDepartment = beneficieryDept;
                 cIJMainViewModel.CIJRequest.BeneficiaryLocation = beneficieryLoc;
                 cIJMainViewModel.userId = user.Id;
+                cIJMainViewModel.userDepartmentId = user.DepartmentId;
                 cIJMainViewModel.userRoles = roles.ToList();
                 if (cIJMainViewModel?.CIJRequest?.Cijid > 0)
                 {
@@ -129,7 +130,7 @@ namespace Capital_Item_Justification.Controllers
                 }
                 else
                 {
-                    int? locationId = cIJMainViewModel.CIJRequest.CostCenterId;
+                    int? locationId = cIJMainViewModel?.CIJRequest.LocationId;
                     string cijNumber = await _service.GenerateCIJNumber(locationId);
                     cIJMainViewModel.CIJRequest.CIJSNumber = cijNumber;
                     if (!string.IsNullOrEmpty(cIJMainViewModel.EquipmentJson))

@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Elfie.Model.Tree;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Common;
+using System.Linq;
 
 namespace Capital_Item_Justification.Repository
 {
@@ -55,9 +56,17 @@ namespace Capital_Item_Justification.Repository
                 // 1. Update CIJ main status
                 CijRequest? request = new();
                 var cijStatus = await _context.CijStatuses.Where(x => x.IsActive == true).ToListAsync();
-                int? draftStatusId = cijStatus.Where(x => x.StatusName == "Draft").Select(x => x.StatusId).FirstOrDefault();
-                int? submittedStatusId = cijStatus.Where(x => x.StatusName == "Submitted").Select(x => x.StatusId).FirstOrDefault();
-                int? pendingApprovalStatusId = cijStatus.Where(x => x.StatusName == "Pending").Select(x => x.StatusId).FirstOrDefault();
+                int draftStatusId = cijStatus.Where(x => x.StatusName == "Draft").Select(x => x.StatusId).FirstOrDefault();
+                if (draftStatusId == 0)
+                    throw new InvalidOperationException("Draft status is not configured.");
+
+                int submittedStatusId = cijStatus.Where(x => x.StatusName == "Submitted").Select(x => x.StatusId).FirstOrDefault();
+                if (submittedStatusId == 0)
+                    throw new InvalidOperationException("Submitted status is not configured.");
+
+                int pendingApprovalStatusId = cijStatus.Where(x => x.StatusName == "Pending").Select(x => x.StatusId).FirstOrDefault();
+                if (pendingApprovalStatusId == 0)
+                    throw new InvalidOperationException("Pending status is not configured.");
 
                 request = await _context.CijRequests.Where(x => x.IsActive == true && x.Cijid == model.CIJRequest.Cijid).FirstOrDefaultAsync();
                 if (request == null)
@@ -66,28 +75,6 @@ namespace Capital_Item_Justification.Repository
                 }
 
                 int? formStatusId = request.StatusId;
-                var firstStep = await _context.CijWorkflowSteps.Where(x => x.IsActive).OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
-                var approvalStep = await _context.CijWorkflowSteps.Where(x => x.IsActive && x.StepNo > 1)
-                                        .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-                if (approvalStep == null)
-                {
-                    throw new InvalidOperationException(
-                        "No active approval workflow step is configured.");
-                }
-                if (string.IsNullOrWhiteSpace(approvalStep.RoleName))
-                {
-                    throw new InvalidOperationException(
-                        $"Role is not configured for workflow step '{approvalStep.StepName}'.");
-                }
-
-                var roleDetail = await _roleManager.FindByNameAsync(approvalStep.RoleName);
-                if (roleDetail == null)
-                {
-                    throw new InvalidOperationException(
-                        $"Role '{approvalStep.RoleName}' is not configured in AspNetRoles.");
-                }
-
                 //Get WorkFlow ID
                 int workflowId = 0;
                 var locartiontype = await _context.CijLocations.Where(a => a.LocationId == request.LocationId && a.IsActive).Select(a => a.LocationType).FirstOrDefaultAsync();
@@ -100,12 +87,15 @@ namespace Capital_Item_Justification.Repository
                 {
                     throw new InvalidOperationException($"costCenter is not found.");
                 }
-                var fundingType = await _context.CijBudgetTypes.Where(a => a.IsActive == true && a.BudgetTypeId == request.BudgetTypeId).Select(a => a.BudgetTypeName).FirstOrDefaultAsync();
-                if (string.IsNullOrWhiteSpace(fundingType))
-                {
-                    throw new InvalidOperationException($"Funding Type is not found.");
+                string? fundingType = string.Empty;
+                if (costCenter == "Project") {
+                     fundingType = await _context.CijBudgetTypes.Where(a => a.IsActive == true && a.BudgetTypeId == request.BudgetTypeId).Select(a => a.BudgetTypeName).FirstOrDefaultAsync();
+                    if (string.IsNullOrWhiteSpace(fundingType))
+                    {
+                        throw new InvalidOperationException($"Funding Type is not found.");
+                    }
                 }
-
+     
                 if (locartiontype == "Primary")
                 {
                     if (costCenter == "SCEH" || (costCenter == "Project" && fundingType == "Partially Funded"))
@@ -121,8 +111,39 @@ namespace Capital_Item_Justification.Repository
                 {
                     workflowId = 3;
                 }
+                //------
+                var firstStep = await _context.CijWorkflowSteps.Where(x => x.IsActive).OrderBy(x => x.StepNo).FirstOrDefaultAsync();
+                if (firstStep == null)
+                    throw new InvalidOperationException("Requestor step is not configured.");
+
+                //Get Next Workflow Step
+                CijWorkflowStep? approvalStep = await GetWorkflowNextStep(firstStep, request, workflowId);
+                if (approvalStep == null)
+                    throw new InvalidOperationException("Next workflow step is not configured.");
+
+                //var approvalStep = await _context.CijWorkflowSteps.Where(x => x.IsActive && x.StepNo > 1)
+                //                            .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
+                if (approvalStep == null)
+                {
+                    throw new InvalidOperationException(
+                        "No active approval workflow step is configured.");
+                }
+                if (string.IsNullOrWhiteSpace(approvalStep.RoleName))
+                {
+                    throw new InvalidOperationException(
+                        $"Role is not configured for workflow step '{approvalStep.StepName}'.");
+                }
+                var roleDetail = await _context.Roles.FirstOrDefaultAsync(r => r.Name != null && r.Name.ToLower() == approvalStep.RoleName.ToLower() && r.IsActive);
+                //var roleDetail = await _roleManager.FindByNameAsync(approvalStep.RoleName);
+                if (roleDetail == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Role '{approvalStep.RoleName}' is not configured in AspNetRoles.");
+                }
+
+                
                 //Update CIJ Request
-                request.StatusId = submittedStatusId ?? 2;
+                request.StatusId = submittedStatusId;
                 request.ModifiedBy = model.userId;
                 request.ModifiedDate = DateTime.Now;
                 request.WorkflowId = workflowId;
@@ -131,7 +152,7 @@ namespace Capital_Item_Justification.Repository
                 CijWorkflowTransaction trans = new();
                 trans.Cijid = cijId;
                 trans.WorkflowId = workflowId;
-                trans.CurrentStatusId = pendingApprovalStatusId ?? 3;
+                trans.CurrentStatusId = pendingApprovalStatusId;
                 trans.StartDate = DateTime.Now;
                 trans.CreatedBy = model.userId;
                 trans.CreatedOn = DateTime.Now;
@@ -152,7 +173,7 @@ namespace Capital_Item_Justification.Repository
                 cijWorkflowApproval.ApproverRole = roleDetail.Name;
                 cijWorkflowApproval.ApproverRoleId = roleDetail.Id;
                 //cijWorkflowApproval.ApproverUserId = "";//Update the approver UserID who approved the request
-                cijWorkflowApproval.StatusId = pendingApprovalStatusId ?? 3;
+                cijWorkflowApproval.StatusId = pendingApprovalStatusId;
                 cijWorkflowApproval.AssignedDate = DateTime.Now;
                 cijWorkflowApproval.ActionDate = DateTime.Now;
                 cijWorkflowApproval.CreatedBy = model.userId;
@@ -163,13 +184,14 @@ namespace Capital_Item_Justification.Repository
 
                 //4. Create workflow history
                 CijWorkflowApprovalHistory cijWorkflowApprovalHistory = new();
-                cijWorkflowApprovalHistory.TransactionId = null; 
+                cijWorkflowApprovalHistory.TransactionId = null;
                 cijWorkflowApprovalHistory.Cijid = cijId;
                 //cijWorkflowApprovalHistory.ApprovalId = 0;
                 cijWorkflowApprovalHistory.FromStatusId = formStatusId ?? 1;
-                cijWorkflowApprovalHistory.ToStatusId = submittedStatusId ?? 2;
+                cijWorkflowApprovalHistory.ToStatusId = submittedStatusId;
                 cijWorkflowApprovalHistory.ApproverUserId = model.userId;
-                cijWorkflowApprovalHistory.ApproverRole = roleDetail.Id;
+                cijWorkflowApprovalHistory.ApproverRole = roleDetail.Name;
+                cijWorkflowApprovalHistory.ApproverRoleId = roleDetail.Id;
                 cijWorkflowApprovalHistory.Remarks = "CIJ request submitted";
                 cijWorkflowApprovalHistory.ActionOn = DateTime.Now;
                 cijWorkflowApprovalHistory.CreatedBy = model.userId;
@@ -203,7 +225,7 @@ namespace Capital_Item_Justification.Repository
                                         on app.DepartmentId equals dept.DepartmentId into deptGroup
                                         from dept in deptGroup.DefaultIfEmpty()
 
-                                        where app.ApprovalId == approvalId
+                                        where app.ApprovalId == approvalId && req.IsActive == true
                                         select new ApprovalDetailViewModel()
                                         {
                                             workflowApprovalId = app.ApprovalId,
@@ -236,11 +258,34 @@ namespace Capital_Item_Justification.Repository
                                               }
                                             ).ToListAsync();
 
-            if (approvalDetail != null && clarificationHistory != null)
-            {
-                approvalDetail.Clarifications = clarificationHistory;
-            }
+            //Approval History
+            var history = await (from h in _context.CijWorkflowApprovalHistories
+                                 join u in _context.Users on h.ApproverUserId equals u.Id
+                                 join s in _context.CijStatuses
+                                     on h.ToStatusId equals s.StatusId
+                                 where h.Cijid == cijId && (s.StatusName == "Submitted" || s.StatusName == "Approved")
+                                 orderby h.ActionOn
+                                 select new WorkflowHistoryViewModel
+                                 {
+                                     ActionDate = h.ActionOn,
+                                     UserName = u.EmployeeCode,
+                                     StatusName = s.StatusName,
+                                     Remark = h.Remarks,
+                                     RoleName = h.ApproverRole
+                                 }
+                            ).ToListAsync();
 
+            if (approvalDetail != null)
+            {
+                if (history.Count > 0)
+                {
+                    approvalDetail.workflowHistory = history;
+                }
+                if (clarificationHistory.Count > 0)
+                {
+                    approvalDetail.Clarifications = clarificationHistory;
+                }
+            }
             return approvalDetail;
         }
         public async Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm)
@@ -274,15 +319,15 @@ namespace Capital_Item_Justification.Repository
                 var cijStatus = await _context.CijStatuses.Where(x => x.IsActive == true).ToListAsync();
                 int approvedStatusId = cijStatus.Where(x => x.StatusName == "Approved").Select(x => x.StatusId).FirstOrDefault();
                 int pendingStatusId = cijStatus.Where(x => x.StatusName == "Pending").Select(x => x.StatusId).FirstOrDefault();
-                int completedStatusId = cijStatus.Where(x => x.StatusName == "Completed").Select(x => x.StatusId).FirstOrDefault();
+                int completedStatusId = cijStatus.Where(x => x.StatusName == "Purchase").Select(x => x.StatusId).FirstOrDefault();
 
                 // 1. Get current pending approval
                 var approval = await _context.CijWorkflowApprovals.FirstOrDefaultAsync(x => x.ApprovalId == vm.workflowApprovalId && x.Cijid == vm.cijId && x.StatusId == pendingStatusId);
                 if (approval == null)
-                    throw new InvalidOperationException("Pending HOD approval not found.");
+                    throw new InvalidOperationException("Pending approval not found.");
 
                 // 2. Get current workflow transaction
-                var currentWorkflowTrans = await _context.CijWorkflowTransactions.FirstOrDefaultAsync(x => x.TransactionId == approval.TransactionId && x.Cijid == vm.cijId);
+                var currentWorkflowTrans = await _context.CijWorkflowTransactions.FirstOrDefaultAsync(x => x.TransactionId == approval.TransactionId && x.Cijid == vm.cijId && x.IsActive == true);
                 if (currentWorkflowTrans == null)
                     throw new InvalidOperationException("Workflow transaction not found.");
 
@@ -293,7 +338,7 @@ namespace Capital_Item_Justification.Repository
                 if (currentStep == null)
                     throw new InvalidOperationException("Workflow step not found.");
 
-                // 4. Validate role
+                // 4. Validate role check Department
                 var hasRequiredRole = vm.userRoles.Any(x =>
                 x.Equals(approval.ApproverRole, StringComparison.OrdinalIgnoreCase));
 
@@ -333,6 +378,7 @@ namespace Capital_Item_Justification.Repository
                     ApprovalId = approval.ApprovalId,
                     ApproverUserId = vm.userId,
                     ApproverRole = approval.ApproverRole,
+                    ApproverRoleId = approval.ApproverRoleId,
                     ToStatusId = approvedStatusId,
                     Remarks = vm.remarks,
                     ActionOn = DateTime.Now,
@@ -368,12 +414,12 @@ namespace Capital_Item_Justification.Repository
                 }
 
                 //Get Next Workflow Step
-                CijWorkflowStep? nextStep = await GetWorkflowNextStep(currentStep, currentWorkflowTrans, cijRequest, approval);
+                CijWorkflowStep? nextStep = await GetWorkflowNextStep(currentStep, cijRequest, cijRequest.WorkflowId??0);
                 if (nextStep == null)
                     throw new InvalidOperationException("Next workflow step is not configured.");
 
                 // Workflow is completely finished.
-                if (nextStep?.StepName == "Completed")
+                if (nextStep?.IsFinalStep == true)
                 {
                     if (cijRequest != null)
                     {
@@ -400,6 +446,7 @@ namespace Capital_Item_Justification.Repository
                         ApprovalId = approval.ApprovalId,
                         ApproverUserId = vm.userId,
                         ApproverRole = approval.ApproverRole,
+                        ApproverRoleId = approval.ApproverRoleId,
                         FromStatusId = approvedStatusId,
                         ToStatusId = completedStatusId,
                         Remarks = "Workflow completed.",
@@ -600,7 +647,8 @@ namespace Capital_Item_Justification.Repository
                     ToStatusId = queryStatusId,
                     ApprovalId = currentApproval.ApprovalId,
                     ApproverUserId = vm.userId,
-                    ApproverRole = currentApproval.ApproverRoleId,
+                    ApproverRole = currentApproval.ApproverRole,
+                    ApproverRoleId = currentApproval.ApproverRoleId,
                     Remarks = vm.ClarificationPoint,
                     ActionOn = DateTime.UtcNow,
                     StepId = currentApproval.StepId,
@@ -681,7 +729,8 @@ namespace Capital_Item_Justification.Repository
                     ToStatusId = pendingStatusId,
                     ApprovalId = clarification.ApprovalId,
                     ApproverUserId = vm.userId,
-                    ApproverRole = approverRole.Id, //"HOD",
+                    ApproverRole = approverRole.Name,
+                    ApproverRoleId = approverRole.Id,
                     Remarks = vm.Answer,
                     ActionOn = DateTime.Now,
                     StepId = clarification.StepId,
@@ -749,8 +798,9 @@ namespace Capital_Item_Justification.Repository
                     FromStatusId = approval.StatusId,
                     ToStatusId = rejectedStatusId,
                     ApprovalId = approval.ApprovalId,
-                    ApproverUserId = "",
-                    ApproverRole = "",
+                    ApproverUserId = vm.userId,
+                    ApproverRole = approval.ApproverRole,
+                    ApproverRoleId = approval.ApproverRoleId,
                     Remarks = vm.Answer,
                     ActionOn = DateTime.Now,
                     StepId = approval.StepId,
@@ -771,62 +821,93 @@ namespace Capital_Item_Justification.Repository
                 throw;
             }
         }
-        private async Task<CijWorkflowStep?> GetWorkflowNextStep(CijWorkflowStep currentStep, CijWorkflowTransaction currentTransaction, CijRequest cijRequest, CijWorkflowApproval cijWorkflowApproval)
+        private async Task<CijWorkflowStep?> GetWorkflowNextStep(CijWorkflowStep currentStep, CijRequest cijRequest,int WorkflowId)
         {
             CijWorkflowStep? nextStep = new CijWorkflowStep();
+            List<string> FHDepartments = new List<string>() { "IT", "BME", "Admin", "Finance", "Purchase", "Civil", "Legal" };
 
-            if (currentStep.StepName.Equals("HOD Initial Approval", StringComparison.OrdinalIgnoreCase))
+            if (currentStep.StepCode.Equals("REQUESTOR", StringComparison.OrdinalIgnoreCase))
             {
-                nextStep = await _context.CijWorkflowSteps.Where(x => x.WorkflowId == currentTransaction.WorkflowId
-                && x.IsActive && x.StepName == "Function Head Approval").OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
-                if (nextStep == null)
+                var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
+                var fhApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                             join role in _context.Roles
+                                           on budget.RoleId equals role.Id
+                                             where role.Name == "Function Head"
+                                             select budget.BudgetLimit).FirstOrDefaultAsync();
+                if (FHDepartments.Contains(requestorDept ?? "", StringComparer.OrdinalIgnoreCase) && cijRequest.TotalEquipmentCost <= fhApprovalLimit)
                 {
-                    throw new InvalidOperationException("Function Head Approval step is not configured.");
-                }
-            }
-            else if (currentStep.StepName.Equals("Function Head Approval", StringComparison.OrdinalIgnoreCase))
-            {
-                var functionHeadBudget = await _context.CijRoleBudgetLimits.Where(x => x.IsActive && x.RoleId == cijWorkflowApproval.ApproverRoleId).FirstOrDefaultAsync();
-                if (functionHeadBudget == null)
-                {
-                    throw new InvalidOperationException("Budget is update for Function head Role.");
-                }
-                if (functionHeadBudget != null)
-                {
-                    nextStep = await _context.CijWorkflowSteps
-                            .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                                    x.IsActive && x.StepName == "Finance Approval")
-                                    .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
+                    string stepCode = "Function_Head_Initial";
+                    nextStep = await GetStep(stepCode, WorkflowId);
                     if (nextStep == null)
                     {
-                        throw new InvalidOperationException("Finance Approval step is not configured.");
+                        throw new InvalidOperationException("Function Head Initial Approval step is not configured.");
                     }
                 }
                 else
                 {
-                    var itemType = await _context.CijItemTypes.FirstOrDefaultAsync(x => x.ItemTypeId == cijRequest.ItemTypeId);
-                    if (itemType == null)
+                    string stepCode = "HOD_Initial";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
                     {
-                        throw new InvalidOperationException("CIJ item type not found.");
+                        throw new InvalidOperationException("HOD initial Approval step is not configured.");
                     }
-                    if (itemType.ItemTypeName.Equals("Medical", StringComparison.OrdinalIgnoreCase))
+                }
+            }
+            else if (currentStep.StepCode.Equals("Function_Head_Initial", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Technical_Assessment";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Technical Assessment Approval step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("HOD_Initial", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Technical_Assessment";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Technical Assessment Approval step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Technical_Assessment", StringComparison.OrdinalIgnoreCase))
+            {
+                string? itemtype = await _context.CijItemTypes.Where(x => x.ItemTypeId == cijRequest.ItemTypeId).Select(x => x.ItemTypeCode).FirstOrDefaultAsync();
+                if (string.IsNullOrWhiteSpace(itemtype))
+                {
+                    throw new InvalidOperationException("Item Type is not configured.");
+                }
+                if (itemtype.Equals("Medical", StringComparison.OrdinalIgnoreCase))
+                {
+                    string stepCode = "Purchase_Committee";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
                     {
-                        nextStep = await _context.CijWorkflowSteps.Where(x =>
-                                x.WorkflowId == currentTransaction.WorkflowId &&
-                                x.IsActive && x.StepName == "Purchase Committee Approval")
-                                .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
+                        throw new InvalidOperationException("Purchase Committee Approval step is not configured.");
+                    }
+                }
+                else
+                {
+                    var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
+                    var fhApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                                 join role in _context.Roles
+                                               on budget.RoleId equals role.Id
+                                                 where role.Name == "Function Head"
+                                                 select budget.BudgetLimit).FirstOrDefaultAsync();
+                    if (FHDepartments.Contains(requestorDept ?? "", StringComparer.OrdinalIgnoreCase) && cijRequest.TotalEquipmentCost <= fhApprovalLimit)
+                    {
+                        string stepCode = "Function_Head_Final";
+                        nextStep = await GetStep(stepCode, WorkflowId);
                         if (nextStep == null)
                         {
-                            throw new InvalidOperationException("Purchase Committee Approval step is not configured.");
+                            throw new InvalidOperationException("Function Head Final Approval step is not configured.");
                         }
                     }
                     else
                     {
-                        nextStep = await _context.CijWorkflowSteps
-                            .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                                    x.IsActive && x.StepName == "HOD Final Approval")
-                                    .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
+                        string stepCode = "HOD_Final";
+                        nextStep = await GetStep(stepCode, WorkflowId);
                         if (nextStep == null)
                         {
                             throw new InvalidOperationException("HOD Final Approval step is not configured.");
@@ -834,28 +915,39 @@ namespace Capital_Item_Justification.Repository
                     }
                 }
             }
-            else if (currentStep.StepName.Equals("Purchase Committee Approval", StringComparison.OrdinalIgnoreCase))
+            else if (currentStep.StepCode.Equals("Purchase_Committee", StringComparison.OrdinalIgnoreCase))
             {
-                nextStep = await _context.CijWorkflowSteps
-                    .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                        x.IsActive && x.StepName == "HOD Final Approval")
-                    .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
-                if (nextStep == null)
+                var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
+                var fhApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                             join role in _context.Roles
+                                           on budget.RoleId equals role.Id
+                                             where role.Name == "Function Head"
+                                             select budget.BudgetLimit).FirstOrDefaultAsync();
+                if (FHDepartments.Contains(requestorDept ?? "", StringComparer.OrdinalIgnoreCase) && cijRequest.TotalEquipmentCost <= fhApprovalLimit)
                 {
-                    throw new InvalidOperationException(
-                        "Final HOD Approval step is not configured.");
+                    string stepCode = "Function_Head_Final";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Function Head Final Approval step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "HOD_Final";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("HOD Final Approval step is not configured.");
+                    }
                 }
             }
-            else if (currentStep.StepName.Equals("HOD Final Approval", StringComparison.OrdinalIgnoreCase))
+            else if (currentStep.StepCode.Equals("Function_Head_Final", StringComparison.OrdinalIgnoreCase))
             {
-                if (cijRequest.BudgetAvailable == "Yes")
+                if (cijRequest.BudgetAvailable.Equals("Yes", StringComparison.OrdinalIgnoreCase))
                 {
-                    nextStep = await _context.CijWorkflowSteps
-                       .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                       x.IsActive && x.StepName == "Finance Approval")
-                       .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                    string stepCode = "FINANCE";
+                    nextStep = await GetStep(stepCode, WorkflowId);
                     if (nextStep == null)
                     {
                         throw new InvalidOperationException("Finance Approval step is not configured.");
@@ -863,51 +955,62 @@ namespace Capital_Item_Justification.Repository
                 }
                 else
                 {
-                    nextStep = await _context.CijWorkflowSteps
-                            .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                            x.IsActive && x.StepName == "COO Pre-Finance Approval")
-                            .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                    string stepCode = "COO_PRE_FINANCE";
+                    nextStep = await GetStep(stepCode, WorkflowId);
                     if (nextStep == null)
                     {
-                        throw new InvalidOperationException("COO Approval step is not configured.");
+                        throw new InvalidOperationException("COO Approval Pre Finance Approval step is not configured.");
                     }
                 }
             }
-            else if (currentStep.StepName.Equals("COO Pre-Finance Approval", StringComparison.OrdinalIgnoreCase))
+            else if (currentStep.StepCode.Equals("HOD_Final", StringComparison.OrdinalIgnoreCase))
             {
-                nextStep = await _context.CijWorkflowSteps
-                   .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                   x.IsActive && x.StepName == "Finance Approval")
-                   .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                if (cijRequest.BudgetAvailable.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+                {
+                    string stepCode = "FINANCE";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Finance Approval step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "COO_PRE_FINANCE";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("COO Approval Pre Finance Approval step is not configured.");
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("COO_PRE_FINANCE", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "FINANCE";
+                nextStep = await GetStep(stepCode, WorkflowId);
                 if (nextStep == null)
                 {
                     throw new InvalidOperationException("Finance Approval step is not configured.");
                 }
             }
-            else if (currentStep.StepName.Equals("Finance Approval", StringComparison.OrdinalIgnoreCase))
+            else if (currentStep.StepCode.Equals("FINANCE", StringComparison.OrdinalIgnoreCase))
             {
-                var hodRoleId = await _context.Roles.Where(x => x.IsActive == true && x.Name == "HOD").Select(a => a.Id).FirstOrDefaultAsync();
-                if (hodRoleId == null)
+                var hodApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                              join role in _context.Roles
+                                            on budget.RoleId equals role.Id
+                                              where role.Name == "HOD" && role.IsActive == true && budget.IsActive == true
+                                              select budget).FirstOrDefaultAsync();
+                if (hodApprovalLimit == null)
                 {
-                    throw new InvalidOperationException("HOD Role is not configured.");
+                    throw new InvalidOperationException("Budget Limit is not configured for HOD Role.");
                 }
-                var budgetLimit = await _context.CijRoleBudgetLimits.Where(x => x.IsActive == true && x.RoleId == hodRoleId).FirstOrDefaultAsync();
-                if (budgetLimit == null)
+                if (hodApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
                 {
-                    throw new InvalidOperationException("Budget Limit is not configured for this Role.");
-                }
-                if (budgetLimit?.BudgetLimit >= cijRequest.TotalEquipmentCost)
-                {
-                    nextStep = await _context.CijWorkflowSteps
-                            .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                            x.IsActive && x.StepName == "Completed")
-                            .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                    string stepCode = "Purchase";
+                    nextStep = await GetStep(stepCode, WorkflowId);
                     if (nextStep == null)
                     {
-                        throw new InvalidOperationException("Completed step is not configured.");
+                        throw new InvalidOperationException("Purchase step is not configured.");
                     }
                 }
                 else
@@ -917,116 +1020,102 @@ namespace Capital_Item_Justification.Repository
                     {
                         throw new InvalidOperationException("Item Type is not configured.");
                     }
-                    if (cijItemType.ItemTypeName == "Medical")
+                    if (cijItemType.ItemTypeCode.Equals("Medical", StringComparison.OrdinalIgnoreCase))
                     {
-                        nextStep = await _context.CijWorkflowSteps
-                                .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                                x.IsActive && x.StepName == "MD Approval")
-                                .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                        string stepCode = "MD";
+                        nextStep = await GetStep(stepCode, WorkflowId);
                         if (nextStep == null)
                         {
                             throw new InvalidOperationException("MD Approval step is not configured.");
                         }
                     }
-                    if (cijItemType.ItemTypeName == "Non Medical")
+                    if (cijItemType.ItemTypeCode.Equals("Non Medical", StringComparison.OrdinalIgnoreCase))
                     {
-                        nextStep = await _context.CijWorkflowSteps
-                                .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                                x.IsActive && x.StepName == "COO Post-Finance Approval")
-                                .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                        string stepCode = "COO_POST_FINANCE";
+                        nextStep = await GetStep(stepCode, WorkflowId);
                         if (nextStep == null)
                         {
-                            throw new InvalidOperationException("COO Approval step is not configured.");
+                            throw new InvalidOperationException("COO Post Finance Approval step is not configured.");
                         }
                     }
                 }
             }
-            else if (currentStep.StepName.Equals("MD Approval", StringComparison.OrdinalIgnoreCase))
+            else if (currentStep.StepCode.Equals("MD", StringComparison.OrdinalIgnoreCase))
             {
-                var mdRoleId = await _context.Roles.Where(x => x.IsActive == true && x.Name == "MD").Select(a => a.Id).FirstOrDefaultAsync();
-                if (mdRoleId == null)
+                var mdApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                             join role in _context.Roles
+                                           on budget.RoleId equals role.Id
+                                             where role.Name == "MD" && role.IsActive == true && budget.IsActive == true
+                                             select budget).FirstOrDefaultAsync();
+                if (mdApprovalLimit == null)
                 {
-                    throw new InvalidOperationException("MD Role is not configured.");
+                    throw new InvalidOperationException("Budget Limit is not configured for MD Role.");
                 }
-                var mdBudgetLimit = await _context.CijRoleBudgetLimits.Where(x => x.IsActive == true && x.RoleId == mdRoleId).FirstOrDefaultAsync();
-                if (mdBudgetLimit == null)
+                if (mdApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
                 {
-                    throw new InvalidOperationException("Budget Limit is not configured for this MD Role.");
-                }
-                if (cijRequest.TotalEquipmentCost > mdBudgetLimit.BudgetLimit)
-                {
-                    nextStep = await _context.CijWorkflowSteps
-                                .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                                x.IsActive && x.StepName == "CEO Approval")
-                                .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
-                    if (nextStep == null)
-                    {
-                        throw new InvalidOperationException("CEO Approval step is not configured.");
-                    }
-                }
-                else
-                {
-                    nextStep = await _context.CijWorkflowSteps
-                           .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                           x.IsActive && x.StepName == "Completed")
-                           .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                    string stepCode = "Purchase";
+                    nextStep = await GetStep(stepCode, WorkflowId);
                     if (nextStep == null)
                     {
                         throw new InvalidOperationException("Purchase step is not configured.");
                     }
                 }
-            }
-            else if (currentStep.StepName.Equals("COO Post-Finance Approval", StringComparison.OrdinalIgnoreCase))
-            {
-                var cooRoleId = await _context.Roles.Where(x => x.IsActive == true && x.Name == "COO").Select(a => a.Id).FirstOrDefaultAsync();
-                if (cooRoleId == null)
+                else
                 {
-                    throw new InvalidOperationException("COO Role is not configured.");
-                }
-                var cooBudgetLimit = await _context.CijRoleBudgetLimits.Where(x => x.IsActive == true && x.RoleId == cooRoleId).FirstOrDefaultAsync();
-                if (cooBudgetLimit == null)
-                {
-                    throw new InvalidOperationException("Budget Limit is not configured for this COO Role.");
-                }
-                if (cijRequest.TotalEquipmentCost > cooBudgetLimit.BudgetLimit)
-                {
-                    nextStep = await _context.CijWorkflowSteps
-                                .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                                x.IsActive && x.StepName == "CEO Approval")
-                                .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                    string stepCode = "CEO";
+                    nextStep = await GetStep(stepCode, WorkflowId);
                     if (nextStep == null)
                     {
                         throw new InvalidOperationException("CEO Approval step is not configured.");
                     }
                 }
-                else
+            }
+            else if (currentStep.StepCode.Equals("COO_POST_FINANCE", StringComparison.OrdinalIgnoreCase))
+            {
+                var cooApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                              join role in _context.Roles
+                                            on budget.RoleId equals role.Id
+                                              where role.Name == "COO" && role.IsActive == true && budget.IsActive == true
+                                              select budget).FirstOrDefaultAsync();
+                if (cooApprovalLimit == null)
                 {
-                    nextStep = await _context.CijWorkflowSteps
-                           .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                           x.IsActive && x.StepName == "Completed")
-                           .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                    throw new InvalidOperationException("Budget Limit is not configured for COO Role.");
+                }
+                if (cooApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
+                {
+                    string stepCode = "Purchase";
+                    nextStep = await GetStep(stepCode, WorkflowId);
                     if (nextStep == null)
                     {
                         throw new InvalidOperationException("Purchase step is not configured.");
                     }
                 }
+                else
+                {
+                    string stepCode = "CEO";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("CEO Approval step is not configured.");
+                    }
+                }
             }
-            else if (currentStep.StepName.Equals("CEO Approval", StringComparison.OrdinalIgnoreCase))
+            else if (currentStep.StepCode.Equals("CEO", StringComparison.OrdinalIgnoreCase))
             {
-                nextStep = await _context.CijWorkflowSteps
-                            .Where(x => x.WorkflowId == currentTransaction.WorkflowId &&
-                            x.IsActive && x.StepName == "Completed")
-                            .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
-
+                string stepCode = "Purchase";
+                nextStep = await GetStep(stepCode, WorkflowId);
                 if (nextStep == null)
                 {
                     throw new InvalidOperationException("Purchase step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Purchase", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Completed";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Completed step is not configured.");
                 }
             }
             else
@@ -1037,5 +1126,12 @@ namespace Capital_Item_Justification.Repository
             return nextStep;
         }
 
+        private async Task<CijWorkflowStep?> GetStep(string StepCode, int? workflowId)
+        {
+            CijWorkflowStep? nextStepFind = await _context.CijWorkflowSteps.Where(x => x.WorkflowId == workflowId
+               && x.IsActive && x.StepCode == StepCode).OrderBy(x => x.StepNo).FirstOrDefaultAsync();
+
+            return nextStepFind;
+        }
     }
 }
