@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Capital_Item_Justification.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -19,11 +20,25 @@ namespace Capital_Item_Justification.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login(string? returnUrl = null)
+        public async Task<IActionResult> Login(string? returnUrl = null)
         {
             if (User.Identity?.IsAuthenticated == true)
             {
-                return RedirectToAction("Dashboard", "CIJ");
+                var loggedinUser = await _userManager.GetUserAsync(User);
+                if (loggedinUser == null)
+                {
+                    return View();
+                }
+                var roles = await _userManager.GetRolesAsync(loggedinUser);
+
+                if (roles.Contains("Requester"))
+                {
+                    return RedirectToAction("Dashboard", "CIJ");
+                }
+                else
+                {
+                    return RedirectToAction("MyApproval", "WorkFlow");
+                }
             }
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -78,8 +93,21 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Redirect(returnUrl);
                 }
+                var loggedinUser =await _userManager.GetUserAsync(User);
+                if (loggedinUser == null)
+                {
+                    return View(model);
+                }
+                var roles = await _userManager.GetRolesAsync(loggedinUser);
 
-                return RedirectToAction("Dashboard", "CIJ");
+                if (roles.Contains("Requester"))
+                {
+                    return RedirectToAction("Dashboard", "CIJ");
+                }
+                else
+                {
+                    return RedirectToAction("MyApproval", "WorkFlow");
+                }
             }
 
             if (result.IsLockedOut)
@@ -230,5 +258,6 @@ namespace Capital_Item_Justification.Controllers
 
             return View(model);
         }
+
     }
 }

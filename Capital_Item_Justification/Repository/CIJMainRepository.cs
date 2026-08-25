@@ -72,110 +72,121 @@ namespace Capital_Item_Justification.Repository
         }
         public async Task<int> SaveCIJ(CIJMainViewModel model)
         {
-            if (model == null)
-                return 0;
-
-            int statusId = _context.CijStatuses.Where(a => a.IsActive == true && a.StatusName == "Draft").Select(a => a.StatusId).FirstOrDefault();
-
-            // Save Request
-            var request = new CijRequest
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                Cijnumber = model?.CIJRequest?.CIJSNumber, //model?.CIJRequest?.CIJSNumber ?? "S-01",
-                ProjectId = model?.CIJRequest?.ProjectId,
-                CostCenterId = model?.CIJRequest?.CostCenterId,
-                BudgetAvailable = model.CIJRequest.BudgetProvision,
-                BudgetAmount = model.CIJRequest.BudgetAmount,
-                ItemTypeId = model.CIJRequest.ItemtypeId,
-                TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost,
-                RequestDate = model.CIJRequest.RequestDate,
-                ProjectCost = model.CIJRequest.ProjectCost,
-                Scehcost = model.CIJRequest.Scehcost,
-                PurchasePurposeId = model.CIJRequest.PurchasePurposeId,
-                OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId,
-                OldEquipmentCost = model.CIJRequest.OldEquipmentCost,
-                WaitingPeriod = model.CIJRequest.WaitingPeriod,
-                StatusId = statusId, //model.CIJRequest.StatusId, 1- Draft
-                //CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId,//Update on submit
-                BeneficiaryDepartment = model.CIJRequest.BeneficiaryDepartment,
-                BeneficiaryLocation = model.CIJRequest.BeneficiaryLocation,
-                LocationId = model.CIJRequest.LocationId,
-                BudgetTypeId = model.CIJRequest.BudgetTypeId,
-                CreatedBy = model.userId,
-            };
-            _context.CijRequests.Add(request);
-            int row = await _context.SaveChangesAsync();
-            int cijId = request.Cijid;
+                if (model == null)
+                    return 0;
 
-            //Save Equipment
-            if (model != null && model.Equipments != null && model.Equipments.Count > 0)
-            {
-                foreach (var item in model.Equipments)
+                int statusId = _context.CijStatuses.Where(a => a.IsActive == true && a.StatusName == "Draft").Select(a => a.StatusId).FirstOrDefault();
+
+                // Save Request
+                var request = new CijRequest
                 {
-                    CijEquipment cijEquipment = new CijEquipment
+                    Cijnumber = model?.CIJRequest?.CIJSNumber, //model?.CIJRequest?.CIJSNumber ?? "S-01",
+                    ProjectId = model?.CIJRequest?.ProjectId,
+                    CostCenterId = model?.CIJRequest?.CostCenterId,
+                    BudgetAvailable = model.CIJRequest.BudgetProvision,
+                    BudgetAmount = model.CIJRequest.BudgetAmount,
+                    ItemTypeId = model.CIJRequest.ItemtypeId,
+                    TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost,
+                    RequestDate = model.CIJRequest.RequestDate,
+                    ProjectCost = model.CIJRequest.ProjectCost,
+                    Scehcost = model.CIJRequest.Scehcost,
+                    PurchasePurposeId = model.CIJRequest.PurchasePurposeId,
+                    OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId,
+                    OldEquipmentCost = model.CIJRequest.OldEquipmentCost,
+                    WaitingPeriod = model.CIJRequest.WaitingPeriod,
+                    StatusId = statusId, //model.CIJRequest.StatusId, 1- Draft
+                                         //CurrentWorkflowStepId = model.CIJRequest.CurrentWorkflowStepId,//Update on submit
+                    BeneficiaryDepartment = model.CIJRequest.BeneficiaryDepartment,
+                    BeneficiaryLocation = model.CIJRequest.BeneficiaryLocation,
+                    LocationId = model.CIJRequest.LocationId,
+                    BudgetTypeId = model.CIJRequest.BudgetTypeId,
+                    CreatedBy = model.userId,
+                    RequestDepartmentId = model.userDepartmentId ?? 0,
+                };
+                _context.CijRequests.Add(request);
+                int row = await _context.SaveChangesAsync();
+                int cijId = request.Cijid;
+
+                //Save Equipment
+                if (model != null && model.Equipments != null && model.Equipments.Count > 0)
+                {
+                    foreach (var item in model.Equipments)
+                    {
+                        CijEquipment cijEquipment = new CijEquipment
+                        {
+                            Cijid = cijId,
+                            EquipmentName = item.EquipmentName,
+                            Qty = item.EquipmentQty,
+                            Make = item.Make,
+                            Model = item.Model,
+                            EquipmentCost = item.EquipmentCost,
+                            PreferenceOrder = item.PreferenceOrder,
+                            IsActive = true,
+                            CreatedBy = model.userId,
+                        };
+                        _context.CijEquipments.Add(cijEquipment);
+                    }
+                }
+                //Save Justification/ Committee Comment
+                if (model != null && model.Justification != null)
+                {
+                    CijJustification cijJustification = new CijJustification
                     {
                         Cijid = cijId,
-                        EquipmentName = item.EquipmentName,
-                        Qty = item.EquipmentQty,
-                        Make = item.Make,
-                        Model = item.Model,
-                        EquipmentCost = item.EquipmentCost,
-                        PreferenceOrder = item.PreferenceOrder,
+                        Roinumber = model.Justification.Roinumber,
+                        IsPurchasedEarlier = model.Justification.IsPurchasedEarlier,
+                        Justification = model.Justification.Justification,
+                        Remarks = model.Justification.Remarks,
+                        CreatedBy = model.userId
+                    };
+                    _context.CijJustifications.Add(cijJustification);
+                }
+
+                if (model?.CommitteeComment != null && !string.IsNullOrWhiteSpace(model.CommitteeComment.Comments))
+                {
+                    CijCommitteeComment cijCommittee = new CijCommitteeComment
+                    {
+                        Cijid = cijId,
+                        CommentDate = DateTime.Now,
+                        Comments = model.CommitteeComment.Comments,
                         IsActive = true,
                         CreatedBy = model.userId,
                     };
-                    _context.CijEquipments.Add(cijEquipment);
+                    _context.CijCommitteeComments.Add(cijCommittee);
                 }
-                _context.SaveChanges();
-            }
-            //Save Justification/ Committee Comment
-            if (model != null && model.Justification != null)
-            {
-                CijJustification cijJustification = new CijJustification
+
+                // 2. Save attachments
+                if (model?.JustificationAttachment != null && model.JustificationAttachment.Count > 0)
                 {
-                    Cijid = cijId,
-                    Roinumber = model.Justification.Roinumber,
-                    IsPurchasedEarlier = model.Justification.IsPurchasedEarlier,
-                    Justification = model.Justification.Justification,
-                    Remarks = model.Justification.Remarks,
-                    CreatedBy = model.userId
-                };
-                _context.CijJustifications.Add(cijJustification);
-
-                _context.SaveChanges();
-            }
-            if (model != null && model.CommitteeComment != null)
-            {
-                CijCommitteeComment cijCommittee = new CijCommitteeComment
+                    await SaveAttachmentsAsync(cijId, model.JustificationAttachment, "justification", model.userId);
+                }
+                if (model?.VendorAttachments != null && model.VendorAttachments.Count > 0)
                 {
-                    Cijid = cijId,
-                    CommentDate = DateTime.Now,
-                    Comments = model.CommitteeComment.Comments,
-                    IsActive = true,
-                    CreatedBy = model.userId,
-                };
-                _context.CijCommitteeComments.Add(cijCommittee);
+                    await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor", model.userId);
+                }
+                await _context.SaveChangesAsync();
 
-                _context.SaveChanges();
+                await transaction.CommitAsync();
+
+                return cijId;
             }
-
-            // 2. Save attachments
-            if (model?.JustificationAttachment != null && model.JustificationAttachment.Count > 0)
+            catch (Exception ex)
             {
-                await SaveAttachmentsAsync(cijId, model.JustificationAttachment, "justification", model.userId);
-            }
-            if (model?.VendorAttachments != null && model.VendorAttachments.Count > 0)
-            {
-                await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor", model.userId);
+                await transaction.RollbackAsync();
+                throw;
             }
 
-            return cijId;
         }
         public async Task<string> UpdateCIJ(CIJMainViewModel model)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-
-                if (model == null)
+            
+                    if (model == null)
                     return string.Empty;
 
                 var request = await _context.CijRequests
@@ -206,7 +217,7 @@ namespace Capital_Item_Justification.Repository
                 request.BudgetTypeId = model.CIJRequest.BudgetTypeId;
                 request.ModifiedBy = model.userId;
                 request.ModifiedDate = DateTime.Now;
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
 
                 int cijId = request.Cijid;
 
@@ -270,7 +281,7 @@ namespace Capital_Item_Justification.Repository
                         _context.CijEquipments.Add(cijEquipment);
                     }
                 }
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
 
                 // Update Justification
 
@@ -293,27 +304,36 @@ namespace Capital_Item_Justification.Repository
                 justification.Remarks = model.Justification.Remarks;
                 justification.ModifiedBy = model.userId;
                 justification.ModifiedDate = DateTime.Now;
-                await _context.SaveChangesAsync();
+               // await _context.SaveChangesAsync();
 
                 //Update Committee Comment
 
                 var committeeComment = await _context.CijCommitteeComments.FirstOrDefaultAsync(x => x.Cijid == cijId);
 
-                if (committeeComment == null)
+                if (committeeComment == null && !string.IsNullOrWhiteSpace(model.CommitteeComment.Comments))
                 {
                     committeeComment = new CijCommitteeComment
                     {
-                        Cijid = cijId
+                        Cijid = cijId,
+                        CommentDate= DateTime.Now,
+                        Comments = model.CommitteeComment.Comments,
+                        CreatedBy=model.userId,
+                        CreatedDate= DateTime.Now
                     };
 
                     _context.CijCommitteeComments.Add(committeeComment);
                 }
-
-                committeeComment.CommentDate = DateTime.Now;
-                committeeComment.Comments = model.CommitteeComment.Comments;
-                committeeComment.ModifiedBy = model.userId;
-                committeeComment.ModifiedDate = DateTime.Now;
-                await _context.SaveChangesAsync();
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(model.CommitteeComment.Comments))
+                    {
+                        committeeComment.CommentDate = DateTime.Now;
+                        committeeComment.Comments = model.CommitteeComment.Comments;
+                        committeeComment.ModifiedBy = model.userId;
+                        committeeComment.ModifiedDate = DateTime.Now;
+                    }
+                }
+                //await _context.SaveChangesAsync();
 
                 // 2. Save attachments
                 if (model?.JustificationAttachment != null && model.JustificationAttachment.Count > 0)
@@ -325,11 +345,15 @@ namespace Capital_Item_Justification.Repository
                     await SaveAttachmentsAsync(cijId, model.VendorAttachments, "Vendor", model.userId);
                 }
 
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
                 return "Updated Successfully";
 
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 throw;
             }
         }
@@ -355,8 +379,8 @@ namespace Capital_Item_Justification.Repository
                        join st in _context.CijStatuses
                       on r.StatusId equals st.StatusId into stGroup
                        from st in stGroup.DefaultIfEmpty()
-                       where r.IsActive == true && r.StatusId==draftStatusId
-                       && r.CreatedBy== userId
+                       where r.IsActive == true && r.StatusId == draftStatusId
+                       && r.CreatedBy == userId
                        select new DashboardViewModel
                        {
                            CIJId = r.Cijid,
@@ -482,8 +506,8 @@ namespace Capital_Item_Justification.Repository
             //    .Select(x => x.Cijnumber)
             //    .FirstOrDefaultAsync();
 
-            int locationTotal = _context.CijRequests.Where(x => x.LocationId == locationId).Count();
-            locationTotal = locationTotal+1;
+            int locationTotal = _context.CijRequests.Where(x => x.LocationId == locationId && x.IsActive == true).Count();
+            locationTotal = locationTotal + 1;
             return $"{"CIJ"}/{locPrefix}/{financialYear}/{locationTotal:D5}";
         }
         public async Task<List<CijProject>> GetProjectCode()

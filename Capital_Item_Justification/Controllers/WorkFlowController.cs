@@ -132,12 +132,14 @@ namespace Capital_Item_Justification.Controllers
                 vm = await _service.GetApprovalDetailAsync(approvalId, cijId);
 
                 var isHod = roles.Any(x => x.Equals("HOD", StringComparison.OrdinalIgnoreCase));
-                var hasPendingClarification = vm.Clarifications.Any(x => x.StatusName == "Query"
+                var hasPendingClarification = vm?.Clarifications.Any(x => x.StatusName == "Query"
                                                 && x.TargetRoleName != null
                                                 && x.TargetRoleName.Equals("HOD", StringComparison.OrdinalIgnoreCase));
 
-                vm.CanAnswerClarification = isHod && hasPendingClarification;
-
+                if (isHod == true && hasPendingClarification == true)
+                {
+                    vm.CanAnswerClarification = true;
+                }
                 vm.CanRaiseClarification = true;
 
                 List<string> workflowStepItem = new List<string>() { "HOD Initial Approval", "Function Head Approval" };
@@ -264,7 +266,7 @@ namespace Capital_Item_Justification.Controllers
                     userId = user.Id,
                     userRoles = roles.ToList(),
                     cijId = cijId,
-                    ClarificationId=clarificationId,
+                    ClarificationId = clarificationId,
                     userDepartmentId = user.DepartmentId,
                     Action = action,
                     Answer = answer

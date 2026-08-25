@@ -11,7 +11,6 @@ namespace Capital_Item_Justification.ViewModels
         public List<IFormFile> VendorAttachments { get; set; } = new();
         public List<IFormFile> JustificationAttachment { get; set; } = new();
         public List<AttachmentViewModel> AttachmentVm { get; set; } = new();
-        public List<CIJVendorViewModel>? ApprovalHistory { get; set; } = new();
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
         public long workflowApprovalId { get; set; }
         public string workFlowStepName { get; set; } = string.Empty;
@@ -19,5 +18,6 @@ namespace Capital_Item_Justification.ViewModels
         public bool CanAnswerClarification { get; set; }
         public bool CanRaiseClarification { get; set; }
         public List<string> workflowStepList { get; set; } = new();
+        public List<WorkflowHistoryViewModel> workflowHistory { get; set; } = new();
     }
 }

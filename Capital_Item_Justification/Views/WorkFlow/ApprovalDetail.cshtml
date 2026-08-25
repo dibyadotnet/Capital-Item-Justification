@@ -321,8 +321,7 @@
             </h3>
         </div>
         <div class="card-body">
-            @if (Model.ApprovalHistory != null &&
-            Model.ApprovalHistory.Any())
+            @if (Model.workflowHistory != null && Model.workflowHistory.Any())
             {
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
@@ -340,7 +339,7 @@
                         </thead>
                         <tbody>
 
-                            @foreach (var history in Model.ApprovalHistory)
+                            @foreach (var history in Model.workflowHistory)
                             {
                                 <tr>
                                     <td>
