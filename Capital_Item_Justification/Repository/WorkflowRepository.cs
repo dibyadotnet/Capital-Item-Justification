@@ -11,6 +11,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Common;
 using System.Linq;
+using System.Net.NetworkInformation;
 
 namespace Capital_Item_Justification.Repository
 {
@@ -44,6 +45,23 @@ namespace Capital_Item_Justification.Repository
                 .AsNoTracking()
                 .ToListAsync();
 
+            var purchaseRole = await (from role in _context.Roles
+                                      join roleId in roleIds
+                                     on role.Id equals roleId
+                                      where role.Name == "Purchase"
+                                      select role).FirstOrDefaultAsync();
+
+            if (purchaseRole != null)
+            {
+                return result;
+            }
+            else
+            {
+                int pendingApprovalStatusId = _context.CijStatuses.Where(x => x.StatusName == "Pending" && x.IsActive == true).Select(x => x.StatusId).FirstOrDefault();
+                if (pendingApprovalStatusId == 0)
+                    throw new InvalidOperationException("Pending status is not configured.");
+                result = result.Where(a => a.StatusId == pendingApprovalStatusId).ToList();
+            }
             return result;
         }
 
@@ -88,14 +106,15 @@ namespace Capital_Item_Justification.Repository
                     throw new InvalidOperationException($"costCenter is not found.");
                 }
                 string? fundingType = string.Empty;
-                if (costCenter == "Project") {
-                     fundingType = await _context.CijBudgetTypes.Where(a => a.IsActive == true && a.BudgetTypeId == request.BudgetTypeId).Select(a => a.BudgetTypeName).FirstOrDefaultAsync();
+                if (costCenter == "Project")
+                {
+                    fundingType = await _context.CijBudgetTypes.Where(a => a.IsActive == true && a.BudgetTypeId == request.BudgetTypeId).Select(a => a.BudgetTypeName).FirstOrDefaultAsync();
                     if (string.IsNullOrWhiteSpace(fundingType))
                     {
                         throw new InvalidOperationException($"Funding Type is not found.");
                     }
                 }
-     
+
                 if (locartiontype == "Primary")
                 {
                     if (costCenter == "SCEH" || (costCenter == "Project" && fundingType == "Partially Funded"))
@@ -141,7 +160,19 @@ namespace Capital_Item_Justification.Repository
                         $"Role '{approvalStep.RoleName}' is not configured in AspNetRoles.");
                 }
 
-                
+                //Get Requestor Role
+                var requesterRole = await (from ur in _context.UserRoles
+                                           join role in _context.Roles
+                                            on ur.RoleId equals role.Id
+                                           where ur.UserId == model.userId
+                                           where role.Name == "Requester"
+                                           select new
+                                           {
+                                               RoleId = role.Id,
+                                               RoleName = role.Name
+                                           }).FirstOrDefaultAsync();
+
+
                 //Update CIJ Request
                 request.StatusId = submittedStatusId;
                 request.ModifiedBy = model.userId;
@@ -178,6 +209,7 @@ namespace Capital_Item_Justification.Repository
                 cijWorkflowApproval.ActionDate = DateTime.Now;
                 cijWorkflowApproval.CreatedBy = model.userId;
                 cijWorkflowApproval.CreatedOn = DateTime.Now;
+                cijWorkflowApproval.DepartmentId = request.RequestDepartmentId;
                 await _context.CijWorkflowApprovals.AddAsync(cijWorkflowApproval);
                 await _context.SaveChangesAsync();
                 long approvalId = cijWorkflowApproval.ApprovalId;
@@ -190,8 +222,8 @@ namespace Capital_Item_Justification.Repository
                 cijWorkflowApprovalHistory.FromStatusId = formStatusId ?? 1;
                 cijWorkflowApprovalHistory.ToStatusId = submittedStatusId;
                 cijWorkflowApprovalHistory.ApproverUserId = model.userId;
-                cijWorkflowApprovalHistory.ApproverRole = roleDetail.Name;
-                cijWorkflowApprovalHistory.ApproverRoleId = roleDetail.Id;
+                cijWorkflowApprovalHistory.ApproverRole = requesterRole.RoleName;
+                cijWorkflowApprovalHistory.ApproverRoleId = requesterRole.RoleId;
                 cijWorkflowApprovalHistory.Remarks = "CIJ request submitted";
                 cijWorkflowApprovalHistory.ActionOn = DateTime.Now;
                 cijWorkflowApprovalHistory.CreatedBy = model.userId;
@@ -213,80 +245,80 @@ namespace Capital_Item_Justification.Repository
         }
         public async Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int approvalId, int cijId)
         {
-            var approvalDetail = await (from app in _context.CijWorkflowApprovals
+            // 1. Get approval details
+            var approvalDetail = await GetApprovalDetailFromSPAsync(approvalId, cijId);
+            if (approvalDetail == null)
+                return null;
+            // 2. Get clarification history
+            var clarificationHistory = await GetClarificationHistoryFromSPAsync(approvalId, cijId);
+            // 3. Get approval/workflow history
+            var history = await GetWorkflowHistoryFromSPAsync(cijId);
 
-                                        join req in _context.CijRequests
-                                        on app.Cijid equals req.Cijid
+            // Assign clarification history
+            if (clarificationHistory.Count > 0)
+            {
+                approvalDetail.Clarifications = clarificationHistory;
+            }
+            // Assign approval history
+            if (history.Count > 0)
+            {
+                approvalDetail.workflowHistory = history;
+            }
+            return approvalDetail;
+        }
+        private async Task<ApprovalDetailViewModel?> GetApprovalDetailFromSPAsync(int approvalId, int cijId)
+        {
+            var approvalDetailResults = await _context
+                .Set<ApprovalDetailResult>()
+                .FromSqlInterpolated($@"
+            EXEC dbo.SP_GetApprovalDetail
+                @ApprovalId = {approvalId},
+                @CIJId = {cijId}")
+                .AsNoTracking()
+                .ToListAsync();
 
-                                        join wfstep in _context.CijWorkflowSteps
-                                        on app.StepId equals wfstep.WorkflowStepId
-
-                                        join dept in _context.CijDepartments
-                                        on app.DepartmentId equals dept.DepartmentId into deptGroup
-                                        from dept in deptGroup.DefaultIfEmpty()
-
-                                        where app.ApprovalId == approvalId && req.IsActive == true
-                                        select new ApprovalDetailViewModel()
-                                        {
-                                            workflowApprovalId = app.ApprovalId,
-                                            workFlowStepName = wfstep.StepName,
-                                            CIJRequest = new CIJRequestViewModel()
-                                            {
-                                                Cijid = req.Cijid,
-                                                CIJSNumber = req.Cijnumber,
-                                            },
-                                        }).FirstOrDefaultAsync();
-
-            var clarificationHistory = await (from c in _context.CijWorkflowClarifications
-                                              join status in _context.CijStatuses on c.StatusId equals status.StatusId
-                                              where c.Cijid == cijId && c.ApprovalId == approvalId
-                                              orderby c.RaisedOn
-                                              select new ClarificationViewModel
-                                              {
-                                                  ClarificationId = c.ClarificationId,
-                                                  ApprovalId = c.ApprovalId,
-                                                  RaisedBy = c.RaisedBy,
-                                                  RaisedByRole = c.RaisedByRole,
-                                                  ClarificationPoint = c.ClarificationPoint,
-                                                  RaisedOn = c.RaisedOn,
-                                                  AnsweredBy = c.AnsweredBy,
-                                                  Answer = c.Answer,
-                                                  AnsweredOn = c.AnsweredOn,
-                                                  StatusName = status.StatusName,
-                                                  TargetRoleId = c.TargetRoleId,
-                                                  TargetRoleName = c.TargetRoleName
-                                              }
-                                            ).ToListAsync();
-
-            //Approval History
-            var history = await (from h in _context.CijWorkflowApprovalHistories
-                                 join u in _context.Users on h.ApproverUserId equals u.Id
-                                 join s in _context.CijStatuses
-                                     on h.ToStatusId equals s.StatusId
-                                 where h.Cijid == cijId && (s.StatusName == "Submitted" || s.StatusName == "Approved")
-                                 orderby h.ActionOn
-                                 select new WorkflowHistoryViewModel
-                                 {
-                                     ActionDate = h.ActionOn,
-                                     UserName = u.EmployeeCode,
-                                     StatusName = s.StatusName,
-                                     Remark = h.Remarks,
-                                     RoleName = h.ApproverRole
-                                 }
-                            ).ToListAsync();
+            var approvalDetail = approvalDetailResults.FirstOrDefault();
+            if (approvalDetail == null)
+                return null;
+            ApprovalDetailViewModel? vm = null;
 
             if (approvalDetail != null)
             {
-                if (history.Count > 0)
+                vm = new ApprovalDetailViewModel
                 {
-                    approvalDetail.workflowHistory = history;
-                }
-                if (clarificationHistory.Count > 0)
-                {
-                    approvalDetail.Clarifications = clarificationHistory;
-                }
+                    workflowApprovalId = approvalDetail.workflowApprovalId,
+                    workFlowStepCode = approvalDetail.workFlowStepCode,
+                    Cijid = approvalDetail.Cijid,
+                    CIJSNumber = approvalDetail.CIJSNumber
+                };
             }
-            return approvalDetail;
+            return vm;
+        }
+        private async Task<List<ClarificationViewModel>> GetClarificationHistoryFromSPAsync(int approvalId, int cijId)
+        {
+            var result = await _context
+                .Set<ClarificationViewModel>()
+                .FromSqlInterpolated($@"
+            EXEC dbo.SP_GetClarificationHistory
+                @ApprovalId = {approvalId},
+                @CIJId = {cijId}")
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result;
+        }
+
+        private async Task<List<WorkflowHistoryViewModel>> GetWorkflowHistoryFromSPAsync(int cijId)
+        {
+            var result = await _context
+                .Set<WorkflowHistoryViewModel>()
+                .FromSqlInterpolated($@"
+            EXEC dbo.SP_GetWorkflowHistory
+                @CIJId = {cijId}")
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result;
         }
         public async Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm)
         {
@@ -319,7 +351,7 @@ namespace Capital_Item_Justification.Repository
                 var cijStatus = await _context.CijStatuses.Where(x => x.IsActive == true).ToListAsync();
                 int approvedStatusId = cijStatus.Where(x => x.StatusName == "Approved").Select(x => x.StatusId).FirstOrDefault();
                 int pendingStatusId = cijStatus.Where(x => x.StatusName == "Pending").Select(x => x.StatusId).FirstOrDefault();
-                int completedStatusId = cijStatus.Where(x => x.StatusName == "Purchase").Select(x => x.StatusId).FirstOrDefault();
+                int completedStatusId = cijStatus.Where(x => x.StatusName == "Completed").Select(x => x.StatusId).FirstOrDefault();
 
                 // 1. Get current pending approval
                 var approval = await _context.CijWorkflowApprovals.FirstOrDefaultAsync(x => x.ApprovalId == vm.workflowApprovalId && x.Cijid == vm.cijId && x.StatusId == pendingStatusId);
@@ -414,7 +446,7 @@ namespace Capital_Item_Justification.Repository
                 }
 
                 //Get Next Workflow Step
-                CijWorkflowStep? nextStep = await GetWorkflowNextStep(currentStep, cijRequest, cijRequest.WorkflowId??0);
+                CijWorkflowStep? nextStep = await GetWorkflowNextStep(currentStep, cijRequest, cijRequest.WorkflowId ?? 0);
                 if (nextStep == null)
                     throw new InvalidOperationException("Next workflow step is not configured.");
 
@@ -479,47 +511,47 @@ namespace Capital_Item_Justification.Repository
                 _context.CijWorkflowTransactions.Add(nextTransaction);
                 await _context.SaveChangesAsync();
 
-                if (currentStep.RoleName.Equals("HOD", StringComparison.OrdinalIgnoreCase) && currentStep.StepName.Equals("HOD Initial Approval", StringComparison.OrdinalIgnoreCase))
+                if (currentStep.StepCode.Equals("HOD_Initial", StringComparison.OrdinalIgnoreCase) || currentStep.StepCode.Equals("Function_Head_Initial", StringComparison.OrdinalIgnoreCase))
                 {
                     if (vm.assignedDept == null || !vm.assignedDept.Any())
                     {
-                        throw new InvalidOperationException("No departments were selected by HOD.");
+                        throw new InvalidOperationException("No departments were selected by HOD/Function Head");
                     }
-                    // 10. Create approval for each department selected by HOD
-                    var functionHeadRole = await _roleManager.FindByNameAsync(nextStep.RoleName);
-
-                    if (functionHeadRole == null)
+                    // 10. Create approval for each department selected by HOD initial and Function head initial
+                    var techinicalAssessementRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name != null &&
+                                r.Name.Trim().ToLower() == nextStep.RoleName.Trim().ToLower());
+                    if (techinicalAssessementRole == null)
                         throw new InvalidOperationException($"Role '{nextStep.RoleName}' not found.");
 
-                    var functionHeadApprovers = await (from user in _context.Users
-                                                       join userRole in _context.UserRoles
-                                                       on user.Id equals userRole.UserId
-                                                       join role in _context.Roles
-                                                       on userRole.RoleId equals role.Id
-                                                       where vm.assignedDept.Contains(user.DepartmentId)
-                                                       && userRole.RoleId == functionHeadRole.Id && user.IsActive
-                                                       select new
-                                                       {
-                                                           user.Id,
-                                                           user.DepartmentId,
-                                                           userRole.RoleId,
-                                                           role.Name
-                                                       }).ToListAsync();
+                    //var functionHeadApprovers = await (from user in _context.Users
+                    //                                   join userRole in _context.UserRoles
+                    //                                   on user.Id equals userRole.UserId
+                    //                                   join role in _context.Roles
+                    //                                   on userRole.RoleId equals role.Id
+                    //                                   where vm.assignedDept.Contains(user.DepartmentId)
+                    //                                   && userRole.RoleId == techinicalAssessementRole.Id && user.IsActive
+                    //                                   select new
+                    //                                   {
+                    //                                       user.Id,
+                    //                                       user.DepartmentId,
+                    //                                       userRole.RoleId,
+                    //                                       role.Name
+                    //                                   }).ToListAsync();
                     foreach (var departmentId in vm.assignedDept.Distinct())
                     {
-                        var functionHeadApproverRole = functionHeadApprovers.FirstOrDefault(x => x.DepartmentId == departmentId);
-                        if (functionHeadApproverRole == null)
-                        {
-                            throw new InvalidOperationException($"No Function Head found for DepartmentId {departmentId}.");
-                        }
+                        //var functionHeadApproverRole = functionHeadApprovers.FirstOrDefault(x => x.DepartmentId == departmentId);
+                        //if (functionHeadApproverRole == null)
+                        //{
+                        //    throw new InvalidOperationException($"No Function Head found for DepartmentId {departmentId}.");
+                        //}
                         var cijWorkflowApproval = new CijWorkflowApproval
                         {
                             Cijid = vm.cijId,
                             TransactionId = nextTransaction.TransactionId,
                             StepId = nextStep.WorkflowStepId,
                             DepartmentId = departmentId,
-                            ApproverRoleId = functionHeadApproverRole.RoleId,
-                            ApproverRole = functionHeadApproverRole.Name,
+                            ApproverRoleId = techinicalAssessementRole.Id,
+                            ApproverRole = techinicalAssessementRole.Name,
                             StatusId = pendingStatusId,
                             CreatedBy = vm.userId,
                             CreatedOn = DateTime.UtcNow,
@@ -547,7 +579,7 @@ namespace Capital_Item_Justification.Repository
                         Cijid = vm.cijId,
                         TransactionId = nextTransaction.TransactionId,
                         StepId = nextStep.WorkflowStepId,
-                        DepartmentId = null,
+                        DepartmentId = nextStep.DepartmentId ?? cijRequest.RequestDepartmentId,
                         ApproverRoleId = nextRole.Id,
                         ApproverRole = nextRole.Name,
                         StatusId = pendingStatusId,
@@ -577,9 +609,10 @@ namespace Capital_Item_Justification.Repository
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                int queryStatusId = await _context.CijStatuses.Where(x => x.IsActive && x.StatusName == "Query").Select(x => x.StatusId).FirstOrDefaultAsync();
-                int pendingStatusId = await _context.CijStatuses.Where(x => x.IsActive && x.StatusName == "Pending").Select(x => x.StatusId).FirstOrDefaultAsync();
-
+                var cijStatus = await _context.CijStatuses.Where(x => x.IsActive).ToListAsync();
+                int queryStatusId = cijStatus.Where(x => x.StatusName == "Query").Select(x => x.StatusId).FirstOrDefault();
+                int pendingStatusId = cijStatus.Where(x => x.StatusName == "Pending").Select(x => x.StatusId).FirstOrDefault();
+                int approvedStatusId = cijStatus.Where(x => x.StatusName == "Approved").Select(x => x.StatusId).FirstOrDefault();
                 if (queryStatusId == 0)
                     throw new InvalidOperationException("Query status is not configured.");
 
@@ -599,8 +632,14 @@ namespace Capital_Item_Justification.Repository
                 if (currentApproval == null)
                     throw new InvalidOperationException("Pending approval not found.");
 
-                bool hasRequiredRole = vm.userRoles.Any(x => x.Equals(currentApproval.ApproverRole, StringComparison.OrdinalIgnoreCase));
+                var targetRole = await _context.CijWorkflowApprovals.Where(x => x.Cijid == vm.cijId &&
+                                            x.StatusId == approvedStatusId)
+                                            .OrderByDescending(x => x.ApprovalId).FirstOrDefaultAsync();
 
+                if (targetRole == null)
+                    throw new InvalidOperationException("Target approval not found.");
+
+                bool hasRequiredRole = vm.userRoles.Any(x => x.Equals(currentApproval.ApproverRole, StringComparison.OrdinalIgnoreCase));
                 if (!hasRequiredRole)
                     throw new UnauthorizedAccessException("You are not authorized.");
 
@@ -613,7 +652,6 @@ namespace Capital_Item_Justification.Repository
                 //            "You are not authorized for this department.");
                 //    }
                 //}
-                var targetrole = await _context.Roles.Where(a => a.IsActive && a.Name == "HOD").FirstOrDefaultAsync();
                 var clarification = new CijWorkflowClarification
                 {
                     Cijid = vm.cijId,
@@ -622,8 +660,8 @@ namespace Capital_Item_Justification.Repository
                     StepId = currentApproval.StepId ?? 0,
                     RaisedBy = vm.userId,
                     RaisedByRole = currentApproval.ApproverRoleId,
-                    TargetRoleId = targetrole.Id,
-                    TargetRoleName = targetrole.Name,
+                    TargetRoleId = targetRole.ApproverRoleId,
+                    TargetRoleName = targetRole.ApproverRole,
                     ClarificationPoint = vm.ClarificationPoint,
                     RaisedOn = DateTime.Now,
                     StatusId = queryStatusId,
@@ -821,7 +859,7 @@ namespace Capital_Item_Justification.Repository
                 throw;
             }
         }
-        private async Task<CijWorkflowStep?> GetWorkflowNextStep(CijWorkflowStep currentStep, CijRequest cijRequest,int WorkflowId)
+        private async Task<CijWorkflowStep?> GetWorkflowNextStep(CijWorkflowStep currentStep, CijRequest cijRequest, int WorkflowId)
         {
             CijWorkflowStep? nextStep = new CijWorkflowStep();
             List<string> FHDepartments = new List<string>() { "IT", "BME", "Admin", "Finance", "Purchase", "Civil", "Legal" };
@@ -1133,5 +1171,21 @@ namespace Capital_Item_Justification.Repository
 
             return nextStepFind;
         }
+
+        public async Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId)
+        {
+            var pendingStatusId = await _context.CijStatuses.Where(x => x.StatusName == "Pending").Select(x => x.StatusId).FirstOrDefaultAsync();
+
+            var results = await _context
+                .Set<RequestTrackingViewModel>()
+                .FromSqlInterpolated($@"
+        EXEC dbo.SP_GetRequesterRequestTracking
+            @UserId = {userId},
+            @PendingStatusId = {pendingStatusId}")
+                .AsNoTracking()
+                .ToListAsync();
+
+            return results;
+        }    
     }
 }

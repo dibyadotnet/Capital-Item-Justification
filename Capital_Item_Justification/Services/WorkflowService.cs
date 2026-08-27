@@ -30,5 +30,9 @@ namespace Capital_Item_Justification.Services
         {
             return await _repository.ApproveRequestAsync(vm);
         }
+        public async Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId)
+        {
+            return await _repository.TrackRequsterRequestAsync(userId);
+        }
     }
 }

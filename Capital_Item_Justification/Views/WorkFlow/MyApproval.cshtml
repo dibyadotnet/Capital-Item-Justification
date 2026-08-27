@@ -33,9 +33,9 @@
                     <thead class="table-light">
                         <tr>
                             <th>CIJ Number</th>
-                            <th>Role</th>
-                            <th>Department</th>
                             <th>Assigned Date</th>
+                            <th>Approver Role</th>
+                            <th>Department</th>
                             <th>Status</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -57,6 +57,9 @@
                                         </strong>
                                     </td>
                                     <td>
+                                        @item.AssignedDate?.ToString("dd-MMM-yyyy hh:mm")
+                                    </td>
+                                    <td>
                                         @item.ApproverRole
                                     </td>
 
@@ -71,15 +74,8 @@
                                         }
                                     </td>
 
+                                  
                                     <td>
-                                        @item.AssignedDate?.ToString("dd-MMM-yyyy hh:mm tt")
-                                    </td>
-
-                                    <td>
-                                        <a asp-controller="WorkFlow" asp-action="ApprovalAction"
-                                           asp-route-approvalId="@item.ApprovalId"
-                                           asp-route-cijId="@item.CIJId"
-                                           class="text-decoration-none">
                                             @if (item.StatusName == "Pending")
                                             {
                                                 <span class="badge bg-warning text-dark">
@@ -98,7 +94,6 @@
                                                     @item.StatusName
                                                 </span>
                                             }
-                                        </a>
                                     </td>
 
                                     <td class="text-center">
@@ -107,13 +102,23 @@
                                            asp-action="ApprovalDetail"
                                            asp-route-approvalId="@item.ApprovalId"
                                            asp-route-cijId="@item.CIJId"
-                                           class="btn btn-sm btn-primary">
+                                           class="btn btn-sm btn-primary view-btn">
                                             <i class="bi bi-eye me-1"></i>
                                             View
                                         </a>
+                                        @if (item.StatusName == "Pending" || item.StatusName == "Query")
+                                        {
+                                            <a asp-controller="WorkFlow"
+                                               asp-action="ApprovalAction"
+                                               asp-route-approvalId="@item.ApprovalId"
+                                               asp-route-cijId="@item.CIJId"
+                                               class="btn btn-sm btn-success">
+                                                <i class="bi bi-check2-square me-1"></i>
+                                                Take Action
+                                            </a>
+                                        }
 
                                     </td>
-
                                 </tr>
                                 index++;
                             }

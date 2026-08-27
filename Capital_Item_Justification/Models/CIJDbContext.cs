@@ -62,9 +62,12 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<MyApprovalViewModel>()
-        .HasNoKey()
-        .ToView(null);
+        modelBuilder.Entity<MyApprovalViewModel>().HasNoKey().ToView(null);
+        modelBuilder.Entity<ApprovalDetailResult>().HasNoKey();
+        modelBuilder.Entity<ClarificationViewModel>().HasNoKey();
+        modelBuilder.Entity<WorkflowHistoryViewModel>().HasNoKey();
+        modelBuilder.Entity<CIJJustificationViewModel>().HasNoKey();
+        modelBuilder.Entity<RequestTrackingViewModel>().HasNoKey();
 
         modelBuilder.Entity<CijWorkflowClarification>(entity =>
         {

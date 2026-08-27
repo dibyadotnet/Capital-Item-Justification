@@ -1,0 +1,98 @@
+﻿@model IEnumerable<Capital_Item_Justification.ViewModels.RequestTrackingViewModel>
+
+<div class="card">
+
+    <div class="card-header">
+        <h3 class="card-title">
+            My Requests
+        </h3>
+    </div>
+
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>CIJ Number</th>
+                            <th>Workflow Stage</th>
+                            <th>Pending With</th>
+                            <th>Status</th>
+                            <th>Pending Since</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @{
+                            var index = 1;
+                        }
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    @index
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        @item.CIJNumber
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @item.WorkFlowStepCode
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        @item.ApproverRole
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-warning text-dark">
+                                        @item.CurrentStatus
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @(item.PendingSince?.ToString("dd-MMM-yyyy hh:mm") ?? "-")
+                                </td>
+
+                                <td>
+                                    <a asp-controller=""
+                                       asp-action=""
+                                       asp-route-approvalId="@item.WorkflowApprovalId"
+                                       asp-route-cijId="@item.CijId"
+                                       class="btn btn-sm btn-primary view-btn">
+                                        View
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                            index++;
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                You have not raised any requests with pending approval.
+            </div>
+        }
+
+    </div>
+
+</div>

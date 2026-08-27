@@ -9,17 +9,8 @@ namespace Capital_Item_Justification.Data
         {
             string[] roles =
             {
-            "HOD",
-            "IT",
-            "BME",
-            "Admin",
-            "Purchage committee",
-            "COO",
-            "Finance",
-            "MD",
-            "CEO",
-            "Purchase"
-        };
+            "Admin"
+            };
 
             foreach (var roleName in roles)
             {
@@ -68,8 +59,8 @@ namespace Capital_Item_Justification.Data
                 }
             }
         }
-    
-    public static async Task SeedAdmin(UserManager<ApplicationUser> userManager)
+
+        public static async Task SeedAdmin(UserManager<ApplicationUser> userManager)
         {
             var email = "admin@cij.com";
 
