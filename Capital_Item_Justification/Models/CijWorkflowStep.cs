@@ -34,6 +34,7 @@ public partial class CijWorkflowStep
     public bool IsFinalStep { get; set; }
 
     public bool IsActive { get; set; }
+    public int? DepartmentId { get; set; }
 
     [StringLength(450)]
     public string? CreatedBy { get; set; }

@@ -168,11 +168,14 @@
     border-radius: 4px;
     padding: 4px 4px;
 }
+.view-btn {
+    border-radius: 4px;
+    padding: 4px 10px;
+}
 /*SELECT2*/
 /* ================================
    Select2 Multi Select
    ================================ */
-
 .select2-container {
     width: 100% !important;
 }

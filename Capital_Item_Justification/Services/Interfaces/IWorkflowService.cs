@@ -9,5 +9,6 @@ namespace Capital_Item_Justification.Services.Interfaces
         Task<List<MyApprovalViewModel>> GetMyApprovalAsync(ApplicationUser user, List<string> roleIds);
         Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int approvalId, int cijId);
         Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm);
+        Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId);
     }
 }

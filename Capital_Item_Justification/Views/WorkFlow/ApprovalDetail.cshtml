@@ -40,7 +40,7 @@
                                 CIJ Number
                             </div>
                             <div class="col-sm-7">
-                                : @Model.CIJRequest.CIJSNumber
+                                : @Model.CIJSNumber
                             </div>
                         </div>
 
@@ -49,7 +49,7 @@
                                 Request Date
                             </div>
                             <div class="col-sm-7">
-                                : @Model.CIJRequest.RequestDate
+                                @* : @Model.CIJRequest.RequestDate *@
                             </div>
                         </div>
 
@@ -125,7 +125,7 @@
             </h3>
         </div>
         <div class="card-body">
-            @if (Model.Equipments != null && Model.Equipments.Any())
+            @if (Model != null)
             {
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
@@ -145,10 +145,10 @@
                                 int equipmentIndex = 1;
                                 decimal equipmentTotal = 0;
                             }
-                            @foreach (var equipment in Model.Equipments)
+                            @foreach (var equipment in Model.Departments)
                             {
-                                @* equipmentTotal += equipment.EquipmentCost ?? 0; *@
-                                <tr>
+                                
+                               @*  <tr>
                                     <td>
                                         @equipmentIndex
                                     </td>
@@ -166,12 +166,12 @@
                                     </td>
 
                                     <td class="text-end">
-                                        @* @((equipment.EquipmentCost ?? 0).ToString("N2")) *@
+                                         @((equipment.EquipmentCost ?? 0).ToString("N2")) 
                                     </td>
                                     <td>
                                         @equipment.PreferenceOrder
                                     </td>
-                                </tr>
+                                </tr> *@
 
                                 equipmentIndex++;
                             }
@@ -213,7 +213,7 @@
 
         <div class="card-body">
 
-            @if (Model.Justification != null)
+            @if (Model != null)
             {
                 <div class="mb-3">
 
@@ -223,7 +223,7 @@
 
                     <div class="border rounded p-3 bg-light"
                          style="min-height:100px; white-space:pre-wrap;">
-                        @Model.Justification.Justification
+                        @Model.CanAnswerClarification
                     </div>
 
                 </div>
@@ -249,7 +249,7 @@
 
         <div class="card-body">
 
-            @if (Model.VendorAttachments != null && Model.VendorAttachments.Any())
+            @if (Model != null)
             {
                 <div class="table-responsive">
 
@@ -265,13 +265,13 @@
                         </thead>
 
                         <tbody>
-                            @foreach (var attachment in Model.VendorAttachments)
+                            @foreach (var attachment in Model.Departments)
                             {
                                 <tr>
 
                                     <td>
                                         <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-                                        @attachment.FileName
+                                        @* @attachment.FileName *@
                                     </td>
 
                                     <td>

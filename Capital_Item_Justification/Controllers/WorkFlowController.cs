@@ -142,7 +142,7 @@ namespace Capital_Item_Justification.Controllers
                 }
                 vm.CanRaiseClarification = true;
 
-                List<string> workflowStepItem = new List<string>() { "HOD Initial Approval", "Function Head Approval" };
+                List<string> workflowStepItem = new List<string>() { "HOD_Initial", "Function_Head_Initial" };
                 if (vm != null)
                 {
                     vm.Departments = departmentItems;
@@ -334,6 +334,26 @@ namespace Capital_Item_Justification.Controllers
             {
                 TempData["ToastMessage"] = "CIJ request failed to reject.";
                 TempData["ToastType"] = "error";
+                throw;
+            }
+        }
+
+        public async Task<IActionResult> TrackRequest()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var trackRequsetResults = await _service.TrackRequsterRequestAsync(user.Id);
+
+                return View(trackRequsetResults);
+
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }
