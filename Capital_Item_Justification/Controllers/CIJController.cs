@@ -26,7 +26,7 @@ namespace Capital_Item_Justification.Controllers
             _workflowService = workflowService;
             _userManager = userManager;
         }
-        //[Authorize(Roles = "Requester")]
+        [Authorize]
         public async Task<IActionResult> Dashboard()
         {
             List<DashboardViewModel> list = new();
@@ -36,6 +36,10 @@ namespace Capital_Item_Justification.Controllers
                 if (user == null)
                 {
                     return Unauthorized();
+                }
+                if (!User.IsInRole("Requester"))
+                {
+                    return RedirectToAction("MyApproval", "WorkFlow");
                 }
                 list = await _service.GetDashboard(user.Id);
             }

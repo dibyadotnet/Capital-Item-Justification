@@ -95,6 +95,7 @@ namespace Capital_Item_Justification.Repository
                 int? formStatusId = request.StatusId;
                 //Get WorkFlow ID
                 int workflowId = 0;
+                string workflowCode = "0";
                 var locartiontype = await _context.CijLocations.Where(a => a.LocationId == request.LocationId && a.IsActive).Select(a => a.LocationType).FirstOrDefaultAsync();
                 if (string.IsNullOrWhiteSpace(locartiontype))
                 {
@@ -120,25 +121,35 @@ namespace Capital_Item_Justification.Repository
                     if (costCenter == "SCEH" || (costCenter == "Project" && fundingType == "Partially Funded"))
                     {
                         workflowId = 1;
+                        workflowCode = "WF001";
                     }
                 }
                 if (locartiontype == "Secondary" && costCenter == "SCEH")
                 {
                     workflowId = 2;
+                    workflowCode = "WF002";
                 }
                 if (fundingType == "Fully Funded")
                 {
                     workflowId = 3;
+                    workflowCode = "WF003";
                 }
                 //------
-                var firstStep = await _context.CijWorkflowSteps.Where(x => x.IsActive).OrderBy(x => x.StepNo).FirstOrDefaultAsync();
+                var firstStep = await _context.CijWorkflowSteps.Where(x => x.IsActive && x.WorkflowId == workflowId).OrderBy(x => x.StepNo).FirstOrDefaultAsync();
                 if (firstStep == null)
-                    throw new InvalidOperationException("Requestor step is not configured.");
+                    throw new InvalidOperationException($"Requestor step is not configured for {workflowCode}");
 
                 //Get Next Workflow Step
-                CijWorkflowStep? approvalStep = await GetWorkflowNextStep(firstStep, request, workflowId);
+                CijWorkflowStep? approvalStep = null;
+                if (workflowId == 1)
+                    approvalStep = await GetWorkflowNextStep(firstStep, request, workflowId);
+                if (workflowId == 2)
+                    approvalStep = await GetSecondWorkflowNextStep(firstStep, request, workflowId);
+                if (workflowId == 3)
+                    approvalStep = await GetThirdWorkflowNextStep(firstStep, request, workflowId);
+
                 if (approvalStep == null)
-                    throw new InvalidOperationException("Next workflow step is not configured.");
+                    throw new InvalidOperationException($"Next workflow step is not configured for {workflowCode}");
 
                 //var approvalStep = await _context.CijWorkflowSteps.Where(x => x.IsActive && x.StepNo > 1)
                 //                            .OrderBy(x => x.StepNo).FirstOrDefaultAsync();
@@ -150,7 +161,7 @@ namespace Capital_Item_Justification.Repository
                 if (string.IsNullOrWhiteSpace(approvalStep.RoleName))
                 {
                     throw new InvalidOperationException(
-                        $"Role is not configured for workflow step '{approvalStep.StepName}'.");
+                        $"Role is not configured for workflow step '{approvalStep.StepName}' for {workflowCode}");
                 }
                 var roleDetail = await _context.Roles.FirstOrDefaultAsync(r => r.Name != null && r.Name.ToLower() == approvalStep.RoleName.ToLower() && r.IsActive);
                 //var roleDetail = await _roleManager.FindByNameAsync(approvalStep.RoleName);
@@ -229,6 +240,7 @@ namespace Capital_Item_Justification.Repository
                 cijWorkflowApprovalHistory.CreatedBy = model.userId;
                 cijWorkflowApprovalHistory.CreatedOn = DateTime.Now;
                 cijWorkflowApprovalHistory.StepId = firstStep.WorkflowStepId;  //Requestor workflowstep ID
+                cijWorkflowApprovalHistory.DepartmentId = request.RequestDepartmentId;
 
                 await _context.CijWorkflowApprovalHistories.AddAsync(cijWorkflowApprovalHistory);
                 await _context.SaveChangesAsync();
@@ -334,7 +346,7 @@ namespace Capital_Item_Justification.Repository
             {
                 return await ApproveWorkflowAsync(vm);
             }
-            if (string.Equals(vm.Action, "Reject", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(vm.Action, "Rejected", StringComparison.OrdinalIgnoreCase))
             {
                 return await RejectWorkflowAsync(vm);
             }
@@ -416,6 +428,7 @@ namespace Capital_Item_Justification.Repository
                     ActionOn = DateTime.Now,
                     StepId = approval.StepId,
                     CreatedBy = vm.userId,
+                    DepartmentId = approval.DepartmentId
                 };
                 _context.CijWorkflowApprovalHistories.Add(history);
                 await _context.SaveChangesAsync();
@@ -485,7 +498,8 @@ namespace Capital_Item_Justification.Repository
                         ActionOn = DateTime.UtcNow,
                         StepId = approval.StepId,
                         CreatedBy = vm.userId,
-                        CreatedOn = DateTime.UtcNow
+                        CreatedOn = DateTime.UtcNow,
+                        DepartmentId = approval.DepartmentId
                     };
                     _context.CijWorkflowApprovalHistories.Add(completionHistory);
 
@@ -691,7 +705,8 @@ namespace Capital_Item_Justification.Repository
                     ActionOn = DateTime.UtcNow,
                     StepId = currentApproval.StepId,
                     CreatedBy = vm.userId,
-                    CreatedOn = DateTime.Now
+                    CreatedOn = DateTime.Now,
+                    DepartmentId = currentApproval.DepartmentId
                 };
 
                 _context.CijWorkflowApprovalHistories.Add(history);
@@ -773,7 +788,8 @@ namespace Capital_Item_Justification.Repository
                     ActionOn = DateTime.Now,
                     StepId = clarification.StepId,
                     CreatedBy = vm.userId,
-                    CreatedOn = DateTime.Now
+                    CreatedOn = DateTime.Now,
+                    DepartmentId = approval.DepartmentId
                 };
 
                 _context.CijWorkflowApprovalHistories.Add(history);
@@ -843,7 +859,8 @@ namespace Capital_Item_Justification.Repository
                     ActionOn = DateTime.Now,
                     StepId = approval.StepId,
                     CreatedBy = vm.userId,
-                    CreatedOn = DateTime.Now
+                    CreatedOn = DateTime.Now,
+                    DepartmentId = approval.DepartmentId
                 };
 
                 _context.CijWorkflowApprovalHistories.Add(history);
@@ -1186,6 +1203,380 @@ namespace Capital_Item_Justification.Repository
                 .ToListAsync();
 
             return results;
-        }    
+        }
+        private async Task<CijWorkflowStep?> GetSecondWorkflowNextStep(CijWorkflowStep currentStep, CijRequest cijRequest, int WorkflowId)
+        {
+            CijWorkflowStep? nextStep = new CijWorkflowStep();
+            if (currentStep.StepCode.Equals("REQUESTOR", StringComparison.OrdinalIgnoreCase))
+            {
+                string? itemtype = await _context.CijItemTypes.Where(x => x.ItemTypeId == cijRequest.ItemTypeId).Select(x => x.ItemTypeCode).FirstOrDefaultAsync();
+                if (string.IsNullOrWhiteSpace(itemtype))
+                {
+                    throw new InvalidOperationException("Item Type is not configured.");
+                }
+                if (itemtype.Equals("Medical", StringComparison.OrdinalIgnoreCase))
+                {
+                    string stepCode = "Consultant_Incharge";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Consultant Incharge Approval step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "Administrator";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Administrator Approval step is not configured.");
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("Consultant_Incharge", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Director_SC_Initial";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Director SC Initial Approval step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Administrator", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Director_SC_Initial";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Director SC Initial Approval step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Director_SC_Initial", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Technical_Assessment";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Technical Assessment Approval step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Technical_Assessment", StringComparison.OrdinalIgnoreCase))
+            {
+                string? itemtype = await _context.CijItemTypes.Where(x => x.ItemTypeId == cijRequest.ItemTypeId).Select(x => x.ItemTypeCode).FirstOrDefaultAsync();
+                if (string.IsNullOrWhiteSpace(itemtype))
+                {
+                    throw new InvalidOperationException("Item Type is not configured.");
+                }
+                if (itemtype.Equals("Medical", StringComparison.OrdinalIgnoreCase))
+                {
+                    string stepCode = "Purchase_Committee";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Purchase Committee Approval step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "Director_SC_Final";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Director SC Final Approval step is not configured.");
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("Purchase_Committee", StringComparison.OrdinalIgnoreCase))
+            {
+
+                string stepCode = "Director_SC_Final";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Function Head Final Approval step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Director_SC_Final", StringComparison.OrdinalIgnoreCase))
+            {
+                if (cijRequest.BudgetAvailable.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+                {
+                    string stepCode = "FINANCE";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Finance Approval step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "COO_PRE_FINANCE";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("COO Approval Pre Finance Approval step is not configured.");
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("COO_PRE_FINANCE", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "FINANCE";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Finance Approval step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("FINANCE", StringComparison.OrdinalIgnoreCase))
+            {
+                var directorApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                              join role in _context.Roles
+                                            on budget.RoleId equals role.Id
+                                              where role.Name == "Director SC" && role.IsActive == true && budget.IsActive == true
+                                              select budget).FirstOrDefaultAsync();
+                if (directorApprovalLimit == null)
+                {
+                    throw new InvalidOperationException("Budget Limit is not configured for Director SC Role.");
+                }
+                if (directorApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
+                {
+                    string stepCode = "Purchase";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Purchase step is not configured.");
+                    }
+                }
+                else
+                {
+                    var cijItemType = await _context.CijItemTypes.Where(x => x.ItemTypeId == cijRequest.ItemTypeId && x.IsActive == true).FirstOrDefaultAsync();
+                    if (cijItemType == null)
+                    {
+                        throw new InvalidOperationException("Item Type is not configured.");
+                    }
+                    if (cijItemType.ItemTypeCode.Equals("Medical", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string stepCode = "MD";
+                        nextStep = await GetStep(stepCode, WorkflowId);
+                        if (nextStep == null)
+                        {
+                            throw new InvalidOperationException("MD Approval step is not configured.");
+                        }
+                    }
+                    if (cijItemType.ItemTypeCode.Equals("Non Medical", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string stepCode = "COO_POST_FINANCE";
+                        nextStep = await GetStep(stepCode, WorkflowId);
+                        if (nextStep == null)
+                        {
+                            throw new InvalidOperationException("COO Post Finance Approval step is not configured.");
+                        }
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("MD", StringComparison.OrdinalIgnoreCase))
+            {
+                var mdApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                             join role in _context.Roles
+                                           on budget.RoleId equals role.Id
+                                             where role.Name == "MD" && role.IsActive == true && budget.IsActive == true
+                                             select budget).FirstOrDefaultAsync();
+                if (mdApprovalLimit == null)
+                {
+                    throw new InvalidOperationException("Budget Limit is not configured for MD Role.");
+                }
+                if (mdApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
+                {
+                    string stepCode = "Purchase";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Purchase step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "CEO";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("CEO Approval step is not configured.");
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("COO_POST_FINANCE", StringComparison.OrdinalIgnoreCase))
+            {
+                var cooApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                              join role in _context.Roles
+                                            on budget.RoleId equals role.Id
+                                              where role.Name == "COO" && role.IsActive == true && budget.IsActive == true
+                                              select budget).FirstOrDefaultAsync();
+                if (cooApprovalLimit == null)
+                {
+                    throw new InvalidOperationException("Budget Limit is not configured for COO Role.");
+                }
+                if (cooApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
+                {
+                    string stepCode = "Purchase";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Purchase step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "CEO";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("CEO Approval step is not configured.");
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("CEO", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Purchase";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Purchase step is not configured.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Purchase", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Completed";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Completed step is not configured.");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException($"Workflow step '{currentStep.StepName}' is not configured.");
+            }
+
+            return nextStep;
+        }
+        private async Task<CijWorkflowStep?> GetThirdWorkflowNextStep(CijWorkflowStep currentStep, CijRequest cijRequest, int WorkflowId)
+        {
+            CijWorkflowStep? nextStep = new CijWorkflowStep();
+            if (currentStep.StepCode.Equals("REQUESTOR", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "HOD_Initial";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("HOD initial Approval step is not configured for WF003");
+                }
+            }
+            else if (currentStep.StepCode.Equals("HOD_Initial", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Technical_Assessment";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Technical Assessment Approval step is not configured for WF003");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Technical_Assessment", StringComparison.OrdinalIgnoreCase))
+            {
+                string? itemtype = await _context.CijItemTypes.Where(x => x.ItemTypeId == cijRequest.ItemTypeId).Select(x => x.ItemTypeCode).FirstOrDefaultAsync();
+                if (string.IsNullOrWhiteSpace(itemtype))
+                {
+                    throw new InvalidOperationException("Item Type is not configured.");
+                }
+                if (itemtype.Equals("Medical", StringComparison.OrdinalIgnoreCase))
+                {
+                    string stepCode = "Purchase_Committee";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Purchase Committee Approval step is not configured for WF003.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "HOD_Final";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("HOD Final Approval step is not configured for WF003.");
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("Purchase_Committee", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "HOD_Final";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("HOD Final Approval step is not configured for WF003.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("HOD_Final", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "FINANCE";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Finance Approval step is not configured for WF003.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("FINANCE", StringComparison.OrdinalIgnoreCase))
+            {
+                var hodApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                                              join role in _context.Roles
+                                            on budget.RoleId equals role.Id
+                                              where role.Name == "Director Public Health" && role.IsActive == true && budget.IsActive == true
+                                              select budget).FirstOrDefaultAsync();
+                if (hodApprovalLimit == null)
+                {
+                    throw new InvalidOperationException("Budget Limit is not configured for Director Public Health for WF003.");
+                }
+                if (hodApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
+                {
+                    string stepCode = "Purchase";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Purchase step is not configured for WF003");
+                    }
+                }
+                else
+                {
+                    string stepCode = "Director_Public_Health ";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Director Public Health Approval step is not configured for WF003");
+                    }
+                }
+            }
+            else if (currentStep.StepCode.Equals("Director_Public_Health", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Purchase";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Purchase step is not configured for WF003.");
+                }
+            }
+            else if (currentStep.StepCode.Equals("Purchase", StringComparison.OrdinalIgnoreCase))
+            {
+                string stepCode = "Completed";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
+                {
+                    throw new InvalidOperationException("Completed step is not configured.");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException($"Workflow step '{currentStep.StepName}' is not configured.");
+            }
+
+            return nextStep;
+        }
     }
 }
