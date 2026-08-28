@@ -28,6 +28,7 @@ namespace Capital_Item_Justification.ViewModels
         public int LocationId { get; set; }
 
         public bool IsActive { get; set; } = true;
+        public string? RoleName { get; set; }
 
         public string? Password { get; set; }
         public string? DepartmentName { get; set; }

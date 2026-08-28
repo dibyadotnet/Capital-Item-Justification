@@ -18,39 +18,20 @@ namespace Capital_Item_Justification.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ICIJRequestService _service;
+        private readonly IUserService _userService;
         public UserController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager,
-            ICIJRequestService service)
+            ICIJRequestService service, IUserService userService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _service = service;
+            _userService = userService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _userManager.Users.ToListAsync();
-            var depts = await _service.GetDepartment();
-            var locss = await _service.GetLocation();
-
-            List<UserViewModel> vm = (from user in users
-                                      join dept in depts
-                                          on user.DepartmentId equals dept.DepartmentId into departmentGroup
-                                      from dept in departmentGroup.DefaultIfEmpty()
-
-                                      join location in locss
-                                          on user.LocationId equals location.LocationId into locationGroup
-                                      from location in locationGroup.DefaultIfEmpty()
-                                      select new UserViewModel
-                                      {
-                                          Id = user.Id,
-                                          FullName = user.FullName ?? "",
-                                          EmployeeCode = user.EmployeeCode ?? "",
-                                          Email = user.Email ?? "",
-                                          DepartmentName = dept != null ? dept.DepartmentName : null,
-                                          LocationName = location != null ? location.LocationName : null,
-                                          IsActive = user.IsActive,
-                                      }).OrderBy(x => x.FullName).ToList();
+            var vm = await _userService.GetGetUsersAsync();
             return View(vm);
         }
 

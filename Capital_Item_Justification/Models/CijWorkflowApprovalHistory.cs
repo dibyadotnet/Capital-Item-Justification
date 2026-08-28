@@ -41,4 +41,5 @@ public partial class CijWorkflowApprovalHistory
     public DateTime? CreatedOn { get; set; }
     public int? StepId { get; set; }
     public string? ApproverRoleId { get; set; }
+    public int? DepartmentId { get; set; }
 }
