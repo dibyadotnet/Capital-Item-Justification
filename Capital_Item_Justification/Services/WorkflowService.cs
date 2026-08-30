@@ -34,5 +34,9 @@ namespace Capital_Item_Justification.Services
         {
             return await _repository.TrackRequsterRequestAsync(userId);
         }
+        public async Task<ApprovalRequestDetailsViewModel?> GetRequestDetailsAsync(int approvalId, int cijId)
+        {
+            return await _repository.GetRequestDetailsAsync(approvalId, cijId);
+        }
     }
 }

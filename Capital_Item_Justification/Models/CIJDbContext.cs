@@ -55,6 +55,7 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<CijRoleBudgetLimit> CijRoleBudgetLimits { get; set; }
     public virtual DbSet<CijWorkflowApproval> CijWorkflowApprovals { get; set; }
+    public virtual DbSet<CijEmailConfiguration> CijEmailConfigurations { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CIJConnection");
 
@@ -68,6 +69,14 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<WorkflowHistoryViewModel>().HasNoKey();
         modelBuilder.Entity<CIJJustificationViewModel>().HasNoKey();
         modelBuilder.Entity<RequestTrackingViewModel>().HasNoKey();
+
+        modelBuilder.Entity<CijEmailConfiguration>(entity =>
+        {
+            entity.HasKey(e => e.EmailConfigurationId).HasName("PK__CIJ_Emai__1452379B4A3658F2");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
 
         modelBuilder.Entity<CijWorkflowClarification>(entity =>
         {

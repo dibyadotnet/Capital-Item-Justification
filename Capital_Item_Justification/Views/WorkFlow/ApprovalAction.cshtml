@@ -70,14 +70,16 @@
                         <i class="bi bi-x-circle me-1"></i>
                         Cancel
                     </a>
-                    @if (!Model.workflowStepList.Contains(Model.workFlowStepCode))
+                    @* @if (!Model.workflowStepList.Contains(Model.workFlowStepCode)) *@
+                    @if (Model.CanQuery)
                     {
                         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#queryModal">
                             <i class="bi bi-question-circle me-1"></i>
                             Send Query
                         </button>
                     }
-                    @if (!User.IsInRole("Finance") || !User.IsInRole("Purchase"))
+                   @*  @if (!User.IsInRole("Finance") || !User.IsInRole("Purchase")) *@
+                   @if(Model.CanReject)
                     {
                         <button type="submit" name="Action" formaction="@Url.Action("RejectWorkFlow", "WorkFlow")" class="btn btn-danger"
                                 onclick="return validateRemarks('Reject');">

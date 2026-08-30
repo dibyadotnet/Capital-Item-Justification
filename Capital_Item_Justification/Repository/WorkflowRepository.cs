@@ -301,7 +301,9 @@ namespace Capital_Item_Justification.Repository
                     workflowApprovalId = approvalDetail.workflowApprovalId,
                     workFlowStepCode = approvalDetail.workFlowStepCode,
                     Cijid = approvalDetail.Cijid,
-                    CIJSNumber = approvalDetail.CIJSNumber
+                    CIJSNumber = approvalDetail.CIJSNumber,
+                    CanReject = approvalDetail.CanReject,
+                    CanQuery = approvalDetail.CanQuery
                 };
             }
             return vm;
@@ -645,10 +647,24 @@ namespace Capital_Item_Justification.Repository
 
                 if (currentApproval == null)
                     throw new InvalidOperationException("Pending approval not found.");
+                int? workflowId = await _context.CijWorkflowTransactions.Where(a => a.TransactionId == currentApproval.TransactionId)
+                    .Select(x => x.WorkflowId).FirstOrDefaultAsync();
 
-                var targetRole = await _context.CijWorkflowApprovals.Where(x => x.Cijid == vm.cijId &&
-                                            x.StatusId == approvedStatusId)
-                                            .OrderByDescending(x => x.ApprovalId).FirstOrDefaultAsync();
+
+                CijWorkflowApproval? targetRole = new();
+                if (workflowId == 1 || workflowId == 3)
+                {
+                    targetRole = await _context.CijWorkflowApprovals.Where(x => x.Cijid == vm.cijId
+                                           && x.StatusId == approvedStatusId && x.ApproverRole == "HOD")
+                                          .OrderByDescending(x => x.ApprovalId).FirstOrDefaultAsync();
+
+                }
+                if (workflowId == 2)
+                {
+                    targetRole = await _context.CijWorkflowApprovals.Where(x => x.Cijid == vm.cijId
+                                           && x.StatusId == approvedStatusId && x.ApproverRole == "Director SC")
+                                          .OrderByDescending(x => x.ApprovalId).FirstOrDefaultAsync();
+                }
 
                 if (targetRole == null)
                     throw new InvalidOperationException("Target approval not found.");
@@ -1329,10 +1345,10 @@ namespace Capital_Item_Justification.Repository
             else if (currentStep.StepCode.Equals("FINANCE", StringComparison.OrdinalIgnoreCase))
             {
                 var directorApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
-                                              join role in _context.Roles
-                                            on budget.RoleId equals role.Id
-                                              where role.Name == "Director SC" && role.IsActive == true && budget.IsActive == true
-                                              select budget).FirstOrDefaultAsync();
+                                                   join role in _context.Roles
+                                                 on budget.RoleId equals role.Id
+                                                   where role.Name == "Director SC" && role.IsActive == true && budget.IsActive == true
+                                                   select budget).FirstOrDefaultAsync();
                 if (directorApprovalLimit == null)
                 {
                     throw new InvalidOperationException("Budget Limit is not configured for Director SC Role.");
@@ -1577,6 +1593,27 @@ namespace Capital_Item_Justification.Repository
             }
 
             return nextStep;
+        }
+
+        public async Task<ApprovalRequestDetailsViewModel?> GetRequestDetailsAsync(int approvalId, int cijId)
+        {
+            var requestvm = await (from req in _context.CijRequests
+                                   join dept in _context.CijDepartments
+                                   on req.RequestDepartmentId equals dept.DepartmentId
+                                   select new CIJRequestViewModel()
+                                   {
+                                       Cijid = req.Cijid,
+                                       CIJSNumber = req.Cijnumber,
+                                       RequestDate = req.RequestDate,
+                                       TotalEquipmentCost = req.TotalEquipmentCost,
+                                       
+                                   }).FirstOrDefaultAsync();
+
+            ApprovalRequestDetailsViewModel vm = new ApprovalRequestDetailsViewModel()
+            {
+                CIJRequest = requestvm
+            };
+            return vm;
         }
     }
 }

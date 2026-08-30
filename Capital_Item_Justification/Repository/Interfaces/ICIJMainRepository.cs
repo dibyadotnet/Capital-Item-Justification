@@ -22,6 +22,9 @@ namespace Capital_Item_Justification.Repository.Interfaces
         Task<int> DeleteAttachment(int attachmentId);
         Task<List<CijCostCenter>> GetCostCenter();
         Task<List<CijBudgetType>> GetBudgetType();
-        
+
+        // Get Email Detail
+        Task<CijEmailConfiguration> GetEmailConfig();
+
     }
 }

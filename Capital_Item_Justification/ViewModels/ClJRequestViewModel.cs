@@ -55,5 +55,7 @@ namespace Capital_Item_Justification.ViewModels
         public IEnumerable<SelectListItem> ProjectList { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> CostCenterList { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> BudgetTypeList { get; set; } = new List<SelectListItem>();
+
+        public string? RequestDepartment { get; set; }
     }
 }

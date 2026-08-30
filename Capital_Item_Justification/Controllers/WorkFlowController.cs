@@ -18,14 +18,16 @@ namespace Capital_Item_Justification.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ICIJRequestService _cijService;
+        private readonly IEmailService _emailService;
         public WorkFlowController(ILogger<WorkFlowController> logger, IWorkflowService service, UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager, ICIJRequestService cijService)
+            RoleManager<ApplicationRole> roleManager, ICIJRequestService cijService, IEmailService emailService)
         {
             _logger = logger;
             _service = service;
             _userManager = userManager;
             _roleManager = roleManager;
             _cijService = cijService;
+            _emailService = emailService;
         }
         public async Task<IActionResult> MyApproval()
         {
@@ -59,39 +61,9 @@ namespace Capital_Item_Justification.Controllers
 
             return View(vm);
         }
-        [HttpPost]
-        public async Task<IActionResult> SubmitRequest(CIJMainViewModel model)
-        {
-            try
-            {
-                //_httpContextAccessor.HttpContext.User
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                {
-                    return Unauthorized();
-                }
-                var roles = await _userManager.GetRolesAsync(user);
-                model.userId = user.Id;
-                model.userRoles = roles.ToList();
-                await _service.SubmitCIJAsync(model);
-
-                TempData["ToastMessage"] = "CIJ request submitted successfully.";
-                TempData["ToastType"] = "success";
-
-                return RedirectToAction("Dashboard", "CIJ");
-            }
-            catch (Exception)
-            {
-                TempData["ToastMessage"] = "Unable to submit the CIJ request.";
-                TempData["ToastType"] = "error";
-
-                return RedirectToAction("Dashboard", "CIJ");
-            }
-        }
-
         public async Task<IActionResult> ApprovalDetail(int approvalId, int cijId)
         {
-            ApprovalDetailViewModel? vm = new();
+            ApprovalRequestDetailsViewModel? vm = new();
             try
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -101,7 +73,7 @@ namespace Capital_Item_Justification.Controllers
                 }
                 var roles = await _userManager.GetRolesAsync(user);
 
-                vm = await _service.GetApprovalDetailAsync(approvalId, cijId);
+                vm = await _service.GetRequestDetailsAsync(approvalId, cijId);
 
             }
             catch (Exception)
