@@ -400,7 +400,7 @@ namespace Capital_Item_Justification.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 cIJMainViewModel.userId=user.Id;
                 cIJMainViewModel.userRoles = roles.ToList();
-                //await _workflowService.SubmitCIJAsync(cIJMainViewModel);
+                await _workflowService.SubmitCIJAsync(cIJMainViewModel);
                 await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.CIJSNumber, "Submit", "CIJ Request Submitted");
                 TempData["ToastMessage"] = "CIJ request submitted successfully.";
                 TempData["ToastType"] = "success";
