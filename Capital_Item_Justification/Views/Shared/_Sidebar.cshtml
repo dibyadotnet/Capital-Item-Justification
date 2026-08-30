@@ -44,35 +44,38 @@
                             </p>
                         </a>
                     </li>
-                }
-                <li class="nav-item">
-                    <a asp-controller="WorkFlow"
-                       asp-action="TrackRequest"
-                       class="nav-link">
-                        <i class="nav-icon bi bi-check2-square me-2"></i>
-                        <p>
-                            Track MyRequest
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a asp-controller="WorkFlow"
-                       asp-action="MyApproval"
-                       class="nav-link">
-                        <i class="nav-icon bi bi-check2-square me-2"></i>
-                        <p>
-                            Pending Approval
-                        </p>
-                    </a>
-                </li>
 
-                 @if (User.IsInRole("Requester"))
+                    <li class="nav-item">
+                        <a asp-controller="WorkFlow"
+                           asp-action="TrackRequest"
+                           class="nav-link">
+                            <i class="nav-icon bi bi-check2-square me-2"></i>
+                            <p>
+                                Track MyRequest
+                            </p>
+                        </a>
+                    </li>
+                }
+                @if (!User.IsInRole("Requester"))
+                {
+                    <li class="nav-item">
+                        <a asp-controller="WorkFlow"
+                           asp-action="MyApproval"
+                           class="nav-link">
+                            <i class="nav-icon bi bi-check2-square me-2"></i>
+                            <p>
+                                Pending Approval
+                            </p>
+                        </a>
+                    </li>
+                }
+                @if (User.IsInRole("Requester"))
                 {
                     <!-- CIJ Request -->
                     <li class="nav-item">
 
                         <a href="#"
-                        class="nav-link">
+                           class="nav-link">
 
                             <i class="nav-icon bi bi-file-earmark-text"></i>
 
@@ -92,8 +95,8 @@
                             <li class="nav-item">
 
                                 <a asp-controller="CIJ"
-                                asp-action="CreateCIJ"
-                                class="nav-link">
+                                   asp-action="CreateCIJ"
+                                   class="nav-link">
 
                                     <i class="nav-icon bi bi-circle"></i>
 

@@ -185,8 +185,8 @@ namespace Capital_Item_Justification.Repository
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-            
-                    if (model == null)
+
+                if (model == null)
                     return string.Empty;
 
                 var request = await _context.CijRequests
@@ -304,7 +304,7 @@ namespace Capital_Item_Justification.Repository
                 justification.Remarks = model.Justification.Remarks;
                 justification.ModifiedBy = model.userId;
                 justification.ModifiedDate = DateTime.Now;
-               // await _context.SaveChangesAsync();
+                // await _context.SaveChangesAsync();
 
                 //Update Committee Comment
 
@@ -315,10 +315,10 @@ namespace Capital_Item_Justification.Repository
                     committeeComment = new CijCommitteeComment
                     {
                         Cijid = cijId,
-                        CommentDate= DateTime.Now,
+                        CommentDate = DateTime.Now,
                         Comments = model.CommitteeComment.Comments,
-                        CreatedBy=model.userId,
-                        CreatedDate= DateTime.Now
+                        CreatedBy = model.userId,
+                        CreatedDate = DateTime.Now
                     };
 
                     _context.CijCommitteeComments.Add(committeeComment);
@@ -639,6 +639,14 @@ namespace Capital_Item_Justification.Repository
                 System.IO.File.Delete(attachment.FilePath);
             }
             return deleteStatus;
+        }
+
+        public async Task<CijEmailConfiguration> GetEmailConfig()
+        {
+            var emaliConfig= await _context.CijEmailConfigurations.FirstOrDefaultAsync(a => a.IsActive);
+            if (emaliConfig == null)
+                throw new InvalidOperationException("Email Configuration is not found.");
+            return emaliConfig;
         }
     }
 }

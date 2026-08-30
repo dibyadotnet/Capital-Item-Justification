@@ -15,5 +15,7 @@ namespace Capital_Item_Justification.ViewModels
         public List<WorkflowHistoryViewModel> workflowHistory { get; set; } = new();
         public int Cijid { get; set; }
         public string? CIJSNumber { get; set; }
+        public bool CanReject { get; set; }
+        public bool CanQuery { get; set; }
     }
 }

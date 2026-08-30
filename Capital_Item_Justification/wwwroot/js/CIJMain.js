@@ -57,6 +57,7 @@ $("#ddlItemType").on("change", function () {
     changeItemType();
 });
 function changeCostCenter() {
+    debugger;
     var costCenterId = $("#CIJRequest_CostCenterId option:selected").val();
     if (costCenterId === "1" || !costCenterId) {
         //Project
@@ -64,12 +65,16 @@ function changeCostCenter() {
         $('#CIJRequest_ProjectCost').prop('disabled', false);
         $('#CIJRequest_Scehcost').prop('disabled', true);
         $('#CIJRequest_Scehcost').val('');
+        $('#CIJRequest_ProjectId').prop('disabled', false);
+        //$("#CIJRequest_ProjectId").val("");
     } else {
         $('#CIJRequest_BudgetTypeId').prop('disabled', true);
         $("#CIJRequest_BudgetTypeId").val("");
         $('#CIJRequest_ProjectCost').prop('disabled', true);
         $("#CIJRequest_ProjectCost").val("");
-        $('#CIJRequest_Scehcost').prop('disabled', false);
+        $('#CIJRequest_ProjectId').prop('disabled', true);
+        $("#CIJRequest_ProjectId").val("");
+        $('#CIJRequest_Scehcost').prop('disabled', true);
     }
 }
 function togglePreviousPurchase() {
@@ -265,6 +270,11 @@ function calculateTotalEquipmentCost() {
     $("#TotalEstEquipmentCost").val(eqpCost);
     $("#CIJRequest_TotalEquipmentCostDisplay").val(eqpCost);
     $("#CIJRequest_TotalEquipmentCost").val(total);
+
+    var costCenterId = $("#CIJRequest_CostCenterId option:selected").val();
+    if (costCenterId === "2" || !costCenterId) {
+        $('#CIJRequest_Scehcost').val(eqpCost)
+    }
 }
 $("#btnModalClose").on("click", function () {
     clearEquipment();
@@ -316,6 +326,17 @@ function validateField(selector, message) {
 
     return true;
 }
+function validateRadio(name, message, errorId) {
+    const isChecked = $(`input[name="${name}"]:checked`).length > 0;
+
+    if (!isChecked) {
+        $(errorId).text(message);
+        return false;
+    }
+
+    $(errorId).text("");
+    return true;
+}
 $("#cijForm").on("submit", function (e) {
 
     let isValid = true;
@@ -328,7 +349,7 @@ $("#cijForm").on("submit", function (e) {
     if (!validateField("#CIJRequest_BudgetProvision", "Budget Provision is required.")) {
         isValid = false;
     }
-    if ($("CIJRequest_BudgetProvision").val() ==="Yes") {
+    if ($("#CIJRequest_BudgetProvision").val() === "Yes") {
         if (!validateField("#CIJRequest_BudgetAmount", "Budget Amount is required.")) {
             isValid = false;
         }
@@ -347,6 +368,18 @@ $("#cijForm").on("submit", function (e) {
     if (!validateField("#CIJRequest_PurchasePurposeId", "Purpose of purchase is required.")) {
         isValid = false;
     }
+    if (!validateField("#txtJustification", "Justification is required.")) {
+        isValid = false;
+    }
+    if (!validateRadio("Justification.IsPurchasedEarlier", "Please select.", "#isPurchasedEarlierError")) {
+        isValid = false;
+    }
+    if ($("input[name='Justification.IsPurchasedEarlier']:checked").val() === "false") {
+        if (!validateField("#Justification_Remarks", "Remarks is required.")) {
+            isValid = false;
+        }
+    } 
+
 
     if (!isValid) {
         e.preventDefault();

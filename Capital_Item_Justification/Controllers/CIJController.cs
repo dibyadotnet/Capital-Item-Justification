@@ -9,6 +9,7 @@ using Capital_Item_Justification.Models;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Capital_Item_Justification.Services;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -19,12 +20,15 @@ namespace Capital_Item_Justification.Controllers
         private readonly ILogger<WorkFlowController> _logger;
         private readonly IWorkflowService _workflowService;
         private readonly UserManager<ApplicationUser> _userManager;
-        public CIJController(ICIJRequestService service, ILogger<WorkFlowController> logger, IWorkflowService workflowService, UserManager<ApplicationUser> userManager)
+        private readonly IEmailService _emailService;
+        public CIJController(ICIJRequestService service, ILogger<WorkFlowController> logger, IWorkflowService workflowService,
+            UserManager<ApplicationUser> userManager, IEmailService emailService)
         {
             _service = service;
             _logger = logger;
             _workflowService = workflowService;
             _userManager = userManager;
+            _emailService = emailService;
         }
         [Authorize]
         public async Task<IActionResult> Dashboard()
@@ -397,7 +401,7 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.userId=user.Id;
                 cIJMainViewModel.userRoles = roles.ToList();
                 await _workflowService.SubmitCIJAsync(cIJMainViewModel);
-
+                await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.CIJSNumber, "Submit", "CIJ Request Submitted");
                 TempData["ToastMessage"] = "CIJ request submitted successfully.";
                 TempData["ToastType"] = "success";
             

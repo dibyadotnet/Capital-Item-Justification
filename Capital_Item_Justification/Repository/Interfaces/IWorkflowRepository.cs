@@ -10,5 +10,6 @@ namespace Capital_Item_Justification.Repository.Interfaces
         Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int approvalId, int cijId);
         Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm);
         Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId);
+        Task<ApprovalRequestDetailsViewModel?> GetRequestDetailsAsync(int approvalId, int cijId); 
     }
 }
