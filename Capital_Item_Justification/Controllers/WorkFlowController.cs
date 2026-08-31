@@ -132,7 +132,7 @@ namespace Capital_Item_Justification.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks, string action)
+        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks, string action,string cijNumber)
         {
             try
             {
@@ -155,6 +155,7 @@ namespace Capital_Item_Justification.Controllers
                     Action = action,
                 };
                 bool? approved = await _service.ApproveRequestAsync(vm);
+                await _emailService.SendEmailAsync(cijNumber, action, remarks);
                 if (approved == true)
                 {
                     TempData["ToastMessage"] = "CIJ request is approved successfully.";

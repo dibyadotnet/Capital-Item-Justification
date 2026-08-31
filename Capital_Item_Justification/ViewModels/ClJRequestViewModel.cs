@@ -9,7 +9,7 @@ namespace Capital_Item_Justification.ViewModels
         public int Cijid { get; set; }
         public string CIJSNumber { get; set; } = null!;
         public DateOnly RequestDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-        public int? ProjectId{ get; set; }
+        public int? ProjectId { get; set; }
         public int? CostCenterId { get; set; }
         public string? BudgetProvision { get; set; }
 
@@ -25,7 +25,7 @@ namespace Capital_Item_Justification.ViewModels
 
         [Column("SCEHCost", TypeName = "decimal(18, 2)")]
         public decimal? Scehcost { get; set; }
-
+        public decimal? ScehcostHidden { get; set; }
         public int? PurchasePurposeId { get; set; }
         public int? OldEquipmentTreatmentId { get; set; }
 

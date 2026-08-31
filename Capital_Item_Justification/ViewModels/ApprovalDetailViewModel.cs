@@ -17,5 +17,6 @@ namespace Capital_Item_Justification.ViewModels
         public string? CIJSNumber { get; set; }
         public bool CanReject { get; set; }
         public bool CanQuery { get; set; }
+        public string? CIJNumber { get; set; }
     }
 }

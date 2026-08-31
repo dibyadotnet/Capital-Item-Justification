@@ -8,5 +8,6 @@ namespace Capital_Item_Justification.Services.Interfaces
         Task<LocationViewModel?> GetByIdAsync(int id);
         Task<bool> SaveAsync(LocationViewModel model, string userName);
         Task<bool> DeleteAsync(int id, string userName);
+        Task<bool> LocationExistsAsync(string locationName, int? locationId);
     }
 }

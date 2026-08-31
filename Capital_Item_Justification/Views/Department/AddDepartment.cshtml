@@ -1,0 +1,48 @@
+﻿@model Capital_Item_Justification.ViewModels.DepartmentViewModel
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-department-plus"></i>
+                Add Department
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Save" method="post">
+
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="DepartmentId" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3">
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="DepartmentName" class="form-label">Department Name</label>
+                        <input asp-for="DepartmentName" class="form-control" />
+                        <span asp-validation-for="DepartmentName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        Save
+                    </button>
+                    <a asp-action="GetAllDept" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
