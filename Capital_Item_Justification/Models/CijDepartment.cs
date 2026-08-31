@@ -13,20 +13,20 @@ public partial class CijDepartment
     [Key]
     public int DepartmentId { get; set; }
 
-    [StringLength(20)]
-    public string DepartmentCode { get; set; } = null!;
+    [StringLength(100)]
+    public string? DepartmentCode { get; set; } = null!;
 
     [StringLength(200)]
     public string DepartmentName { get; set; } = null!;
 
     public bool? IsActive { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedOn { get; set; }
 
-    public int? ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? ModifiedOn { get; set; }

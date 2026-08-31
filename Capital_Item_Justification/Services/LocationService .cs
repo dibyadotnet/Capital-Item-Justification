@@ -22,34 +22,28 @@ namespace Capital_Item_Justification.Services.Interfaces
             return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<bool> SaveAsync(LocationViewModel model, string userName)
+        public async Task<bool> SaveAsync(LocationViewModel model, string userId)
         {
             if (model.LocationId == 0)
             {
-                await _repository.AddAsync(model);
+                await _repository.AddAsync(model, userId);
             }
             else
             {
-                await _repository.UpdateAsync(model,model.LocationId);
+                await _repository.UpdateAsync(model, model.LocationId, userId);
             }
 
             return true;
         }
 
-        public async Task<bool> DeleteAsync(
-            int id,
-            string userName)
+        public async Task<bool> DeleteAsync(int id, string userId)
         {
-            var entity = await _repository.GetByIdAsync(id);
-
-            if (entity == null)
-                return false;
-
-            entity.IsActive = !entity.IsActive;
-
-            //await _repository.UpdateAsync(entity);
-
+            await _repository.DeleteAsync(id, userId);
             return true;
+        }
+        public async Task<bool> LocationExistsAsync(string locationName, int? locationId)
+        {
+           return await _repository.LocationExistsAsync(locationName, locationId);
         }
     }
 }

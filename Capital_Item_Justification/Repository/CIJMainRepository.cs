@@ -92,7 +92,7 @@ namespace Capital_Item_Justification.Repository
                     TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost,
                     RequestDate = model.CIJRequest.RequestDate,
                     ProjectCost = model.CIJRequest.ProjectCost,
-                    Scehcost = model.CIJRequest.Scehcost,
+                    Scehcost = model.CIJRequest.Scehcost??model.CIJRequest.ScehcostHidden,
                     PurchasePurposeId = model.CIJRequest.PurchasePurposeId,
                     OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId,
                     OldEquipmentCost = model.CIJRequest.OldEquipmentCost,
@@ -205,7 +205,7 @@ namespace Capital_Item_Justification.Repository
                 request.TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost;
                 request.RequestDate = model.CIJRequest.RequestDate;
                 request.ProjectCost = model.CIJRequest.ProjectCost;
-                request.Scehcost = model.CIJRequest.Scehcost;
+                request.Scehcost = model.CIJRequest.Scehcost??model.CIJRequest.ScehcostHidden;
                 request.PurchasePurposeId = model.CIJRequest.PurchasePurposeId;
                 request.OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId;
                 request.OldEquipmentCost = model.CIJRequest.OldEquipmentCost;

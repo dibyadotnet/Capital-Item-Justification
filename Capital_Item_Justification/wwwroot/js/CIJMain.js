@@ -63,7 +63,7 @@ function changeCostCenter() {
         //Project
         $('#CIJRequest_BudgetTypeId').prop('disabled', false);
         $('#CIJRequest_ProjectCost').prop('disabled', false);
-        $('#CIJRequest_Scehcost').prop('disabled', true);
+        $('#CIJRequest_Scehcost').prop('readonly', true);
         $('#CIJRequest_Scehcost').val('');
         $('#CIJRequest_ProjectId').prop('disabled', false);
         //$("#CIJRequest_ProjectId").val("");
@@ -74,7 +74,10 @@ function changeCostCenter() {
         $("#CIJRequest_ProjectCost").val("");
         $('#CIJRequest_ProjectId').prop('disabled', true);
         $("#CIJRequest_ProjectId").val("");
-        $('#CIJRequest_Scehcost').prop('disabled', true);
+        $('#CIJRequest_Scehcost').prop('readonly', true);
+
+        $('#CIJRequest_Scehcost').val($("#CIJRequest_TotalEquipmentCost").val());
+        $('#CIJRequest_ScehcostHidden').val($("#CIJRequest_TotalEquipmentCost").val());
     }
 }
 function togglePreviousPurchase() {
@@ -103,12 +106,13 @@ function togglePreviousPurchase() {
 //}
 function enableBudgetType() {
     var budgetTypeId = $("#CIJRequest_BudgetTypeId option:selected").val();
-    if (budgetTypeId === "2" || !budgetTypeId) {
-        //Partially Funded
-        $('#CIJRequest_Scehcost').prop('disabled', false);
+    debugger;
+    //if (budgetTypeId === "2" || !budgetTypeId) {
+    if (budgetTypeId === "2") {//Partially Funded
+        $('#CIJRequest_Scehcost').prop('readonly', false);
     } else {
-        $('#CIJRequest_Scehcost').prop('disabled', true);
-        $("#CIJRequest_Scehcost").val("");
+        $('#CIJRequest_Scehcost').prop('readonly', true);
+        //$("#CIJRequest_Scehcost").val("");
     }
 }
 function changeBudgetProvision() {
@@ -272,8 +276,9 @@ function calculateTotalEquipmentCost() {
     $("#CIJRequest_TotalEquipmentCost").val(total);
 
     var costCenterId = $("#CIJRequest_CostCenterId option:selected").val();
-    if (costCenterId === "2" || !costCenterId) {
+    if (costCenterId === "2") {
         $('#CIJRequest_Scehcost').val(eqpCost)
+        $('#CIJRequest_ScehcostHidden').val(total)
     }
 }
 $("#btnModalClose").on("click", function () {
@@ -345,6 +350,11 @@ $("#cijForm").on("submit", function (e) {
     }
     if (!validateField("#CIJRequest_CostCenterId","Cost Center is required.")) {
         isValid = false;
+    }
+    if ($("#CIJRequest_CostCenterId").val() === "1") {//Project
+        if (!validateField("#CIJRequest_BudgetTypeId", "Project Fund is required.")) {
+            isValid = false;
+        }
     }
     if (!validateField("#CIJRequest_BudgetProvision", "Budget Provision is required.")) {
         isValid = false;

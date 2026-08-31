@@ -44,6 +44,7 @@
         <form id="approvalForm" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" name="cijId" value="@Model.Cijid" />
+            <input type="hidden" name="cijNumber" value="@Model.CIJNumber" />
             <input type="hidden" name="workflowApprovalId" value="@Model.workflowApprovalId" />
             <div class="row">
                 <div class="col-md-6">

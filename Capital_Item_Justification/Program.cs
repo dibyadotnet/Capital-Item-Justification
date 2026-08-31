@@ -63,6 +63,9 @@ builder.Services.AddScoped<IWorkflowRepository, WorkflowRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IDeptService, DeptService>();
+builder.Services.AddScoped<IDeptRepository, DeptRepository>();
+
 
 var app = builder.Build();
 

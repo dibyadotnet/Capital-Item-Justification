@@ -303,7 +303,8 @@ namespace Capital_Item_Justification.Repository
                     Cijid = approvalDetail.Cijid,
                     CIJSNumber = approvalDetail.CIJSNumber,
                     CanReject = approvalDetail.CanReject,
-                    CanQuery = approvalDetail.CanQuery
+                    CanQuery = approvalDetail.CanQuery,
+                    CIJNumber=approvalDetail.CIJSNumber
                 };
             }
             return vm;
