@@ -18,5 +18,6 @@ namespace Capital_Item_Justification.ViewModels
         public bool CanReject { get; set; }
         public bool CanQuery { get; set; }
         public string? CIJNumber { get; set; }
+        public List<SelectListItem> TargetRoles { get; set; } = new();
     }
 }

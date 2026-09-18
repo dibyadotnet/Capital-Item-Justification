@@ -27,27 +27,22 @@
                     </div>
                     <div class="mb-2">
                         <strong>Query:</strong>
-                        <div class="mt-1">
-                            @clarification.ClarificationPoint
-                        </div>
+                        <span class="ms-1">@clarification.ClarificationPoint</span>
                     </div>
                     <!-- Answer -->
                     @if (!string.IsNullOrWhiteSpace(clarification.Answer))
                     {
-                        <div class="mb-2">
-                            <strong>Answer:</strong>
-                            <div class="mt-1">
-                                @clarification.Answer
-                            </div>
-                        </div>
-
                         @if (clarification.AnsweredOn.HasValue)
                         {
-                            <div class="text-muted small">
-                                Answered Date:
+                            <div class="mb-2">
+                                <strong> Answered Date:</strong>
                                 @clarification.AnsweredOn.Value.ToString("dd-MMM-yyyy HH:mm")
                             </div>
                         }
+                        <div class="mb-2">
+                            <strong>Answer:</strong>
+                            <span class="ms-1">@clarification.Answer</span>
+                        </div>
                     }
                     else
                     {
@@ -78,6 +73,10 @@
                                 </div>
 
                                 <div class="text-end">
+                                    <a asp-action="MyApproval" class="btn btn-secondary">
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Cancel
+                                    </a>
                                     <button type="submit" class="btn btn-primary">
                                         Submit Answer
                                     </button>

@@ -102,17 +102,28 @@ namespace Capital_Item_Justification.Controllers
                     Text = x.DepartmentName
                 }).ToList();
                 vm = await _service.GetApprovalDetailAsync(approvalId, cijId);
+                if (vm == null)
+                    throw new InvalidOperationException();
 
-                var isHod = roles.Any(x => x.Equals("HOD", StringComparison.OrdinalIgnoreCase));
+                //var isHod = roles.Any(x => x.Equals("HOD", StringComparison.OrdinalIgnoreCase));
+                //HOD or Function head
                 var hasPendingClarification = vm?.Clarifications.Any(x => x.StatusName == "Query"
                                                 && x.TargetRoleName != null
-                                                && x.TargetRoleName.Equals("HOD", StringComparison.OrdinalIgnoreCase));
+                                                && roles.Contains(x.TargetRoleName));
 
-                if (isHod == true && hasPendingClarification == true)
+                if (hasPendingClarification == true)
                 {
                     vm.CanAnswerClarification = true;
                 }
                 vm.CanRaiseClarification = true;
+
+                //Fetch Target Role for send query
+                var rolevm = await _service.GetRoleToSendQueryAsync(approvalId, cijId);
+                vm.TargetRoles = rolevm.Select(x => new SelectListItem
+                {
+                    Value = x.Id,
+                    Text = x.RoleName
+                }).ToList();
 
                 List<string> workflowStepItem = new List<string>() { "HOD_Initial", "Function_Head_Initial" };
                 if (vm != null)
@@ -132,7 +143,7 @@ namespace Capital_Item_Justification.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks, string action,string cijNumber)
+        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks, string action, string cijNumber)
         {
             try
             {
@@ -178,7 +189,7 @@ namespace Capital_Item_Justification.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendClarification(int workflowApprovalId, int cijId, string clarificationPoint)
+        public async Task<IActionResult> SendClarification(int workflowApprovalId, int cijId, string clarificationPoint,string targetRoleId)
         {
             try
             {
@@ -198,7 +209,8 @@ namespace Capital_Item_Justification.Controllers
                     workflowApprovalId = workflowApprovalId,
                     userDepartmentId = user.DepartmentId,
                     Action = action,
-                    ClarificationPoint = clarificationPoint
+                    ClarificationPoint = clarificationPoint,
+                    targetRoleId=targetRoleId
                 };
                 bool? approved = await _service.ApproveRequestAsync(vm);
                 if (approved == true)

@@ -17,10 +17,11 @@
                         <tr>
                             <th>#</th>
                             <th>CIJ Number</th>
-                            <th>Workflow Stage</th>
+                            @* <th>Workflow Stage</th> *@
                             <th>Current Owner</th>
+                            <th>Department</th>
                             <th>Status</th>
-                            <th>Pending Since</th>
+                            <th>Pending/Completed</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -45,13 +46,18 @@
                                     </strong>
                                 </td>
 
-                                <td>
+                               @*  <td>
                                     @item.WorkFlowStepCode
-                                </td>
+                                </td> *@
 
                                 <td>
                                     <strong>
                                         @item.ApproverRole
+                                    </strong>
+                                </td>
+                                <td>
+                                    <strong>
+                                        @item.DepartmentName
                                     </strong>
                                 </td>
 
@@ -60,14 +66,14 @@
     @(item.CurrentStatus?.Equals("Pending", StringComparison.OrdinalIgnoreCase) == true
         ? "bg-warning text-dark"
         : item.CurrentStatus?.Equals("Rejected", StringComparison.OrdinalIgnoreCase) == true
-            ? "bg-danger"
-            : "bg-secondary")">
+            ? "bg-danger text-dark"
+            : "bg-primary text-dark")">
                                         @item.CurrentStatus
                                     </span>
                                 </td>
 
                                 <td>
-                                    @(item.PendingSince?.ToString("dd-MMM-yyyy hh:mm") ?? "-")
+                                    @(item.PendingSince?.ToString("dd-MMM-yyyy") ?? "-")
                                 </td>
 
                                 <td>

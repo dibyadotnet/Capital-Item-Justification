@@ -4,6 +4,7 @@ using Capital_Item_Justification.Services.Interfaces;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Net.Mail;
 using System.Net;
+using System;
 
 namespace Capital_Item_Justification.Services
 {
@@ -21,15 +22,45 @@ namespace Capital_Item_Justification.Services
             string toEmail = "dibya.sutar@gmail.com";
             try
             {
-                var subject = $"CIJ {cijNumber} - {action}";
-
+                string subject = string.Empty;
+                string body = string.Empty;
                 //var body = $"""Dear User, CIJ Number: {cijNumber} Action Taken: {action} Comments: {comments} Regards,CIJ System""";
-                var body = PendingApprovalEmail(cijNumber, action);
-                CijEmailConfiguration email = await _cijMainRepository.GetEmailConfig();
+                if (action == "Submitted" || action == "Approve")
+                {
+                    action = "Pending";
+                    subject = $"CIJ {cijNumber} - {action}";
+                    body = PendingEmail(cijNumber, action);
+                }
+                if (action == "Query")
+                {
+                    action = "Query";
+                    subject = $"CIJ {cijNumber} - {action}";
+                    body = QueryEmail(cijNumber, action);
+                }
+                if (action == "Answer")
+                {
+                    action = "Answered";
+                    subject = $"CIJ {cijNumber} - {action}";
+                    body = AnsweredEmail(cijNumber, action);
+                }
+                if (action == "Rejected")
+                {
+                    subject = $"CIJ {cijNumber} - {action}";
+                    body = RejectedEmail(cijNumber, action);
+                }
                 var config = await _cijMainRepository.GetEmailConfig();
+                if (config == null)
+                {
+                    _logger.LogError("SMTP email configuration was not found.");
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(config.Username))
+                {
+                    _logger.LogError("SMTP username is not configured.");
+                    return;
+                }
                 using var message = new MailMessage();
-                string UserName = string.Empty;
-                message.From = new MailAddress(config.SenderEmail, UserName ?? "CIJ System");
+                message.From = new MailAddress(config.Username,"CIJ System");
 
                 message.To.Add(toEmail);
 
@@ -45,7 +76,7 @@ namespace Capital_Item_Justification.Services
                 using var smtpClient = new SmtpClient(config.SmtpServer, config.SmtpPort);
 
                 smtpClient.EnableSsl = true;
-
+                smtpClient.UseDefaultCredentials = false;
                 if (!string.IsNullOrWhiteSpace(config.Username))
                 {
                     smtpClient.Credentials =
@@ -57,7 +88,14 @@ namespace Capital_Item_Justification.Services
                 {
                     smtpClient.UseDefaultCredentials = false;
                 }
-
+                _logger.LogInformation(
+    "Sending CIJ email. SMTP={SmtpServer}:{SmtpPort}, From={From}, To={To}, Subject={Subject}",
+    config.SmtpServer,
+    config.SmtpPort,
+    message.From?.Address,
+    string.Join(",", message.To.Select(x => x.Address)),
+    message.Subject
+);
                 await smtpClient.SendMailAsync(message);
                 _logger.LogInformation("CIJ email sent to {Email} for CIJ {CijNumber}", toEmail, cijNumber);
             }
@@ -66,7 +104,7 @@ namespace Capital_Item_Justification.Services
                 _logger.LogError(ex, "Failed to send CIJ email to {Email}", toEmail);
             }
         }
-        private string PendingApprovalEmail(string cijNumber, string approverName)
+        private string PendingEmail(string cijNumber, string approverName)
         {
             approverName = "Dibya";
             return $"""
@@ -104,5 +142,118 @@ namespace Capital_Item_Justification.Services
             </html>
             """;
         }
+        private string QueryEmail(string cijNumber, string approverName)
+        {
+            return $"""
+    <html>
+    <body>
+
+    <p>Dear {approverName},</p>
+
+    <p>
+        A query has been raised on your CIJ request.
+    </p>
+
+    <table border="1" cellpadding="6" cellspacing="0">
+        <tr>
+            <td><b>CIJ Number</b></td>
+            <td>{cijNumber}</td>
+        </tr>
+
+        <tr>
+            <td><b>Status</b></td>
+            <td>Query Raised</td>
+        </tr>
+    </table>
+
+    <p>
+        Please log in to the CIJ system and provide the required clarification.
+    </p>
+
+    <p>
+        Regards,<br/>
+        CIJ System
+    </p>
+
+    </body>
+    </html>
+    """;
+        }
+        private string AnsweredEmail(string cijNumber, string approverName)
+        {
+            return $"""
+    <html>
+    <body>
+
+    <p>Dear {approverName},</p>
+
+    <p>
+        The query raised on the CIJ request has been answered.
+    </p>
+
+    <table border="1" cellpadding="6" cellspacing="0">
+        <tr>
+            <td><b>CIJ Number</b></td>
+            <td>{cijNumber}</td>
+        </tr>
+
+        <tr>
+            <td><b>Status</b></td>
+            <td>Query Answered</td>
+        </tr>
+    </table>
+
+    <p>
+        Please log in to the CIJ system and review the clarification provided.
+    </p>
+
+    <p>
+        Regards,<br/>
+        CIJ System
+    </p>
+
+    </body>
+    </html>
+    """;
+        }
+
+        private string RejectedEmail(string cijNumber, string approverName)
+        {
+            return $"""
+    <html>
+    <body>
+
+    <p>Dear {approverName},</p>
+
+    <p>
+        Your CIJ request has been rejected.
+    </p>
+
+    <table border="1" cellpadding="6" cellspacing="0">
+        <tr>
+            <td><b>CIJ Number</b></td>
+            <td>{cijNumber}</td>
+        </tr>
+
+        <tr>
+            <td><b>Status</b></td>
+            <td>Rejected</td>
+        </tr>
+    </table>
+
+    <p>
+        Please log in to the CIJ system to view the rejection details.
+    </p>
+
+    <p>
+        Regards,<br/>
+        CIJ System
+    </p>
+
+    </body>
+    </html>
+    """;
+        }
+
     }
 }

@@ -1,4 +1,4 @@
-﻿@model Capital_Item_Justification.ViewModels.ApprovalDetailViewModel
+﻿@model Capital_Item_Justification.ViewModels.ApprovalRequestDetailsViewModel
 
 <div class="container-fluid">
     <!-- Page Header -->
@@ -40,7 +40,7 @@
                                 CIJ Number
                             </div>
                             <div class="col-sm-7">
-                                : @Model.CIJSNumber
+                                : @Model.CIJRequest.CIJSNumber
                             </div>
                         </div>
 
@@ -49,26 +49,25 @@
                                 Request Date
                             </div>
                             <div class="col-sm-7">
-                                @* : @Model.CIJRequest.RequestDate *@
+                                : @Model.CIJRequest.RequestDate
                             </div>
                         </div>
 
                         <div class="row mb-2">
                             <div class="col-sm-5 fw-bold">
-                                Department
+                                Requested Department
                             </div>
                             <div class="col-sm-7">
-                                :
-                                @* @Model.CIJRequest.DepartmentName *@
+                                : @Model.CIJRequest.RequestDepartment
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-sm-5 fw-bold">
-                                Location
+                                Cost Center
                             </div>
                             <div class="col-sm-7">
-                                : @* @Model.CIJRequest.LocationName *@
+                                : @Model.CIJRequest.CostCenterName
                             </div>
                         </div>
 
@@ -145,8 +144,8 @@
                                 int equipmentIndex = 1;
                                 decimal equipmentTotal = 0;
                             }
-                            @foreach (var equipment in Model.Departments)
-                            {
+                           @*  @foreach (var equipment in Model)
+                            { *@
                                 
                                @*  <tr>
                                     <td>
@@ -173,8 +172,8 @@
                                     </td>
                                 </tr> *@
 
-                                equipmentIndex++;
-                            }
+                               @*  equipmentIndex++;
+                            } *@
 
                         </tbody>
                         <tfoot>
@@ -223,7 +222,7 @@
 
                     <div class="border rounded p-3 bg-light"
                          style="min-height:100px; white-space:pre-wrap;">
-                        @Model.CanAnswerClarification
+                        @* @Model.CanAnswerClarification *@
                     </div>
 
                 </div>
@@ -265,7 +264,7 @@
                         </thead>
 
                         <tbody>
-                            @foreach (var attachment in Model.Departments)
+                            @* @foreach (var attachment in Model.Departments) *@
                             {
                                 <tr>
 
@@ -321,8 +320,8 @@
             </h3>
         </div>
         <div class="card-body">
-            @if (Model.workflowHistory != null && Model.workflowHistory.Any())
-            {
+           @*  @if (Model.workflowHistory != null && Model.workflowHistory.Any())
+            { *@
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
 
@@ -339,8 +338,8 @@
                         </thead>
                         <tbody>
 
-                            @foreach (var history in Model.workflowHistory)
-                            {
+                           @*  @foreach (var history in Model.workflowHistory)
+                            { *@
                                 <tr>
                                     <td>
                                         @*  @history.ActionDate.ToString("dd-MMM-yyyy HH:mm") *@

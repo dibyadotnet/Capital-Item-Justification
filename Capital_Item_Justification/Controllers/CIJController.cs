@@ -60,13 +60,19 @@ namespace Capital_Item_Justification.Controllers
             CIJMainViewModel vm = new();
             try
             {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
                 CIJRequestViewModel dropDowns = await PopulateDropDownList();
 
                 var requestViewModel = new CIJRequestViewModel
                 {
                     ItemTypes = dropDowns.ItemTypes,
                     Departments = dropDowns.Departments,
-                    Locations = dropDowns.Locations,
+                    Locations = dropDowns.Locations.Where(a => a.Value == user.LocationId.ToString()),
+                    BeneficiaryLocationItem = dropDowns.Locations,
                     BudgetProvisionList = dropDowns.BudgetProvisionList,
                     PurchagePurposeList = dropDowns.PurchagePurposeList,
                     OldEqupTreatmentList = dropDowns.OldEqupTreatmentList,
@@ -171,6 +177,11 @@ namespace Capital_Item_Justification.Controllers
         {
             try
             {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
                 if (cijId <= 0)
                 {
                     return BadRequest();
@@ -204,7 +215,8 @@ namespace Capital_Item_Justification.Controllers
 
                 cIJMainViewModel.CIJRequest.ItemTypes = dropDowns.ItemTypes;
                 cIJMainViewModel.CIJRequest.Departments = dropDowns.Departments;
-                cIJMainViewModel.CIJRequest.Locations = dropDowns.Locations;
+                cIJMainViewModel.CIJRequest.Locations = dropDowns.Locations.Where(a => a.Value == user.LocationId.ToString());
+                cIJMainViewModel.CIJRequest.BeneficiaryLocationItem = dropDowns.Locations;
                 cIJMainViewModel.CIJRequest.BudgetProvisionList = dropDowns.BudgetProvisionList;
                 cIJMainViewModel.CIJRequest.PurchagePurposeList = dropDowns.PurchagePurposeList;
                 cIJMainViewModel.CIJRequest.OldEqupTreatmentList = dropDowns.OldEqupTreatmentList;
@@ -401,7 +413,7 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.userId=user.Id;
                 cIJMainViewModel.userRoles = roles.ToList();
                 await _workflowService.SubmitCIJAsync(cIJMainViewModel);
-                await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.CIJSNumber, "Submit", "CIJ Request Submitted");
+                await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.CIJSNumber, "Submitted", "CIJ Request Submitted");
                 TempData["ToastMessage"] = "CIJ request submitted successfully.";
                 TempData["ToastType"] = "success";
             

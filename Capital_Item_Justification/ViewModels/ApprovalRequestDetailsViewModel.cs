@@ -2,6 +2,6 @@
 {
     public class ApprovalRequestDetailsViewModel
     {
-        public CIJRequestViewModel CIJRequest { get; set; }
-    }
+        public CIJRequestViewModel CIJRequest { get; set; } = new()
+;    }
 }

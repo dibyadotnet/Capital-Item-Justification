@@ -52,4 +52,5 @@ public partial class CijWorkflowApproval
     public DateTime? ModifiedOn { get; set; }
     public string? ApproverRoleId { get; set; }
     public int? StepId { get; set; }
+    public int? LocationId { get; set; }
 }
