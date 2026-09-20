@@ -61,7 +61,7 @@ namespace Capital_Item_Justification.Controllers
 
             return View(vm);
         }
-        public async Task<IActionResult> ApprovalDetail(int approvalId, int cijId)
+        public async Task<IActionResult> ViewCIJRequest(int approvalId, int cijId)
         {
             ApprovalRequestDetailsViewModel? vm = new();
             try
@@ -143,7 +143,7 @@ namespace Capital_Item_Justification.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks, string action, string cijNumber)
+        public async Task<IActionResult> WorkFlowApproval(int workflowApprovalId, int cijId, List<int> assignedDept, string remarks, string action, string cijNumber, List<IFormFile>? PurchaseAttachments)
         {
             try
             {
@@ -164,11 +164,12 @@ namespace Capital_Item_Justification.Controllers
                     workflowApprovalId = workflowApprovalId,
                     userDepartmentId = user.DepartmentId,
                     Action = action,
+                    PurchaseAttachments = PurchaseAttachments
                 };
                 bool? approved = await _service.ApproveRequestAsync(vm);
-                await _emailService.SendEmailAsync(cijNumber, action, remarks);
                 if (approved == true)
                 {
+                    await _emailService.SendEmailAsync(cijId,cijNumber, action, remarks);
                     TempData["ToastMessage"] = "CIJ request is approved successfully.";
                     TempData["ToastType"] = "success";
                 }

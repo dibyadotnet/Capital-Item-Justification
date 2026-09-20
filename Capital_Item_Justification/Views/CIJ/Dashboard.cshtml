@@ -38,7 +38,7 @@
                                 <td>@item.Status</td>
                                 <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
                                 <td>
-                                    <a asp-action="Details" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a>
+                                    @* <a asp-controller="WorkFlow" asp-action="ViewCIJRequest" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a> *@
                                     @if (User.IsInRole("Requester"))
                                     {
                                         <a asp-action="Edit" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-warning">Edit</a>

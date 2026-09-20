@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Data;
 using System.Net.NetworkInformation;
 using System.Text.Json;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -92,7 +93,7 @@ namespace Capital_Item_Justification.Repository
                     TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost,
                     RequestDate = model.CIJRequest.RequestDate,
                     ProjectCost = model.CIJRequest.ProjectCost,
-                    Scehcost = model.CIJRequest.Scehcost??model.CIJRequest.ScehcostHidden,
+                    Scehcost = model.CIJRequest.Scehcost ?? model.CIJRequest.ScehcostHidden,
                     PurchasePurposeId = model.CIJRequest.PurchasePurposeId,
                     OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId,
                     OldEquipmentCost = model.CIJRequest.OldEquipmentCost,
@@ -205,7 +206,7 @@ namespace Capital_Item_Justification.Repository
                 request.TotalEquipmentCost = model.CIJRequest.TotalEquipmentCost;
                 request.RequestDate = model.CIJRequest.RequestDate;
                 request.ProjectCost = model.CIJRequest.ProjectCost;
-                request.Scehcost = model.CIJRequest.Scehcost??model.CIJRequest.ScehcostHidden;
+                request.Scehcost = model.CIJRequest.Scehcost ?? model.CIJRequest.ScehcostHidden;
                 request.PurchasePurposeId = model.CIJRequest.PurchasePurposeId;
                 request.OldEquipmentTreatmentId = model.CIJRequest.OldEquipmentTreatmentId;
                 request.OldEquipmentCost = model.CIJRequest.OldEquipmentCost;
@@ -594,7 +595,7 @@ namespace Capital_Item_Justification.Repository
                     DocumentTypeId = 1,
                     FileName = originalFileName,
                     FilePath = relativePath,
-                    UploadedBy = 1,
+                    UploadedBy = userId,
                     UploadedDate = DateTime.Now,
                     IsActive = true,
                     CreatedBy = userId,
@@ -643,10 +644,38 @@ namespace Capital_Item_Justification.Repository
 
         public async Task<CijEmailConfiguration> GetEmailConfig()
         {
-            var emaliConfig= await _context.CijEmailConfigurations.FirstOrDefaultAsync(a => a.IsActive);
+            var emaliConfig = await _context.CijEmailConfigurations.FirstOrDefaultAsync(a => a.IsActive);
             if (emaliConfig == null)
                 throw new InvalidOperationException("Email Configuration is not found.");
             return emaliConfig;
+        }
+        public async Task<List<string>> GetApproveEmail(int cijId, string action)
+        {
+            var locationSpecificRoles = new[] { "Finance", "Purchase" };
+            int statusId = await _context.CijStatuses.Where(a => a.IsActive && a.StatusName == action).Select(a => a.StatusId).FirstOrDefaultAsync();
+            var nextApproverEmails = await (from approval in _context.CijWorkflowApprovals
+                                            join userRole in _context.UserRoles
+                                                on approval.ApproverRoleId equals userRole.RoleId
+                                            join user in _context.Users
+                                                on userRole.UserId equals user.Id
+                                            join role in _context.Roles
+                                                on userRole.RoleId equals role.Id
+                                            where approval.Cijid == cijId
+                                                  && approval.StatusId == statusId
+                                                  &&
+                                                  (
+                                                      locationSpecificRoles.Contains(role.Name)
+                                                      ||
+                                                      (
+                                                         approval.LocationId == user.LocationId
+                                                      )
+                                                  )
+                                                  && approval.DepartmentId == user.DepartmentId
+                                                  && user.IsActive && !string.IsNullOrEmpty(user.Email)
+                                            select user.Email
+                                        ).Distinct().ToListAsync();
+
+            return nextApproverEmails;
         }
     }
 }

@@ -25,6 +25,7 @@ namespace Capital_Item_Justification.Repository.Interfaces
 
         // Get Email Detail
         Task<CijEmailConfiguration> GetEmailConfig();
+        Task<List<string>> GetApproveEmail(int cijId, string action);
 
     }
 }

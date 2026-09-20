@@ -57,7 +57,15 @@ namespace Capital_Item_Justification.ViewModels
         public IEnumerable<SelectListItem> CostCenterList { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> BudgetTypeList { get; set; } = new List<SelectListItem>();
 
+        //Display in View Page
         public string? RequestDepartment { get; set; }
         public string? CostCenterName { get; set; }
+        public string? LocationName { get; set; }
+        public string? ProjectFund { get; set; }
+        public string? ProjectCode { get; set; }
+        public string? StatusName { get; set; }
+        public string? ItemTypeName { get; set; }
+        public string? RequestorName { get; set; }
+
     }
 }

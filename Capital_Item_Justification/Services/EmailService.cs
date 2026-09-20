@@ -17,9 +17,10 @@ namespace Capital_Item_Justification.Services
             _cijMainRepository = cijMainRepository;
             _logger = logger;
         }
-        public async Task SendEmailAsync(string cijNumber, string action, string comments)
+        public async Task SendEmailAsync(int cijId, string cijNumber, string action, string comments)
         {
-            string toEmail = "dibya.sutar@gmail.com";
+            //string toEmail = "dibya.sutar@gmail.com";
+            List<string> approverMails = new List<string>();
             try
             {
                 string subject = string.Empty;
@@ -59,11 +60,13 @@ namespace Capital_Item_Justification.Services
                     _logger.LogError("SMTP username is not configured.");
                     return;
                 }
+                approverMails = await _cijMainRepository.GetApproveEmail(cijId, action);
                 using var message = new MailMessage();
-                message.From = new MailAddress(config.Username,"CIJ System");
-
-                message.To.Add(toEmail);
-
+                message.From = new MailAddress(config.Username, "CIJ System");
+                foreach (var email in approverMails)
+                {
+                    message.To.Add(email);
+                }
                 //if (!string.IsNullOrWhiteSpace(ccEmail))
                 //{
                 //    message.CC.Add(ccEmail);
@@ -89,19 +92,19 @@ namespace Capital_Item_Justification.Services
                     smtpClient.UseDefaultCredentials = false;
                 }
                 _logger.LogInformation(
-    "Sending CIJ email. SMTP={SmtpServer}:{SmtpPort}, From={From}, To={To}, Subject={Subject}",
-    config.SmtpServer,
-    config.SmtpPort,
-    message.From?.Address,
-    string.Join(",", message.To.Select(x => x.Address)),
-    message.Subject
-);
+                    "Sending CIJ email. SMTP={SmtpServer}:{SmtpPort}, From={From}, To={To}, Subject={Subject}",
+                    config.SmtpServer,
+                    config.SmtpPort,
+                    message.From?.Address,
+                    string.Join(",", message.To.Select(x => x.Address)),
+                    message.Subject
+                );
                 await smtpClient.SendMailAsync(message);
-                _logger.LogInformation("CIJ email sent to {Email} for CIJ {CijNumber}", toEmail, cijNumber);
+                _logger.LogInformation("CIJ email sent to {Email} for CIJ {CijNumber}", string.Join(",", approverMails), cijNumber);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send CIJ email to {Email}", toEmail);
+                _logger.LogError(ex, "Failed to send CIJ email to {Email}", string.Join(",", approverMails));
             }
         }
         private string PendingEmail(string cijNumber, string approverName)

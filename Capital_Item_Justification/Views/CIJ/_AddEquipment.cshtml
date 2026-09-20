@@ -29,6 +29,7 @@
                     <div class="col-md-12">
                         <label asp-for="EquipmentName" class="form-label required"></label>
                         <input asp-for="EquipmentName" class="form-control" />
+                        <span asp-validation-for="EquipmentName" class="text-danger"></span>
                     </div>                  
 
                     <!-- Manufacturer -->
@@ -46,11 +47,13 @@
                     <div class="col-md-6">
                         <label asp-for="EquipmentQty" class="form-label required"></label>
                         <input asp-for="EquipmentQty" type="number" class="form-control" />
+                        <span asp-validation-for="EquipmentQty" class="text-danger"></span>
                     </div>
                     <!-- Estimated Cost -->
                     <div class="col-md-6">
                         <label asp-for="EquipmentCost" class="form-label required"></label>
                         <input asp-for="EquipmentCost" type="number" class="form-control" />
+                        <span asp-validation-for="EquipmentCost" class="text-danger"></span>
                     </div>
                    @*  <div class="col-md-6">
                         <label asp-for="PreferenceOrder" class="form-label">Doctor’s Preference</label>

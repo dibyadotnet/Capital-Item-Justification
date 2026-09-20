@@ -47,7 +47,7 @@
             </h3>
         </div>
         <div class="card-body">
-            <form id="approvalForm" method="post">
+            <form id="approvalForm" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="cijId" value="@Model.Cijid" />
                 <input type="hidden" name="cijNumber" value="@Model.CIJNumber" />
@@ -68,6 +68,20 @@
                             <select id="assignedDept" name="assignedDept" asp-items="Model.Departments" class="form-select" multiple>
                                 <option value="">-- Select Dept--</option>
                             </select>
+                        </div>
+                    }
+                    @if (Model.workFlowStepCode == "Purchase")
+                    {
+
+                        <div class="col-md-6">
+                            <label for="attachmentFile"
+                                   class="form-label fw-semibold">
+                                Select File
+                            </label>
+                            <input type="file" id="purchaseAttachments" name="PurchaseAttachments" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple />
+                            <small class="text-muted">
+                                Allowed: PDF, Word, Excel, JPG, PNG
+                            </small>
                         </div>
                     }
                 </div>

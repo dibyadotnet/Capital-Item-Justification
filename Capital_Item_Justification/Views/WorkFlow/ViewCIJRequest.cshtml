@@ -1,0 +1,569 @@
+﻿@model Capital_Item_Justification.ViewModels.ApprovalRequestDetailsViewModel
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-1">
+                        <i class="bi bi-check2-square me-2"></i>
+                        CIJ Approval Detail
+                    </h3>
+                    <small class="text-muted">
+                        Review the CIJ request
+                    </small>
+                </div>
+
+                <a class="btn btn-outline-secondary" onclick="history.back()">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back to My Approval
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- CIJ Summary -->
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-file-earmark-text me-2"></i>
+                CIJ Request Information
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="border rounded p-3 bg-light">
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                CIJ Number
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.CIJSNumber
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Request Date
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.RequestDate
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Requested Department
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.RequestDepartment
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Location
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.LocationName
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                Cost Center
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.CostCenterName
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                Budget Provision
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.BudgetProvision
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                Equipment Cost
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.TotalEquipmentCost
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 fw-bold">
+                                Beneficiary Department
+                            </div>
+                            <div class="col-sm-6">
+                                : @Model.CIJRequest.BeneficiaryDepartment
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Project Fund
+                            </div>
+                            <div class="col-sm-7">
+                                :  @Model.CIJRequest.ProjectFund
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Project Code
+                            </div>
+                            <div class="col-sm-7">
+                                :  @Model.CIJRequest.ProjectCode
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Requestor
+                            </div>
+                            <div class="col-sm-7">
+                                :  @Model.CIJRequest.RequestorName
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-5 fw-bold">
+                                Item Type
+                            </div>
+                            <div class="col-sm-7">
+                                :  @Model.CIJRequest.ItemTypeName
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                Current Status
+                            </div>
+                            <div class="col-sm-7">
+                                :
+                                <span>
+                                    @Model.CIJRequest.StatusName
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                Project Cost
+                            </div>
+                            <div class="col-sm-7">
+                                :
+                                <span>
+                                    @Model.CIJRequest.ProjectCost
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                SCEH Cost
+                            </div>
+                            <div class="col-sm-7">
+                                :
+                                <span>
+                                    @Model.CIJRequest.Scehcost
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5 fw-bold">
+                                Beneficiary Location
+                            </div>
+                            <div class="col-sm-7">
+                                : @Model.CIJRequest.BeneficiaryLocation
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Details -->
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-pc-display me-2"></i>
+                Equipment Details
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model != null)
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>Equipment Name</th>
+                                <th>Manufacturer</th>
+                                <th>Model</th>
+                                <th>Quantity</th>
+                                <th class="text-end">Estimated Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int equipmentIndex = 1;
+                                decimal equipmentTotal = 0;
+                            }
+                            @foreach (var equipment in Model.cIJEquipmentViewModels)
+                            {
+
+                                <tr>
+                                    <td>
+                                        @equipmentIndex
+                                    </td>
+                                    <td>
+                                        @equipment.EquipmentName
+                                    </td>
+                                    <td>
+                                        @equipment.Make
+                                    </td>
+                                    <td>
+                                        @equipment.Model
+                                    </td>
+                                    <td>
+                                        @equipment.EquipmentQty
+                                    </td>
+                                    <td class="text-end">
+                                        @(equipment.EquipmentCost.ToString("N2") ?? "0.00")
+                                    </td>
+
+                                </tr>
+
+                                equipmentIndex++;
+                                equipmentTotal += equipment.EquipmentCost;
+                            }
+
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light fw-bold">
+                                <td colspan="5" class="text-end">
+                                    Total Estimated Cost
+                                </td>
+                                <td class="text-end">
+                                    @equipmentTotal.ToString("N2")
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No equipment details available.
+                </div>
+            }
+        </div>
+    </div>
+    <!-- Justification -->
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-chat-left-text me-2"></i>
+                Justification
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model?.cIJJustificationViewModel != null)
+            {
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-9 col-form-label fw-semibold">
+                        (i) If it is new treatment / diagnostic provision calculation
+                        (Number of Beneficiary) of Return on Investment (ROI)
+                    </label>
+
+                    <div class="col-md-3">
+                        <div class="border rounded p-2 bg-light">
+                            @(Model.cIJJustificationViewModel.Roinumber?.ToString() ?? "-")
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Replacement of Old Asset -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        (ii) If it is replacement of old asset, old asset beyond repairs confirmation from Biomedical.
+                        Biomedical shall confirm if there is spare equipment at any location in the network.
+                    </label>
+                </div>
+
+                <!-- Addition to Capacity -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        (iii) If it is addition to capacity, number of patients/tests being done with earlier
+                        equipment and current waiting period for patients.
+                    </label>
+                </div>
+
+                <hr />
+
+                <!-- Business Justification -->
+                <div class="mb-2">
+                    <label class="form-label fw-semibold">
+                        Justification
+                    </label>
+                    <div class="border rounded p-2 bg-light" style="min-height:70px;">
+                        @(string.IsNullOrWhiteSpace(Model.cIJJustificationViewModel.Justification) ? "-" : Model.cIJJustificationViewModel.Justification)
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No justification available.
+                </div>
+            }
+        </div>
+    </div>
+    <!-- Remarks -->
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-chat-square-text me-2"></i>
+                Remarks
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model?.cIJEquipmentViewModels != null)
+            {
+                <div class="row">
+                    <!-- Same Brand -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">
+                            Is the same brand as earlier purchased / available?
+                        </label>
+
+                        <div class="border rounded p-2 bg-light">
+                            @if (Model.cIJJustificationViewModel.IsPurchasedEarlier == true)
+                            {
+                                <span class="badge bg-success">
+                                    Yes
+                                </span>
+                            }
+                            else if (Model.cIJJustificationViewModel.IsPurchasedEarlier == false)
+                            {
+                                <span class="badge bg-danger">
+                                    No
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    Not specified
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    @if (Model.cIJJustificationViewModel.IsPurchasedEarlier == false)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">
+                                Remarks
+                            </label>
+
+                            <div class="border rounded p-2 bg-light"
+                                 style="min-height:70px;">
+                                @(string.IsNullOrWhiteSpace(Model.cIJJustificationViewModel.Remarks) ? "-" : Model.cIJJustificationViewModel.Remarks)
+                            </div>
+                        </div>
+                    }
+                    @if (Model.CIJRequest.ItemTypeName == "Medical")
+                    {
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">
+                                Equipment Committee Comments
+                            </label>
+                            <div class="border rounded p-2 bg-light"
+                            style="min-height:70px;">
+                                @(string.IsNullOrWhiteSpace(Model.committeeCommentViewModel?.Comments) ? "-" : Model.committeeCommentViewModel.Comments)
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <!-- Attachments -->
+    <div class="card card-primary card-outline mb-3">
+
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-paperclip me-2"></i>
+                Attachments
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model != null)
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>File Name</th>
+                                <th>Module name</th>
+                                <th style="width:100px;">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var attachment in Model.attachmentViewModels)
+                            {
+                                <tr>
+                                    <td>
+                                        <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                        @attachment.FileName
+                                    </td>
+                                    <td>
+                                        @attachment.ModuleName
+                                    </td>
+                                    <td align="center">
+                                        <a title="Download" href="@Url.Action("DownloadAttachment", "CIJ", new { attachmentId = attachment.AttachmentId,cijId=attachment.Cijid })">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No attachments available.
+                </div>
+            }
+
+        </div>
+    </div>
+    <!-- Approval History -->
+    @*  <div class="card card-primary card-outline mb-3">
+    <div class="card-header">
+    <h3 class="card-title">
+    <i class="bi bi-clock-history me-2"></i>
+    Approval History
+    </h3>
+    </div>
+    <div class="card-body">
+    @if (Model.workflowHistory != null && Model.workflowHistory.Any())
+    {
+    <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+
+    <thead class="table-light">
+    <tr>
+    <th>Date</th>
+    <th>Role</th>
+    <th>Action By</th>
+    <th>Action</th>
+    <th>From Status</th>
+    <th>To Status</th>
+    <th>Remarks</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    @foreach (var history in Model.workflowHistory)
+    {
+    <tr>
+    <td>
+    @history.ActionDate.ToString("dd-MMM-yyyy HH:mm")
+    </td>
+    <td>
+    @history.ActionRole
+    </td>
+    <td>
+    @history.ActionBy
+    </td>
+    <td>
+    @if (history.ToStatusName == "Approved")
+    {
+    <span class="badge bg-success">
+    Approved
+    </span>
+    }
+    else if (history.ToStatusName == "Rejected")
+    {
+    <span class="badge bg-danger">
+    Rejected
+    </span>
+    }
+    else if (history.ToStatusName == "Clarification Required")
+    {
+    <span class="badge bg-warning text-dark">
+    Clarification Required
+    </span>
+    }
+    else
+    {
+    <span class="badge bg-secondary">
+    @history.ToStatusName
+    </span>
+    }
+    </td>
+
+    <td>
+    @history.FromStatusName
+    </td>
+
+    <td>
+    @history.ToStatusName
+    </td>
+
+    <td>
+    @history.Remarks
+    </td>
+
+    </tr>
+    }
+
+    </tbody>
+
+    </table>
+
+    </div>
+    }
+    else
+    {
+    <div class="alert alert-info mb-0">
+    No approval history available.
+    </div>
+    }
+
+    </div>
+    </div> *@
+
+    <div class="row button-margin">
+        <div class="d-flex justify-content-end gap-2 ">
+            <a class="btn btn-secondary" onclick="history.back()">
+                <i class="bi bi-x-circle me-1"></i>
+                Cancel
+            </a>
+        </div>
+    </div>
+</div>

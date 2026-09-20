@@ -19,10 +19,12 @@ namespace Capital_Item_Justification.Repository
     {
         private readonly CIJDbContext _context;
         private readonly RoleManager<ApplicationRole> _roleManager;
-        public WorkflowRepository(CIJDbContext context, RoleManager<ApplicationRole> roleManager)
+        private readonly IConfiguration _configuration;
+        public WorkflowRepository(CIJDbContext context, RoleManager<ApplicationRole> roleManager, IConfiguration configuration)
         {
             _context = context;
             _roleManager = roleManager;
+            _configuration = configuration;
         }
 
         public async Task<List<MyApprovalViewModel>> GetMyApprovalAsync(ApplicationUser user, List<string> roleIds)
@@ -441,7 +443,7 @@ namespace Capital_Item_Justification.Repository
                     StepId = approval.StepId,
                     CreatedBy = vm.userId,
                     DepartmentId = approval.DepartmentId,
-                    LocationId=approval.LocationId
+                    LocationId = approval.LocationId
                 };
                 _context.CijWorkflowApprovalHistories.Add(history);
                 await _context.SaveChangesAsync();
@@ -470,10 +472,15 @@ namespace Capital_Item_Justification.Repository
                 {
                     throw new InvalidOperationException("CIJ request not found.");
                 }
+                //Purchase attachments
+                if (currentStep.StepCode.Equals("Purchase", StringComparison.OrdinalIgnoreCase) && vm.PurchaseAttachments != null && vm.PurchaseAttachments.Any())
+                {
+                    await SaveAttachments(cijRequest.Cijid, vm.PurchaseAttachments, "Purchase", vm.userId);
+                }
 
                 //Get Next Workflow Step
                 CijWorkflowStep? nextStep = null;
-                if(cijRequest.WorkflowId ==1)
+                if (cijRequest.WorkflowId == 1)
                     nextStep = await GetWorkflowNextStep(currentStep, cijRequest, cijRequest.WorkflowId ?? 0);
                 else if (cijRequest.WorkflowId == 2)
                     nextStep = await GetSecondWorkflowNextStep(currentStep, cijRequest, cijRequest.WorkflowId ?? 0);
@@ -521,7 +528,7 @@ namespace Capital_Item_Justification.Repository
                         CreatedBy = vm.userId,
                         CreatedOn = DateTime.UtcNow,
                         DepartmentId = approval.DepartmentId,
-                        LocationId=approval.LocationId
+                        LocationId = approval.LocationId
                     };
                     _context.CijWorkflowApprovalHistories.Add(completionHistory);
 
@@ -610,7 +617,7 @@ namespace Capital_Item_Justification.Repository
                         AssignedDate = DateTime.UtcNow,
                         CreatedBy = vm.userId,
                         CreatedOn = DateTime.UtcNow,
-                        LocationId=cijRequest.LocationId
+                        LocationId = cijRequest.LocationId
                     };
                     _context.CijWorkflowApprovals.Add(nextApproval);
                 }
@@ -676,10 +683,10 @@ namespace Capital_Item_Justification.Repository
                 RoleViewModel? targetRole = new();
                 if (!string.IsNullOrWhiteSpace(vm.targetRoleId))
                 {
-                    targetRole = await _context.Roles.Where(a => a.Id == vm.targetRoleId).Select(x=>new RoleViewModel()
+                    targetRole = await _context.Roles.Where(a => a.Id == vm.targetRoleId).Select(x => new RoleViewModel()
                     {
-                        Id=x.Id,
-                        RoleName=x.Name
+                        Id = x.Id,
+                        RoleName = x.Name
                     }).FirstOrDefaultAsync();
                 }
 
@@ -719,8 +726,8 @@ namespace Capital_Item_Justification.Repository
                     StatusId = queryStatusId,
                     CreatedBy = vm.userId,
                     CreatedOn = DateTime.UtcNow,
-                    TargetDepartmentId= tragetapproval.DepartmentId,
-                    TargetLocationId= tragetapproval.LocationId
+                    TargetDepartmentId = tragetapproval.DepartmentId,
+                    TargetLocationId = tragetapproval.LocationId
                 };
 
                 _context.CijWorkflowClarifications.Add(clarification);
@@ -747,7 +754,7 @@ namespace Capital_Item_Justification.Repository
                     CreatedBy = vm.userId,
                     CreatedOn = DateTime.Now,
                     DepartmentId = currentApproval.DepartmentId,
-                    LocationId=currentApproval.LocationId
+                    LocationId = currentApproval.LocationId
                 };
 
                 _context.CijWorkflowApprovalHistories.Add(history);
@@ -831,7 +838,7 @@ namespace Capital_Item_Justification.Repository
                     CreatedBy = vm.userId,
                     CreatedOn = DateTime.Now,
                     DepartmentId = approval.DepartmentId,
-                    LocationId=approval.LocationId
+                    LocationId = approval.LocationId
                 };
 
                 _context.CijWorkflowApprovalHistories.Add(history);
@@ -903,7 +910,7 @@ namespace Capital_Item_Justification.Repository
                     CreatedBy = vm.userId,
                     CreatedOn = DateTime.Now,
                     DepartmentId = approval.DepartmentId,
-                    LocationId= approval.LocationId
+                    LocationId = approval.LocationId
                 };
 
                 _context.CijWorkflowApprovalHistories.Add(history);
@@ -917,6 +924,83 @@ namespace Capital_Item_Justification.Repository
             {
                 await transaction.RollbackAsync();
                 throw;
+            }
+        }
+
+        private async Task SaveAttachments(int cijId, List<IFormFile> files, string moduleName, string userId)
+        {
+            if (files == null || files.Count == 0)
+                return;
+            var configuredPath = _configuration["FileStorage:CIJAttachmentPath"];
+
+            if (string.IsNullOrWhiteSpace(configuredPath))
+            {
+                throw new InvalidOperationException("CIJ attachment storage path is not configured.");
+            }
+            //// Physical root outside wwwroot
+            //var basePath = Path.Combine(
+            //    _environment.ContentRootPath,
+            //    configuredPath);
+
+            //// CIJ-specific folder
+            //var cijFolder = Path.Combine(
+            //    basePath,
+            //    cijId.ToString());
+
+            if (!Directory.Exists(configuredPath))
+            {
+                Directory.CreateDirectory(configuredPath);
+            }
+
+            var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".jpg", ".jpeg" };
+
+            foreach (var file in files)
+            {
+                if (file == null || file.Length == 0)
+                    continue;
+
+                // Original file name
+                var originalFileName = Path.GetFileName(file.FileName);
+                // Extension
+                var extension = Path.GetExtension(originalFileName).ToLowerInvariant();
+
+                // Validate extension
+                if (!allowedExtensions.Contains(extension))
+                {
+                    throw new InvalidOperationException(
+                        $"File type '{extension}' is not allowed.");
+                }
+
+                // Unique physical file name
+                var storedFileName = $"{Guid.NewGuid():N}{extension}";
+
+                // Physical file path
+                var physicalFilePath = Path.Combine(configuredPath, storedFileName);
+
+                // Save physical file
+                await using (var stream = new FileStream(physicalFilePath, FileMode.CreateNew))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                // Relative path stored in DB
+                var relativePath = Path.Combine(configuredPath, storedFileName).Replace("\\", "/");
+
+
+                // Database record
+                var attachment = new CijAttachment
+                {
+                    Cijid = cijId,
+                    DocumentTypeId = 1,
+                    FileName = originalFileName,
+                    FilePath = relativePath,
+                    UploadedBy = userId,
+                    UploadedDate = DateTime.Now,
+                    IsActive = true,
+                    CreatedBy = userId,
+                    CreatedDate = DateTime.Now,
+                    ModuleName = moduleName
+                };
+                _context.CijAttachments.Add(attachment);
             }
         }
         private async Task<CijWorkflowStep?> GetWorkflowNextStep(CijWorkflowStep currentStep, CijRequest cijRequest, int WorkflowId)
@@ -1568,33 +1652,33 @@ namespace Capital_Item_Justification.Repository
             }
             else if (currentStep.StepCode.Equals("FINANCE", StringComparison.OrdinalIgnoreCase))
             {
-                var hodApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
-                                              join role in _context.Roles
-                                            on budget.RoleId equals role.Id
-                                              where role.Name == "Director Public Health" && role.IsActive == true && budget.IsActive == true
-                                              select budget).FirstOrDefaultAsync();
-                if (hodApprovalLimit == null)
+                //var directorApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                //                              join role in _context.Roles
+                //                            on budget.RoleId equals role.Id
+                //                              where role.Name == "Director Public Health" && role.IsActive == true && budget.IsActive == true
+                //                              select budget).FirstOrDefaultAsync();
+                //if (directorApprovalLimit == null)
+                //{
+                //    throw new InvalidOperationException("Budget Limit is not configured for Director Public Health for WF003.");
+                //}
+                //if (directorApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
+                //{
+                //    string stepCode = "Purchase";
+                //    nextStep = await GetStep(stepCode, WorkflowId);
+                //    if (nextStep == null)
+                //    {
+                //        throw new InvalidOperationException("Purchase step is not configured for WF003");
+                //    }
+                //}
+                //else
+                //{
+                string stepCode = "Director_Public_Health";
+                nextStep = await GetStep(stepCode, WorkflowId);
+                if (nextStep == null)
                 {
-                    throw new InvalidOperationException("Budget Limit is not configured for Director Public Health for WF003.");
+                    throw new InvalidOperationException("Director Public Health Approval step is not configured for WF003");
                 }
-                if (hodApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
-                {
-                    string stepCode = "Purchase";
-                    nextStep = await GetStep(stepCode, WorkflowId);
-                    if (nextStep == null)
-                    {
-                        throw new InvalidOperationException("Purchase step is not configured for WF003");
-                    }
-                }
-                else
-                {
-                    string stepCode = "Director_Public_Health";
-                    nextStep = await GetStep(stepCode, WorkflowId);
-                    if (nextStep == null)
-                    {
-                        throw new InvalidOperationException("Director Public Health Approval step is not configured for WF003");
-                    }
-                }
+                //}
             }
             else if (currentStep.StepCode.Equals("Director_Public_Health", StringComparison.OrdinalIgnoreCase))
             {
@@ -1625,14 +1709,41 @@ namespace Capital_Item_Justification.Repository
         public async Task<ApprovalRequestDetailsViewModel?> GetRequestDetailsAsync(int approvalId, int cijId)
         {
             var requestvm = await (from req in _context.CijRequests
+
                                    join app in _context.CijWorkflowApprovals
                                    on req.Cijid equals app.Cijid
+
                                    join dept in _context.CijDepartments
                                    on req.RequestDepartmentId equals dept.DepartmentId into deptGroup
                                    from dept in deptGroup.DefaultIfEmpty()
+
                                    join cs in _context.CijCostCenters
                                    on req.CostCenterId equals cs.CostCenterId into csGroup
                                    from cs in csGroup.DefaultIfEmpty()
+
+                                   join lc in _context.CijLocations
+                                   on req.LocationId equals lc.LocationId into lcGroup
+                                   from lc in lcGroup.DefaultIfEmpty()
+
+                                   join bt in _context.CijBudgetTypes
+                                   on req.BudgetTypeId equals bt.BudgetTypeId into btGroup
+                                   from bt in btGroup.DefaultIfEmpty()
+
+                                   join pr in _context.CijProjects
+                                   on req.ProjectId equals pr.ProjectId into prGroup
+                                   from pr in prGroup.DefaultIfEmpty()
+
+                                   join st in _context.CijStatuses
+                                   on req.StatusId equals st.StatusId into stGroup
+                                   from st in stGroup.DefaultIfEmpty()
+
+                                   join it in _context.CijItemTypes
+                                   on req.ItemTypeId equals it.ItemTypeId into itGroup
+                                   from it in itGroup.DefaultIfEmpty()
+
+                                   join us in _context.Users
+                                   on req.CreatedBy equals us.Id into usGroup
+                                   from us in usGroup.DefaultIfEmpty()
 
                                    where app.ApprovalId == approvalId
                                    && req.IsActive == true
@@ -1643,13 +1754,101 @@ namespace Capital_Item_Justification.Repository
                                        RequestDate = req.RequestDate,
                                        TotalEquipmentCost = req.TotalEquipmentCost,
                                        RequestDepartment = dept != null ? dept.DepartmentName : null,
-                                       CostCenterName = cs != null ? cs.CostCenterName : null
+                                       CostCenterName = cs != null ? cs.CostCenterName : null,
+                                       LocationName = lc != null ? lc.LocationName : null,
+                                       ProjectFund = bt != null ? bt.BudgetTypeName : null,
+                                       ProjectCode = pr != null ? pr.ProjectCode : null,
+                                       StatusName = st != null ? st.StatusName : null,
+                                       ItemTypeName = it != null ? it.ItemTypeName : null,
+                                       BudgetProvision = req.BudgetAvailable,
+                                       ProjectCost = req.ProjectCost,
+                                       Scehcost = req.Scehcost,
+                                       RequestorName = us.FullName,
+                                       BeneficiaryDepartment = req.BeneficiaryDepartment,
+                                       BeneficiaryLocation = req.BeneficiaryLocation
                                    }).FirstOrDefaultAsync();
+
+            if (requestvm != null && !string.IsNullOrWhiteSpace(requestvm.BeneficiaryDepartment))
+            {
+                var departmentIds = requestvm.BeneficiaryDepartment
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => int.Parse(x.Trim()))
+                    .ToList();
+
+                var beneficiaryDepartments = await _context.CijDepartments
+                    .Where(x => departmentIds.Contains(x.DepartmentId))
+                    .Select(x => x.DepartmentName)
+                    .ToListAsync();
+
+                requestvm.BeneficiaryDepartment = string.Join(", ", beneficiaryDepartments);
+            }
+            if (requestvm != null && !string.IsNullOrWhiteSpace(requestvm.BeneficiaryLocation))
+            {
+                var locationIds = requestvm.BeneficiaryLocation
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => int.Parse(x.Trim()))
+                    .ToList();
+
+                var beneficiaryLocations = await _context.CijLocations
+                    .Where(x => locationIds.Contains(x.LocationId))
+                    .Select(x => x.LocationName)
+                    .ToListAsync();
+
+                requestvm.BeneficiaryLocation = string.Join(", ", beneficiaryLocations);
+            }
+
+            var equipments = await _context.CijEquipments.Where(x => x.Cijid == cijId && x.IsActive)
+                            .Select(x => new CIJEquipmentViewModel
+                            {
+                                EquipmentId = x.EquipmentId,
+                                Cijid = x.Cijid,
+                                EquipmentName = x.EquipmentName,
+                                Make = x.Make,
+                                Model = x.Model,
+                                EquipmentQty = x.Qty,
+                                EquipmentCost = x.EquipmentCost
+                            }).ToListAsync();
+
+            var justification = await _context.CijJustifications.Where(x => x.Cijid == cijId)
+                                .Select(x => new CIJJustificationViewModel
+                                {
+                                    Cijid = x.Cijid,
+                                    IsPurchasedEarlier = x.IsPurchasedEarlier,
+                                    Justification = x.Justification,
+                                    Roinumber = x.Roinumber,
+                                    Remarks = x.Remarks
+                                }).FirstOrDefaultAsync();
+
+            var committeeComment = await _context.CijCommitteeComments.Where(x => x.Cijid == cijId && x.IsActive)
+                                    .OrderByDescending(x => x.CreatedDate)
+                                    .Select(x => new CommitteeCommentViewModel()
+                                    {
+                                        Cijid = x.Cijid,
+                                        Comments = x.Comments
+                                    })
+                                    .FirstOrDefaultAsync();
+
+            var attachments = await _context.CijAttachments
+                             .Where(x => x.Cijid == cijId && x.IsActive)
+                             .Select(x => new AttachmentViewModel
+                             {
+                                 AttachmentId = x.AttachmentId,
+                                 Cijid = x.Cijid,
+                                 ModuleName = x.ModuleName,
+                                 FileName = x.FileName,
+                                 FilePath = x.FilePath
+                             }).ToListAsync();
+
 
             ApprovalRequestDetailsViewModel vm = new ApprovalRequestDetailsViewModel()
             {
-                CIJRequest = requestvm
+                CIJRequest = requestvm,
+                cIJEquipmentViewModels = equipments,
+                cIJJustificationViewModel = justification,
+                attachmentViewModels = attachments,
+                committeeCommentViewModel = committeeComment
             };
+
             return vm;
         }
         public async Task<List<RoleViewModel>> GetRoleToSendQueryAsync(int approvalId, int cijId)
