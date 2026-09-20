@@ -9,6 +9,6 @@ namespace Capital_Item_Justification.ViewModels
         [StringLength(200)]
         [Required(ErrorMessage = "Department Name is required.")]
         public string DepartmentName { get; set; } = null!;
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; }
     }
 }

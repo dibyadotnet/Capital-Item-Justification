@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Capital_Item_Justification.Models;
 using System.Data;
+using Azure;
+using System.Drawing.Printing;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -21,10 +23,34 @@ namespace Capital_Item_Justification.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRoles()
+        public async Task<IActionResult> GetRoles(int page = 1, int pageSize = 10)
         {
-            var roles = await _roleManager.Roles.OrderBy(x => x.Name).ToListAsync();
-            return View(roles);
+            if (page < 1)
+                page = 1;
+
+            if (pageSize <= 0)
+                pageSize = 10;
+
+            var query = await _roleManager.Roles.OrderBy(x => x.Name).ToListAsync();
+
+            var totalRecords = query.Count();
+            var roles = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+            var model = new RoleListViewModel
+            {
+                Roles = roles,
+                Pagination = new PaginationViewModel
+                {
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalRecords = totalRecords,
+                    TotalPages = totalPages,
+                    ControllerName = "Role",
+                    ActionName = "GetRoles"
+                }
+            };
+            
+            return View(model);
         }
 
         [HttpGet]

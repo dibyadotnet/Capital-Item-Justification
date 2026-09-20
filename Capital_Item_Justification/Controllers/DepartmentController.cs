@@ -1,9 +1,12 @@
-﻿using Capital_Item_Justification.Models;
+﻿using Azure;
+using Capital_Item_Justification.Models;
+using Capital_Item_Justification.Services;
 using Capital_Item_Justification.Services.Interfaces;
 using Capital_Item_Justification.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Drawing.Printing;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -18,18 +21,43 @@ namespace Capital_Item_Justification.Controllers
             _logger = logger;
             _userManager = userManager;
         }
-        public async Task<IActionResult> GetAllDept()
+        public async Task<IActionResult> GetAllDept(int page = 1, int pageSize = 10)
         {
             List<DepartmentViewModel> depts = new List<DepartmentViewModel>();
+            var model = new DepartmentListViewModel();
             try
             {
+                if (page < 1)
+                    page = 1;
+
+                if (pageSize <= 0)
+                    pageSize = 10;
+
                 depts = await _service.GetAllAsync();
+
+                var totalRecords = depts.Count();
+                var departments = depts.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                model = new DepartmentListViewModel
+                {
+                    Departments = departments,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalRecords = totalRecords,
+                        TotalPages = totalPages,
+                        ControllerName = "Department",
+                        ActionName = "GetAllDept"
+                    }
+                };
+
             }
             catch (Exception)
             {
                 throw;
             }
-            return View(depts);
+            return View(model);
         }
         [HttpGet]
         public IActionResult AddDepartment()
@@ -37,7 +65,7 @@ namespace Capital_Item_Justification.Controllers
             try
             {
                 DepartmentViewModel vm = new DepartmentViewModel();
-                return View("AddDepartment",vm);
+                return View("AddDepartment", vm);
             }
             catch (Exception)
             {
@@ -115,19 +143,19 @@ namespace Capital_Item_Justification.Controllers
                 bool deleted = await _service.DeleteAsync(id, user.Id);
                 if (deleted)
                 {
-                    TempData["ToastMessage"] = "Department Deleted successfully.";
+                    TempData["ToastMessage"] = "Status updated successfully.";
                     TempData["ToastType"] = "success";
                 }
                 else
                 {
-                    TempData["ToastMessage"] = "Department failed to Delete.";
+                    TempData["ToastMessage"] = "Status failed to Update.";
                     TempData["ToastType"] = "error";
                 }
                 return RedirectToAction("GetAllDept");
             }
             catch (Exception)
             {
-                TempData["ToastMessage"] = "Department failed to Delete";
+                TempData["ToastMessage"] = "Status failed to Update.";
                 TempData["ToastType"] = "error";
                 throw;
             }
