@@ -1,30 +1,26 @@
-﻿using Azure;
-using Capital_Item_Justification.Models;
-using Capital_Item_Justification.Services;
+﻿using Capital_Item_Justification.Models;
 using Capital_Item_Justification.Services.Interfaces;
 using Capital_Item_Justification.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Drawing.Printing;
 
 namespace Capital_Item_Justification.Controllers
 {
-    public class DepartmentController : Controller
+    public class ProjectController : Controller
     {
-        private readonly IDeptService _service;
-        private readonly ILogger<DepartmentController> _logger;
+        private readonly IProjectService _service;
+        private readonly ILogger<ProjectController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
-        public DepartmentController(IDeptService service, ILogger<DepartmentController> logger, UserManager<ApplicationUser> userManager)
+        public ProjectController(IProjectService service, ILogger<ProjectController> logger, UserManager<ApplicationUser> userManager)
         {
             _service = service;
             _logger = logger;
             _userManager = userManager;
         }
-        public async Task<IActionResult> GetAllDept(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetProjects(int page = 1, int pageSize = 10)
         {
-            List<DepartmentViewModel> depts = new List<DepartmentViewModel>();
-            var model = new DepartmentListViewModel();
+            List<ProjectViewModel> projects = new List<ProjectViewModel>();
+            var model = new ProjectListViewModel();
             try
             {
                 if (page < 1)
@@ -33,22 +29,22 @@ namespace Capital_Item_Justification.Controllers
                 if (pageSize <= 0)
                     pageSize = 10;
 
-                depts = await _service.GetAllAsync();
+                projects = await _service.GetAllAsync();
 
-                var totalRecords = depts.Count();
-                var departments = depts.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalRecords = projects.Count();
+                var projectslst = projects.Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-                model = new DepartmentListViewModel
+                model = new ProjectListViewModel
                 {
-                    Departments = departments,
+                    Projects = projectslst,
                     Pagination = new PaginationViewModel
                     {
                         CurrentPage = page,
                         PageSize = pageSize,
                         TotalRecords = totalRecords,
                         TotalPages = totalPages,
-                        ControllerName = "Department",
-                        ActionName = "GetAllDept"
+                        ControllerName = "Project",
+                        ActionName = "GetProjects"
                     }
                 };
 
@@ -60,12 +56,12 @@ namespace Capital_Item_Justification.Controllers
             return View(model);
         }
         [HttpGet]
-        public IActionResult AddDepartment()
+        public IActionResult AddProject()
         {
             try
             {
-                DepartmentViewModel vm = new DepartmentViewModel();
-                return View("AddDepartment", vm);
+                ProjectViewModel vm = new ProjectViewModel();
+                return View("AddProject", vm);
             }
             catch (Exception)
             {
@@ -73,15 +69,15 @@ namespace Capital_Item_Justification.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> EditDepartment(int id)
+        public async Task<IActionResult> EditProject(int id)
         {
             try
             {
-                DepartmentViewModel? vm = await _service.GetByIdAsync(id);
+                ProjectViewModel? vm = await _service.GetByIdAsync(id);
                 if (vm == null)
                     throw new InvalidOperationException();
 
-                return View("AddDepartment", vm);
+                return View("AddProject", vm);
             }
             catch (Exception)
             {
@@ -89,49 +85,49 @@ namespace Capital_Item_Justification.Controllers
             }
         }
         [HttpPost]
-        public async Task<IActionResult> Save(DepartmentViewModel model)
+        public async Task<IActionResult> Save(ProjectViewModel model)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return View("AddDepartment", model);
+                    return View("AddProject", model);
                 }
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
                     return Unauthorized();
                 }
-                var exists = await _service.DeptExistsAsync(model.DepartmentName, model.DepartmentId);
+                var exists = await _service.ProjectExistsAsync(model.ProjectCode, model.ProjectId);
 
                 if (exists)
                 {
-                    ModelState.AddModelError(nameof(model.DepartmentName), "Department already exists.");
-                    return View("AddDepartment", model);
+                    ModelState.AddModelError(nameof(model.ProjectCode), "Project Code already exists.");
+                    return View("AddProject", model);
                 }
                 bool saved = await _service.SaveAsync(model, user.Id);
                 if (saved)
                 {
-                    TempData["ToastMessage"] = "Department Saved successfully.";
+                    TempData["ToastMessage"] = "Project Saved successfully.";
                     TempData["ToastType"] = "success";
                 }
                 else
                 {
-                    TempData["ToastMessage"] = "Department failed to save.";
+                    TempData["ToastMessage"] = "Project failed to save.";
                     TempData["ToastType"] = "error";
                 }
             }
             catch (Exception)
             {
-                TempData["ToastMessage"] = "Department failed to save.";
+                TempData["ToastMessage"] = "Project failed to save.";
                 TempData["ToastType"] = "error";
                 throw;
             }
 
-            return RedirectToAction("GetAllDept");
+            return RedirectToAction("GetProjects");
         }
         [HttpPost]
-        public async Task<IActionResult> DeleteDepartment(int id)
+        public async Task<IActionResult> DeleteProject(int id)
         {
             try
             {
@@ -151,7 +147,7 @@ namespace Capital_Item_Justification.Controllers
                     TempData["ToastMessage"] = "Status failed to Update.";
                     TempData["ToastType"] = "error";
                 }
-                return RedirectToAction("GetAllDept");
+                return RedirectToAction("GetProjects");
             }
             catch (Exception)
             {

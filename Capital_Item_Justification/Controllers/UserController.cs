@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.Intrinsics.Arm;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -19,20 +20,46 @@ namespace Capital_Item_Justification.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ICIJRequestService _service;
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
         public UserController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager,
-            ICIJRequestService service, IUserService userService)
+            ICIJRequestService service, IUserService userService, IEmailService emailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _service = service;
             _userService = userService;
+            _emailService = emailService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers(int page = 1, int pageSize = 10)
         {
+            if (page < 1)
+                page = 1;
+
+            if (pageSize <= 0)
+                pageSize = 10;
+
             var vm = await _userService.GetGetUsersAsync();
-            return View(vm);
+
+            var totalRecords = vm.Count();
+            var users = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+            var model = new UserListViewModel
+            {
+                Users = users,
+
+                Pagination = new PaginationViewModel
+                {
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalRecords = totalRecords,
+                    TotalPages = totalPages,
+                    ControllerName = "User",
+                    ActionName = "GetUsers"
+                }
+            };
+            return View(model);
         }
 
         [HttpGet]
@@ -100,7 +127,8 @@ namespace Capital_Item_Justification.Controllers
 
             if (result.Succeeded)
             {
-                //TempData["SuccessMessage"] = "User created successfully.";
+                string firstName = model.FullName?.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+                await _emailService.SendUserCreationEmailAsync(firstName, user.Email);
                 TempData["ToastMessage"] = "User created successfully.";
                 TempData["ToastType"] = "success";
                 return RedirectToAction(nameof(GetUsers));

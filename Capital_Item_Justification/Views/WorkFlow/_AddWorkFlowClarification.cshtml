@@ -27,6 +27,15 @@
                             <textarea name="clarificationPoint" id="clarificationPoint" class="form-control custom-textarea" rows="6" required
                                   placeholder="Enter your clarification point..."></textarea>
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                Target Role
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select id="targetRoleId" name="targetRoleId" asp-items="Model.TargetRoles" class="form-select" required>
+                                <option value="">-- Select Role --</option>
+                            </select>
+                        </div>
                     </div>
 
                 </div>

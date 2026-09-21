@@ -9,5 +9,6 @@
         public string? CurrentStatus { get; set; }
         public DateTime? PendingSince { get; set; }
         public string? WorkFlowStepCode { get; set; }
+        public string? DepartmentName { get; set; }
     }
 }

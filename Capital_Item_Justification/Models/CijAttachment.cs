@@ -24,7 +24,7 @@ public partial class CijAttachment
     [StringLength(500)]
     public string FilePath { get; set; } = null!;
 
-    public int UploadedBy { get; set; }
+    public string UploadedBy { get; set; } = null!;
 
     public DateTime UploadedDate { get; set; }
 

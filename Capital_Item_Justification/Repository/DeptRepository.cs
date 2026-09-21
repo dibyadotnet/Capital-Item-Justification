@@ -17,7 +17,7 @@ namespace Capital_Item_Justification.Repository
 
         public async Task<List<DepartmentViewModel>> GetAllAsync()
         {
-            return await _context.CijDepartments.Where(x => x.IsActive == true).Select(x => new DepartmentViewModel()
+            return await _context.CijDepartments.Select(x => new DepartmentViewModel()
             {
                 DepartmentId = x.DepartmentId,
                 DepartmentName = x.DepartmentName,
@@ -64,11 +64,12 @@ namespace Capital_Item_Justification.Repository
 
         public async Task DeleteAsync(int id, string userId)
         {
-            var entity = _context.CijDepartments.Where(x => x.IsActive == true && x.DepartmentId == id).FirstOrDefault();
+            var entity = _context.CijDepartments.Where(x => x.DepartmentId == id).FirstOrDefault();
+
             if (entity == null)
                 throw new InvalidOperationException();
 
-            entity.IsActive = false;
+            entity.IsActive = !entity.IsActive;
             entity.ModifiedBy = userId;
             entity.ModifiedOn = DateTime.Now;
 

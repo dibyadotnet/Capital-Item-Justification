@@ -55,4 +55,7 @@ public partial class CijWorkflowClarification
 
     public string? TargetRoleId {  get; set; }
     public string? TargetRoleName { get; set; }
+
+    public int? TargetDepartmentId { get; set; }
+    public int? TargetLocationId { get; set; }
 }

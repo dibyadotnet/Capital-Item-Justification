@@ -117,7 +117,7 @@
             <div class="col-md-5">
                 <label class="form-label fw-semibold">Beneficiary Location</label>
                 @* <input asp-for="BeneficiaryLocation" class="form-control" /> *@
-                <select id="BeneLocdropdown" asp-for="SelectedBenefLocIds" asp-items="Model.Locations" class="form-select" multiple>
+                <select id="BeneLocdropdown" asp-for="SelectedBenefLocIds" asp-items="Model.BeneficiaryLocationItem" class="form-select" multiple>
                 </select>
             </div>
          </div>

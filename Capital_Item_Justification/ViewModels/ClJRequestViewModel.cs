@@ -49,6 +49,7 @@ namespace Capital_Item_Justification.ViewModels
         public List<int> SelectedBenefDeptIds { get; set; } = new();
         public List<int> SelectedBenefLocIds { get; set; } = new();
         public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
+        public IEnumerable<SelectListItem> BeneficiaryLocationItem { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> BudgetProvisionList { get; set; } = new();
         public List<SelectListItem> PurchagePurposeList { get; set; } = new();
         public List<SelectListItem> OldEqupTreatmentList { get; set; } = new();
@@ -56,6 +57,15 @@ namespace Capital_Item_Justification.ViewModels
         public IEnumerable<SelectListItem> CostCenterList { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> BudgetTypeList { get; set; } = new List<SelectListItem>();
 
+        //Display in View Page
         public string? RequestDepartment { get; set; }
+        public string? CostCenterName { get; set; }
+        public string? LocationName { get; set; }
+        public string? ProjectFund { get; set; }
+        public string? ProjectCode { get; set; }
+        public string? StatusName { get; set; }
+        public string? ItemTypeName { get; set; }
+        public string? RequestorName { get; set; }
+
     }
 }

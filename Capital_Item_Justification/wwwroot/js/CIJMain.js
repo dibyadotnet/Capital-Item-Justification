@@ -11,7 +11,7 @@ $(document).ready(function () {
         allowClear: true,
         width: '100%'
     });
-   
+
     var equipmentJson = $("#EquipmentJson").val();
     if (equipmentJson && equipmentJson !== "") {
         equipments = JSON.parse(equipmentJson);
@@ -57,7 +57,6 @@ $("#ddlItemType").on("change", function () {
     changeItemType();
 });
 function changeCostCenter() {
-    debugger;
     var costCenterId = $("#CIJRequest_CostCenterId option:selected").val();
     if (costCenterId === "1" || !costCenterId) {
         //Project
@@ -106,7 +105,6 @@ function togglePreviousPurchase() {
 //}
 function enableBudgetType() {
     var budgetTypeId = $("#CIJRequest_BudgetTypeId option:selected").val();
-    debugger;
     //if (budgetTypeId === "2" || !budgetTypeId) {
     if (budgetTypeId === "2") {//Partially Funded
         $('#CIJRequest_Scehcost').prop('readonly', false);
@@ -150,6 +148,34 @@ function changeItemType() {
 }
 
 $("#btnEquipmentSave").on("click", function () {
+    let isValid = true;
+    debugger;
+    const equipmentName = $('#EquipmentName');
+    const equipmentQty = $('#EquipmentQty');
+    const equipmentCost = $('#EquipmentCost');
+
+    // Clear previous validation
+    $('.form-control').removeClass('is-invalid');
+
+    if ($.trim(equipmentName.val()) === '') {
+        equipmentName.addClass('is-invalid');
+        isValid = false;
+    }
+
+    if (!equipmentQty.val() || parseInt(equipmentQty.val()) <= 0) {
+        equipmentQty.addClass('is-invalid');
+        isValid = false;
+    }
+
+    if (!equipmentCost.val() || parseFloat(equipmentCost.val()) <= 0) {
+        equipmentCost.addClass('is-invalid');
+        isValid = false;
+    }
+
+    if (!isValid) {
+        return;
+    }
+
     addEquipment();
 });
 function loadEquipmentTable() {
@@ -348,7 +374,7 @@ $("#cijForm").on("submit", function (e) {
     if (!validateField("#CIJRequest_LocationId", "Location is required.")) {
         isValid = false;
     }
-    if (!validateField("#CIJRequest_CostCenterId","Cost Center is required.")) {
+    if (!validateField("#CIJRequest_CostCenterId", "Cost Center is required.")) {
         isValid = false;
     }
     if ($("#CIJRequest_CostCenterId").val() === "1") {//Project
@@ -367,7 +393,7 @@ $("#cijForm").on("submit", function (e) {
     if (!validateField("#ddlItemType", "Item type is required.")) {
         isValid = false;
     }
-    if ($("#ddlItemType").val()==="1") {
+    if ($("#ddlItemType").val() === "1") {
         if (!validateField("#txtCommiteeComments", "Equipment Committee Comments is required.")) {
             isValid = false;
         }
@@ -388,7 +414,7 @@ $("#cijForm").on("submit", function (e) {
         if (!validateField("#Justification_Remarks", "Remarks is required.")) {
             isValid = false;
         }
-    } 
+    }
 
 
     if (!isValid) {
@@ -408,3 +434,40 @@ $(document).on("change", "select", function () {
         $(this).next(".custom-error").remove();
     }
 });
+
+$('#vendorAttachments').on('change', function () {
+ 
+    var isError = false;
+    const maxFiles = 3;
+    const count = this.files.length;
+    const existingCount = $('#attachmentTableBody tr').filter(function () {
+        const moduleName = $(this).find('td').eq(3).text().trim();
+        return moduleName === 'Vendor';
+    }).length;
+
+    if (existingCount > 0) {
+        const totalCount = existingCount + count;
+
+        $('#attachmentError').text('');
+        if (totalCount > maxFiles) {
+            $('#attachmentError').text(
+                `Maximum ${maxFiles} vendor attachments are allowed. ` +
+                `You already have ${existingCount} attachment(s).`
+            );
+            isError = true;
+        }
+    }
+    else {
+        $('#attachmentError').text('');
+        if (count > maxFiles) {
+            $('#attachmentError').text('You can upload maximum of 3 attachments.');
+            isError = true;
+        }
+    }
+    if (isError) {
+        $(this).val('');
+        return;
+    }
+});
+
+

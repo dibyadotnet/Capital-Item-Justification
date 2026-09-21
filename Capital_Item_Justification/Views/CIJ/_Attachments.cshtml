@@ -20,17 +20,19 @@
                     <div class="mb-3">
                         <label for="attachmentFile"
                                class="form-label fw-semibold">
-                            Select File
+                            Select File(Maximum 3 attachments is allowed.)
                         </label>
 
                         <input type="file"
                                asp-for="VendorAttachments"
+                               id="vendorAttachments"
                                class="form-control"
                                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple />
 
                         <small class="text-muted">
                             Allowed: PDF, Word, Excel, JPG, PNG
                         </small>
+                        <div id="attachmentError" class="text-danger small mt-1"></div>
                     </div>
 
                     @*  <div class="mb-3">

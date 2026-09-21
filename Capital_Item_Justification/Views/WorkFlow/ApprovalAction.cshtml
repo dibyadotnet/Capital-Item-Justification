@@ -24,85 +24,105 @@
     </div>
 </div>
 <div>
-    @if (Model.workFlowStepCode != "HOD_Initial" && Model.Clarifications.Count > 0)
+    @* @if (Model.workFlowStepCode != "HOD_Initial" && Model.Clarifications.Count > 0)
+    {
+    <partial name="_WorkFlowClarificationHistory" model="Model" />
+    } *@
+    @if (Model.Clarifications.Count > 0)
     {
         <partial name="_WorkFlowClarificationHistory" model="Model" />
     }
 </div>
-<div>
-    <partial name="_WorkFlowApprovalHistory" model="Model" />
-</div>
-<!-- Approval Action -->
-<div class="card card-warning card-outline mb-4">
-    <div class="card-header">
-        <h3 class="card-title">
-            <i class="bi bi-person-check me-2"></i>
-            Approval Action
-        </h3>
-    </div>
-    <div class="card-body">
-        <form id="approvalForm" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="cijId" value="@Model.Cijid" />
-            <input type="hidden" name="cijNumber" value="@Model.CIJNumber" />
-            <input type="hidden" name="workflowApprovalId" value="@Model.workflowApprovalId" />
-            <div class="row">
-                <div class="col-md-6">
-                    <label for="remarks" class="form-label fw-bold">
-                        Remarks
-                        @*  <span class="text-danger">*</span> *@
-                    </label>
-                    <textarea id="remarks" name="remarks" class="form-control custom-textarea" rows="6" placeholder="Enter your remarks..."></textarea>
-                </div>
-                @if (Model.workFlowStepCode == "HOD_Initial" || Model.workFlowStepCode == "Function_Head_Initial")
-                {
-                    <div class="col-md-6">
-                        <label class="form-label">Assigned Department</label>
-                        <span class="text-danger">*</span>
-                        <select id="assignedDept" name="assignedDept" asp-items="Model.Departments" class="form-select" multiple>
-                            <option value="">-- Select Dept--</option>
-                        </select>
-                    </div>
-                }
-            </div>
-            <div class="row button-margin">
-                <div class="d-flex justify-content-end gap-2 ">
-                    <a asp-action="MyApproval" class="btn btn-secondary">
-                        <i class="bi bi-x-circle me-1"></i>
-                        Cancel
-                    </a>
-                    @* @if (!Model.workflowStepList.Contains(Model.workFlowStepCode)) *@
-                    @if (Model.CanQuery)
-                    {
-                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#queryModal">
-                            <i class="bi bi-question-circle me-1"></i>
-                            Send Query
-                        </button>
-                    }
-                   @*  @if (!User.IsInRole("Finance") || !User.IsInRole("Purchase")) *@
-                   @if(Model.CanReject)
-                    {
-                        <button type="submit" name="Action" formaction="@Url.Action("RejectWorkFlow", "WorkFlow")" class="btn btn-danger"
-                                onclick="return validateRemarks('Reject');">
-                            <i class="bi bi-x-lg me-1"></i>
-                            Reject
-                        </button>
-                    }
-                    <button type="submit" name="Action" value="Approve" formaction="@Url.Action("WorkFlowApproval", "WorkFlow")"
-                            class="btn btn-success" onclick="return validateApprove();">
-                        <i class="bi bi-check-lg me-1"></i>
-                        Approve
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-@if (Model.CanRaiseClarification)
+@if (!Model.CanAnswerClarification)
 {
-    <partial name="_AddWorkFlowClarification" model="Model" />
-}
+    <div>
+        <partial name="_WorkFlowApprovalHistory" model="Model" />
+    </div>
+    <!-- Approval Action -->
+    <div class="card card-warning card-outline mb-4">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-person-check me-2"></i>
+                Approval Action
+            </h3>
+        </div>
+        <div class="card-body">
+            <form id="approvalForm" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="cijId" value="@Model.Cijid" />
+                <input type="hidden" name="cijNumber" value="@Model.CIJNumber" />
+                <input type="hidden" name="workflowApprovalId" value="@Model.workflowApprovalId" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="remarks" class="form-label fw-bold">
+                            Remarks
+                            @*  <span class="text-danger">*</span> *@
+                        </label>
+                        <textarea id="remarks" name="remarks" class="form-control custom-textarea" rows="6" placeholder="Enter your remarks..."></textarea>
+                    </div>
+                    @if (Model.workFlowStepCode == "HOD_Initial" || Model.workFlowStepCode == "Function_Head_Initial")
+                    {
+                        <div class="col-md-6">
+                            <label class="form-label">Assigned Department</label>
+                            <span class="text-danger">*</span>
+                            <select id="assignedDept" name="assignedDept" asp-items="Model.Departments" class="form-select" multiple>
+                                <option value="">-- Select Dept--</option>
+                            </select>
+                        </div>
+                    }
+                    @if (Model.workFlowStepCode == "Purchase")
+                    {
 
+                        <div class="col-md-6">
+                            <label for="attachmentFile"
+                                   class="form-label fw-semibold">
+                                Select File
+                            </label>
+                            <input type="file" id="purchaseAttachments" name="PurchaseAttachments" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple />
+                            <small class="text-muted">
+                                Allowed: PDF, Word, Excel, JPG, PNG
+                            </small>
+                        </div>
+                    }
+                </div>
+                <div class="row button-margin">
+                    <div class="d-flex justify-content-end gap-2 ">
+                        <a asp-action="MyApproval" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancel
+                        </a>
+                        @* @if (!Model.workflowStepList.Contains(Model.workFlowStepCode)) *@
+                        @if (Model.CanQuery)
+                        {
+                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#queryModal">
+                                <i class="bi bi-question-circle me-1"></i>
+                                Send Query
+                            </button>
+                        }
+                        @*  @if (!User.IsInRole("Finance") || !User.IsInRole("Purchase")) *@
+                        @if (Model.CanReject)
+                        {
+                            <button type="submit" name="Action" formaction="@Url.Action("RejectWorkFlow", "WorkFlow")" class="btn btn-danger"
+                                    onclick="return validateRemarks('Reject');">
+                                <i class="bi bi-x-lg me-1"></i>
+                                Reject
+                            </button>
+                        }
+                        <button type="submit" name="Action" value="Approve" formaction="@Url.Action("WorkFlowApproval", "WorkFlow")"
+                                class="btn btn-success" onclick="return validateApprove();">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Approve
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @if (Model.CanRaiseClarification)
+    {
+        <partial name="_AddWorkFlowClarification" model="Model" />
+    }
+}
 <style>
     .button-margin {
         margin-top: 1%;

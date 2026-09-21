@@ -1,39 +1,23 @@
-﻿@model Capital_Item_Justification.ViewModels.UserListViewModel
+﻿@model Capital_Item_Justification.ViewModels.ProjectListViewModel
 
 <div class="container-fluid">
-
     <div class="d-flex justify-content-between align-items-center mb-3">
-
         <h4>
-            <i class="bi bi-people"></i>
-            User Master
+            <i class="bi bi-kanban"></i>
+            Project Master
         </h4>
-
-        <a asp-action="CreateUser"
-           class="btn btn-primary">
-
+        <a asp-action="AddProject" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i>
-            Add User
-
+            Add Project
         </a>
-
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">
-            @TempData["SuccessMessage"]
-        </div>
-    }
-
     <div class="card shadow-sm">
-
         <div class="card-body">
-
             <div class="table-responsive">
                 <div class="d-flex justify-content-end mb-3">
 
-                    <form asp-action="GetUsers"
+                    <form asp-action="GetProjects"
                           method="get"
                           class="d-flex align-items-center gap-2">
 
@@ -75,47 +59,28 @@
 
                 </div>
                 <table class="table table-bordered table-hover">
-
                     <thead class="table-light">
-
                         <tr>
-                            <th>Employee Code</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Department</th>
-                            <th>Role</th>
-                            <th>Location</th>
+                            <th class="d-none"></th>
+                            <th>Project Code</th>
+                            <th>Project Name</th>
                             <th>Status</th>
                             <th width="150">Action</th>
                         </tr>
-
                     </thead>
-
                     <tbody>
-
-                        @foreach (var user in Model.Users)
+                        @foreach (var item in Model.Projects)
                         {
-                            <tr>                            
+                            <tr>
+                                <td class="d-none">@item.ProjectId</td>
                                 <td>
-                                    @user.EmployeeCode
+                                    @item.ProjectCode
                                 </td>
                                 <td>
-                                    @user.FullName
+                                    @item.ProjectName
                                 </td>
                                 <td>
-                                    @user.Email
-                                </td>
-                                <td>
-                                    @user.DepartmentName
-                                </td>
-                                <td>
-                                    @user.RoleName
-                                </td>
-                                <td>
-                                    @user.LocationName
-                                </td>
-                                <td>
-                                    @if (user.IsActive)
+                                    @if (item.IsActive)
                                     {
                                         <span class="badge bg-success">
                                             Active
@@ -128,43 +93,22 @@
                                         </span>
                                     }
                                 </td>
-
                                 <td>
-                                    @if (user.IsActive)
+                                    @if (item.IsActive)
                                     {
-                                        <a asp-action="EditUser" title="Edit User"
-                                        asp-route-id="@user.Id"
-                                        class="btn btn-sm btn-outline-primary">
+                                        <a asp-action="EditProject" title="Edit Project" asp-route-id="@item.ProjectId"
+                                           class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                     }
-                                    <form asp-action="ToggleStatus" onsubmit="return confirm('Are you sure you want to change this User status?');"
-                                          method="post"
-                                          class="d-inline">
-
+                                    <form asp-action="DeleteProject" onsubmit="return confirm('Are you sure you want to change the status of this Project?');" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.ProjectId" />
 
-                                        <input type="hidden"
-                                               name="id"
-                                               value="@user.Id" />
-
-                                        <button type="submit" title="Manage Status"                                   
-                                                class="btn btn-sm btn-outline-warning">
+                                        <button type="submit" title="Manage Status" class="btn btn-sm btn-outline-warning">
                                             <i class="bi bi-toggle-on"></i>
-
                                         </button>
-
                                     </form>
-                                    @if(user.IsActive){
-                                    <a asp-action="ManageRoles"
-                                       asp-route-id="@user.Id"
-                                       class="btn btn-sm btn-outline-success"
-                                       title="Manage Roles">
-
-                                        <i class="bi bi-person-check"></i>
-
-                                    </a>
-                                    }
                                 </td>
 
                             </tr>
@@ -179,4 +123,6 @@
         </div>
 
     </div>
+
 </div>
+
