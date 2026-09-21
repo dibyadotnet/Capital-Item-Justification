@@ -1,0 +1,128 @@
+﻿@model Capital_Item_Justification.ViewModels.ProjectListViewModel
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>
+            <i class="bi bi-kanban"></i>
+            Project Master
+        </h4>
+        <a asp-action="AddProject" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i>
+            Add Project
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <div class="d-flex justify-content-end mb-3">
+
+                    <form asp-action="GetProjects"
+                          method="get"
+                          class="d-flex align-items-center gap-2">
+
+                        <label class="mb-0">
+                            Show:
+                        </label>
+
+                        <select name="pageSize"
+                                class="form-select form-select-sm"
+                                style="width:80px;"
+                                onchange="this.form.submit()">
+
+                            <option value="10"
+                                    selected="@(Model.Pagination.PageSize == 10)">
+                                10
+                            </option>
+
+                            <option value="25"
+                                    selected="@(Model.Pagination.PageSize == 25)">
+                                25
+                            </option>
+
+                            <option value="50"
+                                    selected="@(Model.Pagination.PageSize == 50)">
+                                50
+                            </option>
+
+                        </select>
+
+                        <span class="text-muted">
+                            entries
+                        </span>
+
+                        <input type="hidden"
+                               name="page"
+                               value="1" />
+
+                    </form>
+
+                </div>
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="d-none"></th>
+                            <th>Project Code</th>
+                            <th>Project Name</th>
+                            <th>Status</th>
+                            <th width="150">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Projects)
+                        {
+                            <tr>
+                                <td class="d-none">@item.ProjectId</td>
+                                <td>
+                                    @item.ProjectCode
+                                </td>
+                                <td>
+                                    @item.ProjectName
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success">
+                                            Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            Inactive
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <a asp-action="EditProject" title="Edit Project" asp-route-id="@item.ProjectId"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    }
+                                    <form asp-action="DeleteProject" onsubmit="return confirm('Are you sure you want to change the status of this Project?');" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.ProjectId" />
+
+                                        <button type="submit" title="Manage Status" class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-toggle-on"></i>
+                                        </button>
+                                    </form>
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+                <partial name="_Pagination" model="Model.Pagination" />
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
