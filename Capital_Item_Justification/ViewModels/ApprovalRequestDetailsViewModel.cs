@@ -7,5 +7,7 @@
         public CIJJustificationViewModel cIJJustificationViewModel { get; set; } = new();
         public List<AttachmentViewModel> attachmentViewModels { get; set; } = new();
         public CommitteeCommentViewModel committeeCommentViewModel { get; set; } = new();
+        public List<ClarificationViewModel> Clarifications { get; set; } = new();
+        public List<WorkflowHistoryViewModel> workflowHistory { get; set; } = new();
     }
 }

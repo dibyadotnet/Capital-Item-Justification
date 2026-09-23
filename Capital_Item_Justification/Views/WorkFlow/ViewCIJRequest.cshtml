@@ -393,7 +393,7 @@
                                 Equipment Committee Comments
                             </label>
                             <div class="border rounded p-2 bg-light"
-                            style="min-height:70px;">
+                                 style="min-height:70px;">
                                 @(string.IsNullOrWhiteSpace(Model.committeeCommentViewModel?.Comments) ? "-" : Model.committeeCommentViewModel.Comments)
                             </div>
                         </div>
@@ -461,102 +461,161 @@
 
         </div>
     </div>
-    <!-- Approval History -->
-    @*  <div class="card card-primary card-outline mb-3">
-    <div class="card-header">
-    <h3 class="card-title">
-    <i class="bi bi-clock-history me-2"></i>
-    Approval History
-    </h3>
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-clock-history me-2"></i>
+                Clarification History
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model.Clarifications != null && Model.Clarifications.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Raised By</th>
+                                <th>Role</th>
+                                <th>Query</th>
+                                <th>Answered By</th>
+                                <th>Answer</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var clarification in Model.Clarifications)
+                            {
+                                <tr>
+                                    <td>
+                                        @clarification.RaisedOn.ToString("dd-MMM-yyyy")
+                                    </td>
+
+                                    <td>
+                                        @clarification.RaisedBy
+                                    </td>
+
+                                    <td>
+                                        @clarification.RaisedByRole
+                                    </td>
+
+                                    <td>
+                                        @clarification.ClarificationPoint
+                                    </td>
+
+                                    <td>
+                                        @(string.IsNullOrEmpty(clarification.AnsweredBy)
+                                            ? "-"
+                                            : clarification.AnsweredBy)
+                                    </td>
+
+                                    <td>
+                                        @(string.IsNullOrEmpty(clarification.Answer) ? "-" : clarification.Answer)
+                                    </td>
+
+                                    <td>
+                                        @if (clarification.StatusName == "Answered")
+                                        {
+                                            <span class="badge bg-success">
+                                                Answered
+                                            </span>
+                                        }
+                                        else if (clarification.StatusName == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @clarification.StatusName
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No clarification history available.
+                </div>
+            }
+        </div>
     </div>
-    <div class="card-body">
-    @if (Model.workflowHistory != null && Model.workflowHistory.Any())
-    {
-    <div class="table-responsive">
-    <table class="table table-bordered table-hover align-middle">
 
-    <thead class="table-light">
-    <tr>
-    <th>Date</th>
-    <th>Role</th>
-    <th>Action By</th>
-    <th>Action</th>
-    <th>From Status</th>
-    <th>To Status</th>
-    <th>Remarks</th>
-    </tr>
-    </thead>
-    <tbody>
+    <div class="card card-primary card-outline mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-clock-history me-2"></i>
+                Approval History
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model.workflowHistory != null && Model.workflowHistory.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Approved Date</th>
+                                <th>Approved By</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var history in Model.workflowHistory)
+                            {
+                                <tr>
+                                    <td>
+                                        history.ActionDate
+                                    </td>
+                                    <td>
+                                        @history.UserName
+                                    </td>
+                                    <td>
+                                        @history.RoleName
+                                    </td>
+                                    <td>
+                                        @if (history.StatusName == "Submitted" || history.StatusName == "Approved")
+                                        {
+                                            <span class="badge bg-success">
+                                                @history.StatusName
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @history.StatusName
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @history.Remark
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No approval history available.
+                </div>
+            }
 
-    @foreach (var history in Model.workflowHistory)
-    {
-    <tr>
-    <td>
-    @history.ActionDate.ToString("dd-MMM-yyyy HH:mm")
-    </td>
-    <td>
-    @history.ActionRole
-    </td>
-    <td>
-    @history.ActionBy
-    </td>
-    <td>
-    @if (history.ToStatusName == "Approved")
-    {
-    <span class="badge bg-success">
-    Approved
-    </span>
-    }
-    else if (history.ToStatusName == "Rejected")
-    {
-    <span class="badge bg-danger">
-    Rejected
-    </span>
-    }
-    else if (history.ToStatusName == "Clarification Required")
-    {
-    <span class="badge bg-warning text-dark">
-    Clarification Required
-    </span>
-    }
-    else
-    {
-    <span class="badge bg-secondary">
-    @history.ToStatusName
-    </span>
-    }
-    </td>
-
-    <td>
-    @history.FromStatusName
-    </td>
-
-    <td>
-    @history.ToStatusName
-    </td>
-
-    <td>
-    @history.Remarks
-    </td>
-
-    </tr>
-    }
-
-    </tbody>
-
-    </table>
-
+        </div>
     </div>
-    }
-    else
-    {
-    <div class="alert alert-info mb-0">
-    No approval history available.
-    </div>
-    }
-
-    </div>
-    </div> *@
 
     <div class="row button-margin">
         <div class="d-flex justify-content-end gap-2 ">

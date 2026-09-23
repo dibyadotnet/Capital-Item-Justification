@@ -287,7 +287,26 @@ namespace Capital_Item_Justification.Repository
             {
                 approvalDetail.workflowHistory = history;
             }
+            var attchments = await GetAttachments(cijId);
+            if (attchments.Count > 0)
+            {
+                approvalDetail.AttachmentVm = attchments;
+            }
             return approvalDetail;
+        }
+
+        private async Task<List<AttachmentViewModel>> GetAttachments(int cijId)
+        {
+            var attchaments = await _context.CijAttachments.Where(x => x.Cijid == cijId && x.IsActive == true).
+                Select(x => new AttachmentViewModel()
+                {
+                    AttachmentId = x.AttachmentId,
+                    Cijid = x.Cijid,
+                    FileName = x.FileName,
+                    ModuleName = x.ModuleName,
+                    FilePath = x.FilePath
+                }).ToListAsync();
+            return attchaments;
         }
         private async Task<ApprovalDetailViewModel?> GetApprovalDetailFromSPAsync(int approvalId, int cijId)
         {
@@ -1455,16 +1474,16 @@ namespace Capital_Item_Justification.Repository
             }
             else if (currentStep.StepCode.Equals("FINANCE", StringComparison.OrdinalIgnoreCase))
             {
-                var directorApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
+                var hodApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
                                                    join role in _context.Roles
                                                  on budget.RoleId equals role.Id
-                                                   where role.Name == "Director SC" && role.IsActive == true && budget.IsActive == true
+                                                   where role.Name == "HOD" && role.IsActive == true && budget.IsActive == true
                                                    select budget).FirstOrDefaultAsync();
-                if (directorApprovalLimit == null)
+                if (hodApprovalLimit == null)
                 {
-                    throw new InvalidOperationException("Budget Limit is not configured for Director SC Role.");
+                    throw new InvalidOperationException("Budget Limit is not configured for HOD Role.");
                 }
-                if (directorApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
+                if (hodApprovalLimit.BudgetLimit >= cijRequest.TotalEquipmentCost)
                 {
                     string stepCode = "Purchase";
                     nextStep = await GetStep(stepCode, WorkflowId);
@@ -1839,14 +1858,17 @@ namespace Capital_Item_Justification.Repository
                                  FilePath = x.FilePath
                              }).ToListAsync();
 
-
+            var clarificationHistory = await GetClarificationHistoryFromSPAsync(approvalId, cijId);
+            var approvalHistory = await GetWorkflowHistoryFromSPAsync(cijId);
             ApprovalRequestDetailsViewModel vm = new ApprovalRequestDetailsViewModel()
             {
                 CIJRequest = requestvm,
                 cIJEquipmentViewModels = equipments,
                 cIJJustificationViewModel = justification,
                 attachmentViewModels = attachments,
-                committeeCommentViewModel = committeeComment
+                committeeCommentViewModel = committeeComment,
+                Clarifications=clarificationHistory,
+                workflowHistory= approvalHistory
             };
 
             return vm;
