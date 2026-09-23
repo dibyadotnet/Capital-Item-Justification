@@ -55,6 +55,7 @@ namespace Capital_Item_Justification.Repository
                 throw new InvalidOperationException();
 
             entity.DepartmentName = vm.DepartmentName;
+            entity.DepartmentCode = vm.DepartmentName;
             entity.ModifiedBy = userId;
             entity.ModifiedOn = DateTime.Now;
 

@@ -35,7 +35,9 @@
                                 <td>@Model[i].Make</td>
                                 <td>@Model[i].Model</td>
                                 <td>@Model[i].EquipmentQty</td>
-                                <td>@Model[i].EquipmentCost</td>
+                                <td>
+                                    @($"₹ {Model[i].EquipmentCost:N0}")
+                                </td>
                                 @* <td>@Model[i].PreferenceOrder</td> *@
                                 <td>
                                     <button type="button" class="btn btn-sm btn-warning me-1" onclick="EditEquipment(@i)">
@@ -65,7 +67,7 @@
             </button>
             <div class="equipment-total">
                 <span>Total Estimated Equipment Cost</span>
-                <input type="text" id="TotalEstEquipmentCost" class="form-control" value="@(ViewBag.TotalEstEquipmentCost ?? "₹ 0.00")" readonly />
+                <input type="text" id="TotalEstEquipmentCost" class="form-control" value="@(ViewBag.TotalEstEquipmentCost ?? "₹ 0")" readonly />
             </div>
         </div>
     </div>

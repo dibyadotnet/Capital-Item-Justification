@@ -225,10 +225,12 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.CIJRequest.BudgetTypeList = dropDowns.BudgetTypeList;
 
                 var culture = new CultureInfo("en-IN");
-                string formattedCost = string.Format(culture, "₹ {0:N2}", cIJMainViewModel.CIJRequest.TotalEquipmentCost);
+                string formattedCost = string.Format(culture, "₹ {0:N0}", cIJMainViewModel.CIJRequest.TotalEquipmentCost);
                 cIJMainViewModel.CIJRequest.TotalEquipmentCostDisplay = formattedCost;
 
                 @ViewBag.TotalEstEquipmentCost = formattedCost;
+
+                cIJMainViewModel.CIJRequest.ScehcostHidden = cIJMainViewModel.CIJRequest.Scehcost;
 
                 //get attachments
                 List<AttachmentViewModel> model = await _service.GetAttachmentsById(cijId);

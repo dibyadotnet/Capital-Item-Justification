@@ -27,8 +27,8 @@ $(document).ready(function () {
 
     togglePreviousPurchase();
 
-    changeCostCenter();
-
+    //changeCostCenter();
+    changeCostCenterPageLoad();
     changeBudgetProvision();
 
     enableBudgetType();
@@ -74,8 +74,29 @@ function changeCostCenter() {
         $('#CIJRequest_ProjectId').prop('disabled', true);
         $("#CIJRequest_ProjectId").val("");
         $('#CIJRequest_Scehcost').prop('readonly', true);
-
-        $('#CIJRequest_Scehcost').val($("#CIJRequest_TotalEquipmentCost").val());
+        //$('#CIJRequest_Scehcost').val($("#CIJRequest_TotalEquipmentCost").val());
+        $('#CIJRequest_Scehcost').val($("#CIJRequest_TotalEquipmentCostDisplay").val());
+        $('#CIJRequest_ScehcostHidden').val($("#CIJRequest_TotalEquipmentCost").val());
+    }
+}
+function changeCostCenterPageLoad() {
+    var costCenterId = $("#CIJRequest_CostCenterId option:selected").val();
+    if (costCenterId === "1" || !costCenterId) {
+        //Project
+        $('#CIJRequest_BudgetTypeId').prop('disabled', false);
+        $('#CIJRequest_ProjectCost').prop('disabled', false);
+        $('#CIJRequest_Scehcost').prop('readonly', true);
+        $('#CIJRequest_ProjectId').prop('disabled', false);
+        if ($('#CIJRequest_BudgetTypeId').val() === '2') {
+            $('#CIJRequest_ScehcostHidden').val($("#CIJRequest_Scehcost").val());
+        }
+    } else {
+        $('#CIJRequest_BudgetTypeId').prop('disabled', true);
+        $('#CIJRequest_ProjectCost').prop('disabled', true);
+        $('#CIJRequest_ProjectId').prop('disabled', true);
+        $('#CIJRequest_Scehcost').prop('readonly', true);
+        //$('#CIJRequest_Scehcost').val($("#CIJRequest_TotalEquipmentCost").val());
+        $('#CIJRequest_Scehcost').val($("#CIJRequest_TotalEquipmentCostDisplay").val());
         $('#CIJRequest_ScehcostHidden').val($("#CIJRequest_TotalEquipmentCost").val());
     }
 }
@@ -110,7 +131,10 @@ function enableBudgetType() {
         $('#CIJRequest_Scehcost').prop('readonly', false);
     } else {
         $('#CIJRequest_Scehcost').prop('readonly', true);
-        //$("#CIJRequest_Scehcost").val("");
+        if ($("#CIJRequest_CostCenterId").val()==="1") {
+            $("#CIJRequest_Scehcost").val("");
+            $('#CIJRequest_ScehcostHidden').val("");
+        }
     }
 }
 function changeBudgetProvision() {
@@ -149,7 +173,6 @@ function changeItemType() {
 
 $("#btnEquipmentSave").on("click", function () {
     let isValid = true;
-    debugger;
     const equipmentName = $('#EquipmentName');
     const equipmentQty = $('#EquipmentQty');
     const equipmentCost = $('#EquipmentCost');
@@ -190,7 +213,7 @@ function loadEquipmentTable() {
                 <td>${item.Make}</td>
                 <td>${item.Model}</td>
                 <td>${item.EquipmentQty}</td>
-                <td>${item.EquipmentCost}</td>
+                <td>₹${Number(item.EquipmentCost || 0).toLocaleString('en-IN')}</td>
                 <td>
                     <button type="button" onclick="EditEquipment(${i})" class="btn btn-warning btn-sm me-1"> <i class="bi bi-pencil-square"></i></button>
                     <button type="button" onclick="DeleteEquipment(${i})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
@@ -293,10 +316,7 @@ function calculateTotalEquipmentCost() {
     $.each(equipments, function (i, item) {
         total += parseFloat(item.EquipmentCost || 0);
     });
-    var eqpCost = "₹ " + total.toLocaleString('en-IN', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    })
+    var eqpCost = "₹ " + total.toLocaleString('en-IN')
     $("#TotalEstEquipmentCost").val(eqpCost);
     $("#CIJRequest_TotalEquipmentCostDisplay").val(eqpCost);
     $("#CIJRequest_TotalEquipmentCost").val(total);
@@ -436,7 +456,7 @@ $(document).on("change", "select", function () {
 });
 
 $('#vendorAttachments').on('change', function () {
- 
+
     var isError = false;
     const maxFiles = 3;
     const count = this.files.length;
@@ -469,5 +489,35 @@ $('#vendorAttachments').on('change', function () {
         return;
     }
 });
+$(document).on('keydown', '#EquipmentQty', function (e) {
+    if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === '-') {
+        e.preventDefault();
+    }
+});
+$(document).on('keydown', '#EquipmentCost', function (e) {
+    if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === '-') {
+        e.preventDefault();
+    }
+});
 
+$(document).on('keydown', '#CIJRequest_Scehcost', function (e) {
+    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+        e.preventDefault();
+    }
+});
+$(document).on('keydown', '#CIJRequest_BudgetAmount', function (e) {
+    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+        e.preventDefault();
+    }
+});
+$(document).on('keydown', '#CIJRequest_ProjectCost', function (e) {
+    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+        e.preventDefault();
+    }
+});
+$(document).on('keydown', '#CIJRequest_OldEquipmentCost', function (e) {
+    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+        e.preventDefault();
+    }
+});
 

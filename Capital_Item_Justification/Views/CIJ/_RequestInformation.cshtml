@@ -55,7 +55,7 @@
             <div class="col">
                 <label class="form-label fw-semibold">Budget Amount</label>
                 <span class="text-danger">*</span>
-                <input asp-for="BudgetAmount" class="form-control" />
+                <input asp-for="BudgetAmount" class="form-control" value="@(Model.BudgetAmount?.ToString("N0", new System.Globalization.CultureInfo("en-IN")))" />
             </div>              
         </div>
 
@@ -75,12 +75,12 @@
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Project Cost</label>
-                <input asp-for="ProjectCost" class="form-control" />
+                <input asp-for="ProjectCost" class="form-control" value="@(Model.ProjectCost?.ToString("N0", new System.Globalization.CultureInfo("en-IN")))" />
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">SCEH Cost</label>
                 <input asp-for="ScehcostHidden" class="form-control" type="hidden" />
-                <input asp-for="Scehcost" class="form-control" />
+                <input asp-for="Scehcost" class="form-control" value="@(Model.Scehcost?.ToString("N0", new System.Globalization.CultureInfo("en-IN")))" />
             </div>          
         </div>
         <div class="row g-4">
@@ -99,7 +99,7 @@
             </div>
             <div class="col">
                 <label class="form-label fw-semibold">Old Equipment Cost</label>
-                <input asp-for="OldEquipmentCost" class="form-control" />
+                <input asp-for="OldEquipmentCost" class="form-control" value="@(Model.OldEquipmentCost?.ToString("N0", new System.Globalization.CultureInfo("en-IN")))" />
             </div>
             
             <div class="col">

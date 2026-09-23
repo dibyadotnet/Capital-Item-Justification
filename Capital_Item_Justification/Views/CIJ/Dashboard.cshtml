@@ -34,7 +34,7 @@
                                 <td>@item.Location</td>
                                 <td>@item.ItemType</td>
                                 <td>@item.ProjectName</td>
-                                <td>@item.TotalEquipmentCost?.ToString("N2")</td>
+                                <td>@($"₹ {item.TotalEquipmentCost:N0}")</td>
                                 <td>@item.Status</td>
                                 <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
                                 <td>
