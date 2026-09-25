@@ -75,5 +75,14 @@ namespace Capital_Item_Justification.Services
         {
             return await _cijMainRepository.GetBudgetType();
         }
+
+        public async Task<List<RequestTrackingViewModel>> GetCijNumberListAsync(string userId)
+        {
+            return await _cijMainRepository.GetCijNumberListAsync(userId);
+        }
+        public async Task<List<StatusViewModel>> GetStatusListAsync()
+        {
+            return await _cijMainRepository.GetStatusListAsync();
+        }
     }
 }

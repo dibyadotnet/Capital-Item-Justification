@@ -22,5 +22,8 @@ namespace Capital_Item_Justification.Services.Interfaces
         Task<int> DeleteAttachment(int attachmentId);
         Task<List<CijCostCenter>> GetCostCenter();
         Task<List<CijBudgetType>> GetBudgetType();
+
+        Task<List<RequestTrackingViewModel>> GetCijNumberListAsync(string userId);
+        Task<List<StatusViewModel>> GetStatusListAsync();
     }
 }

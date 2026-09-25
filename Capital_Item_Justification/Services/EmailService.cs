@@ -7,6 +7,8 @@ using System.Net;
 using System;
 using Capital_Item_Justification.Repository;
 using System.Numerics;
+using System.Security.Policy;
+using Capital_Item_Justification.ViewModels;
 
 namespace Capital_Item_Justification.Services
 {
@@ -21,36 +23,119 @@ namespace Capital_Item_Justification.Services
         }
         public async Task SendEmailAsync(int cijId, string cijNumber, string action, string comments)
         {
-            //string toEmail = "dibya.sutar@gmail.com";
-            List<string> approverMails = new List<string>();
+            EmailViewModel email = new EmailViewModel();
             try
             {
                 string subject = string.Empty;
                 string body = string.Empty;
-                //var body = $"""Dear User, CIJ Number: {cijNumber} Action Taken: {action} Comments: {comments} Regards,CIJ System""";
-                if (action == "Submitted" || action == "Approve")
+                var cijRequest = await _cijMainRepository.GetCIJById(cijId);
+                if (cijRequest == null)
                 {
-                    action = "Pending";
-                    subject = $"CIJ {cijNumber} - {action}";
-                    body = PendingEmail(cijNumber, action);
+                    _logger.LogError("CIJ request not found for CIJ ID {CijId}", cijId);
+                    return;
                 }
-                if (action == "Query")
+                string emailAction = action;
+
+                switch (action)
                 {
-                    action = "Query";
-                    subject = $"CIJ {cijNumber} - {action}";
-                    body = QueryEmail(cijNumber, action);
+                    case "Submitted":
+                    case "Approve":
+                        emailAction = "Pending";
+
+                        email = await _cijMainRepository.GetApproveEmail(cijId, emailAction);
+
+                        if (email == null || string.IsNullOrWhiteSpace(email.approverEmail))
+                        {
+                            _logger.LogWarning(
+                                "No approver email found for CIJ {CijNumber} and action {Action}",
+                                cijNumber,
+                                emailAction);
+
+                            return;
+                        }
+
+                        string approverName = email.approverName?
+                            .Trim()
+                            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                            .FirstOrDefault() ?? "";
+
+                        subject = $"CIJ {cijNumber} - {emailAction}";
+                        body = PendingEmail(
+                            cijNumber,
+                            approverName,
+                            cijRequest.CIJRequest.RequestDate);
+
+                        break;
+
+                    case "Query":
+                        emailAction = "Query";
+
+                        email = await _cijMainRepository.GetApproveEmail(cijId, emailAction);
+
+                        if (email == null || string.IsNullOrWhiteSpace(email.approverEmail))
+                        {
+                            _logger.LogWarning(
+                                "No recipient email found for CIJ {CijNumber} and action {Action}",
+                                cijNumber,
+                                emailAction);
+
+                            return;
+                        }
+
+                        subject = $"CIJ {cijNumber} - {emailAction}";
+                        body = QueryEmail(cijNumber, emailAction);
+
+                        break;
+
+                    case "Answer":
+                        emailAction = "Answered";
+
+                        email = await _cijMainRepository.GetApproveEmail(cijId, emailAction);
+
+                        if (email == null || string.IsNullOrWhiteSpace(email.approverEmail))
+                        {
+                            _logger.LogWarning(
+                                "No recipient email found for CIJ {CijNumber} and action {Action}",
+                                cijNumber,
+                                emailAction);
+
+                            return;
+                        }
+
+                        subject = $"CIJ {cijNumber} - {emailAction}";
+                        body = AnsweredEmail(cijNumber, emailAction);
+
+                        break;
+
+                    case "Rejected":
+                        emailAction = "Rejected";
+
+                        email = await _cijMainRepository.GetApproveEmail(cijId, emailAction);
+
+                        if (email == null || string.IsNullOrWhiteSpace(email.approverEmail))
+                        {
+                            _logger.LogWarning(
+                                "No recipient email found for CIJ {CijNumber} and action {Action}",
+                                cijNumber,
+                                emailAction);
+
+                            return;
+                        }
+
+                        subject = $"CIJ {cijNumber} - {emailAction}";
+                        body = RejectedEmail(cijNumber, emailAction);
+
+                        break;
+
+                    default:
+                        _logger.LogWarning(
+                            "Unsupported email action {Action} for CIJ {CijNumber}",
+                            action,
+                            cijNumber);
+
+                        return;
                 }
-                if (action == "Answer")
-                {
-                    action = "Answered";
-                    subject = $"CIJ {cijNumber} - {action}";
-                    body = AnsweredEmail(cijNumber, action);
-                }
-                if (action == "Rejected")
-                {
-                    subject = $"CIJ {cijNumber} - {action}";
-                    body = RejectedEmail(cijNumber, action);
-                }
+
                 var config = await _cijMainRepository.GetEmailConfig();
                 if (config == null)
                 {
@@ -62,18 +147,14 @@ namespace Capital_Item_Justification.Services
                     _logger.LogError("SMTP username is not configured.");
                     return;
                 }
-                approverMails = await _cijMainRepository.GetApproveEmail(cijId, action);
                 using var message = new MailMessage();
                 message.From = new MailAddress(config.Username, "CIJ System");
-                foreach (var email in approverMails)
-                {
-                    message.To.Add(email);
-                }
-                //if (!string.IsNullOrWhiteSpace(ccEmail))
+                string toEmail = email?.approverEmail;//"dibya.sutar@gmail.com";
+                message.To.Add(toEmail);
+                //foreach (var email in approverMails)
                 //{
-                //    message.CC.Add(ccEmail);
+                //    message.To.Add(email);
                 //}
-
                 message.Subject = subject;
                 message.Body = body;
                 message.IsBodyHtml = true;
@@ -102,42 +183,63 @@ namespace Capital_Item_Justification.Services
                     message.Subject
                 );
                 await smtpClient.SendMailAsync(message);
-                _logger.LogInformation("CIJ email sent to {Email} for CIJ {CijNumber}", string.Join(",", approverMails), cijNumber);
+                //_logger.LogInformation("CIJ email sent to {Email} for CIJ {CijNumber}", string.Join(",", approverMails), cijNumber);
+                _logger.LogInformation("CIJ email sent to {Email} for CIJ {CijNumber}", email?.approverEmail, cijNumber);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send CIJ email to {Email}", string.Join(",", approverMails));
+                // _logger.LogError(ex, "Failed to send CIJ email to {Email}", string.Join(",", approverMails));
+                _logger.LogError(ex, "Failed to send CIJ email to {Email}", email?.approverEmail);
             }
         }
-        private string PendingEmail(string cijNumber, string approverName)
+        private string PendingEmail(string cijNumber, string approverName, DateOnly requestDate)
         {
-            approverName = "Dibya";
+            //approverName = "Dibya";
+            string url = "http://190.92.175.61/";
             return $"""
             <html>
-            <body>
-
+            <body style="font-family: Arial, sans-serif; color: #333;">
             <p>Dear {approverName},</p>
-
             <p>
                 A CIJ request is pending for your approval.
             </p>
 
-            <table border="1" cellpadding="6">
-                <tr>
-                    <td><b>CIJ Number</b></td>
-                    <td>{cijNumber}</td>
+            <table style="border-collapse: collapse; width: 100%; max-width: 700px;">
+                <tr style="background-color: #f2f2f2;">
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">
+                        CIJ Number
+                    </th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">
+                        Request Date
+                    </th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">
+                        Status
+                    </th>
                 </tr>
 
                 <tr>
-                    <td><b>Status</b></td>
-                    <td>Pending Approval</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">
+                        {cijNumber}
+                    </td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">
+                        {requestDate}
+                    </td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">
+                        Pending Approval
+                    </td>
                 </tr>
             </table>
 
             <p>
                 Please log in to the CIJ system and take the required action.
             </p>
-
+            <p>
+                <b>CIJ System:</b>
+                <a href="{url}">{url}</a>
+            </p>
+            <p style="font-size: 12px; color: #6c757d;">
+                This is an automated notification. Please do not reply to this email.
+            </p>
             <p>
                 Regards,<br/>
                 CIJ System

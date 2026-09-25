@@ -10,5 +10,6 @@
         public DateTime? PendingSince { get; set; }
         public string? WorkFlowStepCode { get; set; }
         public string? DepartmentName { get; set; }
+        public string LocationName { get; set; } = null!;
     }
 }

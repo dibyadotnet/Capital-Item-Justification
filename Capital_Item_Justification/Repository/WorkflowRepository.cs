@@ -1335,18 +1335,16 @@ namespace Capital_Item_Justification.Repository
             return nextStepFind;
         }
 
-        public async Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId)
+        public async Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId,int? cijId, int? statusId)
         {
-            var pendingStatusId = await _context.CijStatuses.Where(x => x.StatusName == "Pending").Select(x => x.StatusId).FirstOrDefaultAsync();
-
             var results = await _context
                 .Set<RequestTrackingViewModel>()
                 .FromSqlInterpolated($@"
         EXEC dbo.SP_GetRequesterRequestTracking
             @UserId = {userId},
-            @PendingStatusId = {pendingStatusId}")
-                .AsNoTracking()
-                .ToListAsync();
+            @CijId ={ cijId},
+            @StatusId ={statusId}"
+            ).AsNoTracking().ToListAsync();
 
             return results;
         }

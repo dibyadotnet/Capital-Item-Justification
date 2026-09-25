@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Diagnostics;
+using System.Drawing.Printing;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -169,7 +170,7 @@ namespace Capital_Item_Justification.Controllers
                 bool? approved = await _service.ApproveRequestAsync(vm);
                 if (approved == true)
                 {
-                    await _emailService.SendEmailAsync(cijId,cijNumber, action, remarks);
+                    await _emailService.SendEmailAsync(cijId, cijNumber, action, remarks);
                     TempData["ToastMessage"] = "CIJ request is approved successfully.";
                     TempData["ToastType"] = "success";
                 }
@@ -190,7 +191,7 @@ namespace Capital_Item_Justification.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendClarification(int workflowApprovalId, int cijId, string clarificationPoint,string targetRoleId)
+        public async Task<IActionResult> SendClarification(int workflowApprovalId, int cijId, string clarificationPoint, string targetRoleId)
         {
             try
             {
@@ -211,7 +212,7 @@ namespace Capital_Item_Justification.Controllers
                     userDepartmentId = user.DepartmentId,
                     Action = action,
                     ClarificationPoint = clarificationPoint,
-                    targetRoleId=targetRoleId
+                    targetRoleId = targetRoleId
                 };
                 bool? approved = await _service.ApproveRequestAsync(vm);
                 if (approved == true)
@@ -324,7 +325,7 @@ namespace Capital_Item_Justification.Controllers
             }
         }
 
-        public async Task<IActionResult> TrackRequest()
+        public async Task<IActionResult> TrackRequest(int? cijId, int? statusId, int page = 1, int pageSize = 10)
         {
             try
             {
@@ -333,9 +334,33 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var trackRequsetResults = await _service.TrackRequsterRequestAsync(user.Id);
+                var cijList = await _cijService.GetCijNumberListAsync(user.Id);
+                var statusList = await _cijService.GetStatusListAsync();
+                statusList = statusList.Where(x => x.StatusName == "Pending" || x.StatusName == "Completed" || x.StatusName == "Rejected").ToList();
+                ViewBag.CIJNumberList = new SelectList(cijList, "CijId", "CIJNumber", cijId);
+                ViewBag.StatusList = new SelectList(statusList, "StatusId", "StatusName", statusId);
 
-                return View(trackRequsetResults);
+                var trackRequsetResults = await _service.TrackRequsterRequestAsync(user.Id, cijId, statusId);
+               
+                var totalRecords = trackRequsetResults.Count();
+                var trackMyRequests = trackRequsetResults.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                var model = new TrackMyRequestListViewModel
+                {
+                    requestTrackings = trackMyRequests,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalRecords = totalRecords,
+                        TotalPages = totalPages,
+                        ControllerName = "WorkFlow",
+                        ActionName = "TrackRequest"
+                    }
+                };
+                
+
+                return View(model);
 
             }
             catch (Exception)
