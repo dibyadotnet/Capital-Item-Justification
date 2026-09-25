@@ -649,7 +649,7 @@ namespace Capital_Item_Justification.Repository
                 throw new InvalidOperationException("Email Configuration is not found.");
             return emaliConfig;
         }
-        public async Task<List<string>> GetApproveEmail(int cijId, string action)
+        public async Task<EmailViewModel> GetApproveEmail(int cijId, string action)
         {
             var locationSpecificRoles = new[] { "Finance", "Purchase" };
             int statusId = await _context.CijStatuses.Where(a => a.IsActive && a.StatusName == action).Select(a => a.StatusId).FirstOrDefaultAsync();
@@ -672,10 +672,35 @@ namespace Capital_Item_Justification.Repository
                                                   )
                                                   && approval.DepartmentId == user.DepartmentId
                                                   && user.IsActive && !string.IsNullOrEmpty(user.Email)
-                                            select user.Email
-                                        ).Distinct().ToListAsync();
+                                            select new EmailViewModel()
+                                            {
+                                                approverName = user.FullName,
+                                                approverEmail = user.Email
+                                            }
+                                        ).Distinct().FirstOrDefaultAsync();
 
             return nextApproverEmails;
+        }
+
+        public async Task<List<RequestTrackingViewModel>> GetCijNumberListAsync(string userId)
+        {
+            var cijList = await _context.CijRequests.Where(a => a.CreatedBy == userId && a.IsActive == true).Select(x => new RequestTrackingViewModel()
+            {
+                CijId = x.Cijid,
+                CIJNumber = x.Cijnumber
+            }).ToListAsync();
+
+            return cijList;
+        }
+        public async Task<List<StatusViewModel>> GetStatusListAsync()
+        {
+            var statusList = await _context.CijStatuses.Where(a => a.IsActive == true).Select(x => new StatusViewModel()
+            {
+                StatusId = x.StatusId,
+                StatusName = x.StatusName
+            }).ToListAsync();
+
+            return statusList;
         }
     }
 }

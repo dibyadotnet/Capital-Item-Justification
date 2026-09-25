@@ -9,7 +9,7 @@ namespace Capital_Item_Justification.Repository.Interfaces
         Task<List<MyApprovalViewModel>> GetMyApprovalAsync(ApplicationUser user, List<string> roleIds);
         Task<ApprovalDetailViewModel?> GetApprovalDetailAsync(int approvalId, int cijId);
         Task<bool?> ApproveRequestAsync(ApproveRejectViewModel vm);
-        Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId);
+        Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId, int? cijId, int? statusId);
         Task<ApprovalRequestDetailsViewModel?> GetRequestDetailsAsync(int approvalId, int cijId);
         Task<List<RoleViewModel>> GetRoleToSendQueryAsync(int approvalId, int cijId);
     }

@@ -1,109 +1,185 @@
-﻿@model IEnumerable<Capital_Item_Justification.ViewModels.RequestTrackingViewModel>
+﻿@model Capital_Item_Justification.ViewModels.TrackMyRequestListViewModel
+<div class="card shadow-sm mb-4">
 
-<div class="card">
-
-    <div class="card-header">
-        <h3 class="card-title">
-            Track Requests
-        </h3>
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-search me-2"></i>
+            Track My Request
+        </h5>
     </div>
 
     <div class="card-body">
-        @if (Model.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>CIJ Number</th>
-                            @* <th>Workflow Stage</th> *@
-                            <th>Current Owner</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Pending/Completed</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+        <form asp-controller="WorkFlow" asp-action="TrackRequest" method="get">
+            <div class="row g-3 align-items-end mb-2">
+                <!-- CIJ Number -->
+                <div class="col-md-4">
+                    <label for="cijNumber" class="form-label fw-semibold">
+                        CIJ Number
+                    </label>
+                    <select id="CijId" name="cijId" class="form-select" asp-items="ViewBag.CIJNumberList">
+                        <option value="">-- Select CIJNumber --</option>
+                    </select>
+                </div>
+                <!-- Status -->
+                <div class="col-md-4">
+                    <label for="statusId" class="form-label fw-semibold">
+                        Status
+                    </label>
+                    <select id="StausId" name="statusId" class="form-select" asp-items="ViewBag.StatusList">
+                        <option value="">-- Select Status --</option>
+                    </select>
+                </div>
+                <!-- Buttons -->
+                <div class="col-md-4">
 
-                    <tbody>
+                    <button type="submit"
+                            class="btn btn-primary me-2">
+                        <i class="bi bi-search me-1"></i>
+                        Search
+                    </button>
 
-                        @{
-                            var index = 1;
-                        }
+                    <a asp-action="TrackRequest"
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Reset
+                    </a>
 
-                        @foreach (var item in Model)
-                        {
+                </div>
+            </div>
+        </form>
+        <div>
+            @if (Model.requestTrackings.Any())
+            {
+                <div class="d-flex justify-content-end mb-3">
+                    <form asp-action="TrackRequest"
+                          method="get"
+                          class="d-flex align-items-center gap-2">
+
+                        @* <label class="mb-0">
+                            Show:
+                        </label> *@
+
+                        <select name="pageSize"
+                                class="form-select form-select-sm"
+                                style="width:80px;"
+                                onchange="this.form.submit()">
+
+                            <option value="10"
+                                    selected="@(Model.Pagination.PageSize == 10)">
+                                10
+                            </option>
+
+                            <option value="25"
+                                    selected="@(Model.Pagination.PageSize == 25)">
+                                25
+                            </option>
+
+                            <option value="50"
+                                    selected="@(Model.Pagination.PageSize == 50)">
+                                50
+                            </option>
+
+                        </select>
+@* 
+                        <span class="text-muted">
+                            entries
+                        </span> *@
+
+                        <input type="hidden"
+                               name="page"
+                               value="1" />
+
+                    </form>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
                             <tr>
+                                <th>#</th>
+                                <th>CIJ Number</th>
+                                <th>Current Owner</th>
+                                <th>Department</th>
+                                <th>Location</th>
+                                <th>Pending/Completed</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
 
-                                <td>
-                                    @index
-                                </td>
+                        <tbody>
 
-                                <td>
-                                    <strong>
-                                        @item.CIJNumber
-                                    </strong>
-                                </td>
+                            @{
+                                var index = 1;
+                            }
 
-                               @*  <td>
-                                    @item.WorkFlowStepCode
-                                </td> *@
+                            @foreach (var item in Model.requestTrackings)
+                            {
+                                <tr>
 
-                                <td>
-                                    <strong>
-                                        @item.ApproverRole
-                                    </strong>
-                                </td>
-                                <td>
-                                    <strong>
-                                        @item.DepartmentName
-                                    </strong>
-                                </td>
+                                    <td>
+                                        @index
+                                    </td>
 
-                                <td>
-                                    <span class="badge
+                                    <td>
+                                        <strong>
+                                            @item.CIJNumber
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <strong>
+                                            @item.ApproverRole
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <strong>
+                                            @item.DepartmentName
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <strong>
+                                            @item.LocationName
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        @(item.PendingSince?.ToString("dd-MMM-yyyy") ?? "-")
+                                    </td>
+                                    <td>
+                                        <span class="badge
     @(item.CurrentStatus?.Equals("Pending", StringComparison.OrdinalIgnoreCase) == true
         ? "bg-warning text-dark"
         : item.CurrentStatus?.Equals("Rejected", StringComparison.OrdinalIgnoreCase) == true
             ? "bg-danger text-dark"
             : "bg-primary text-dark")">
-                                        @item.CurrentStatus
-                                    </span>
-                                </td>
+                                            @item.CurrentStatus
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a asp-controller="WorkFlow"
+                                           asp-action="ViewCIJRequest"
+                                           asp-route-approvalId="@item.WorkflowApprovalId"
+                                           asp-route-cijId="@item.CijId"
+                                           class="btn btn-sm btn-primary view-btn">
+                                            View
+                                        </a>
+                                    </td>
 
-                                <td>
-                                    @(item.PendingSince?.ToString("dd-MMM-yyyy") ?? "-")
-                                </td>
+                                </tr>
 
-                                <td>
-                                    <a asp-controller="WorkFlow"
-                                       asp-action="ViewCIJRequest"
-                                       asp-route-approvalId="@item.WorkflowApprovalId"
-                                       asp-route-cijId="@item.CijId"
-                                       class="btn btn-sm btn-primary view-btn">
-                                        View
-                                    </a>
-                                </td>
+                                index++;
+                            }
 
-                            </tr>
+                        </tbody>
 
-                            index++;
-                        }
-
-                    </tbody>
-
-                </table>
-
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-info">
-                You have not raised any requests with pending approval.
-            </div>
-        }
-
+                    </table>
+                    <partial name="_Pagination" model="Model.Pagination" />
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    You have not raised any requests with pending approval.
+                </div>
+            }
+        </div>
     </div>
-
 </div>

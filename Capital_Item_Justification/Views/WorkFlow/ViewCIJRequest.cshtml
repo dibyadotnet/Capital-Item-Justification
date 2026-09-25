@@ -90,7 +90,9 @@
                                 Equipment Cost
                             </div>
                             <div class="col-sm-7">
-                                : @Model.CIJRequest.TotalEquipmentCost
+                                ₹@(Model.CIJRequest.TotalEquipmentCost.HasValue
+                                   ? Model.CIJRequest.TotalEquipmentCost.Value.ToString("N0")
+                                   : "0")
                             </div>
                         </div>
                         <div class="row">
@@ -160,7 +162,9 @@
                             <div class="col-sm-7">
                                 :
                                 <span>
-                                    @Model.CIJRequest.ProjectCost
+                                    ₹@(Model.CIJRequest.ProjectCost.HasValue
+                                       ? Model.CIJRequest.ProjectCost.Value.ToString("N0")
+                                       : "0")
                                 </span>
                             </div>
                         </div>
@@ -171,7 +175,9 @@
                             <div class="col-sm-7">
                                 :
                                 <span>
-                                    @Model.CIJRequest.Scehcost
+                                    ₹@(Model.CIJRequest.Scehcost.HasValue
+                                       ? Model.CIJRequest.Scehcost.Value.ToString("N0")
+                                       : "0")
                                 </span>
                             </div>
                         </div>
@@ -238,7 +244,7 @@
                                         @equipment.EquipmentQty
                                     </td>
                                     <td class="text-end">
-                                        @(equipment.EquipmentCost.ToString("N2") ?? "0.00")
+                                        ₹@equipment.EquipmentCost.ToString("N0")
                                     </td>
 
                                 </tr>
@@ -254,7 +260,7 @@
                                     Total Estimated Cost
                                 </td>
                                 <td class="text-end">
-                                    @equipmentTotal.ToString("N2")
+                                    ₹@equipmentTotal.ToString("N0")
                                 </td>
                             </tr>
                         </tfoot>
