@@ -117,6 +117,15 @@
                                                 Take Action
                                             </a>
                                         }
+                                        @if (item.StatusName == "Completed" && item.ApproverRole=="Purchase")
+                                        {
+                                            <a asp-controller="GeneratePDF"
+                                               asp-action="DownloadCIJPDF"
+                                               asp-route-cijId="@item.CIJId"
+                                               class="btn btn-sm btn-success view-btn">
+                                                CIJ Download
+                                            </a>
+                                        }
 
                                     </td>
                                 </tr>

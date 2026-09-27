@@ -161,6 +161,15 @@
                                            class="btn btn-sm btn-primary view-btn">
                                             View
                                         </a>
+                                        &nbsp;
+                                        @if(item.CurrentStatus =="Completed"){
+                                            <a asp-controller="GeneratePDF"
+                                               asp-action="DownloadCIJPDF"
+                                               asp-route-cijId="@item.CijId"
+                                               class="btn btn-sm btn-success view-btn">
+                                                CIJ Download
+                                            </a>
+                                        }
                                     </td>
 
                                 </tr>

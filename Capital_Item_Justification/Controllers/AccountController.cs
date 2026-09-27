@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Capital_Item_Justification.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using Capital_Item_Justification.Services.Interfaces;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -11,11 +14,12 @@ namespace Capital_Item_Justification.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
-
-        public AccountController( SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        private readonly IEmailService _emailService;
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager,IEmailService emailService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -50,7 +54,7 @@ namespace Capital_Item_Justification.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model,string? returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
@@ -93,7 +97,7 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Redirect(returnUrl);
                 }
-                var loggedinUser =await _userManager.GetUserAsync(User);
+                var loggedinUser = await _userManager.GetUserAsync(User);
                 if (loggedinUser == null)
                 {
                     return View(model);
@@ -162,8 +166,7 @@ namespace Capital_Item_Justification.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(
-            ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -177,18 +180,19 @@ namespace Capital_Item_Justification.Controllers
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
             var resetLink = Url.Action(
                 nameof(ResetPassword),
                 "Account",
                 new
                 {
                     userId = user.Id,
-                    token = token
+                    token = encodedToken
                 },
                 Request.Scheme);
 
             // TODO: Send resetLink through your email service
+            await _emailService.SendPasswordResetEmailAsync(user.Email!,resetLink!);
 
             return RedirectToAction(nameof(ForgotPasswordConfirmation));
         }
@@ -202,28 +206,34 @@ namespace Capital_Item_Justification.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ResetPassword(
-            string? userId,
-            string? token)
+        public IActionResult ResetPassword(string? userId, string? token)
         {
             if (string.IsNullOrEmpty(userId) ||
                 string.IsNullOrEmpty(token))
             {
                 return BadRequest();
             }
-
+            string decodedToken;
+            try
+            {
+                decodedToken = Encoding.UTF8.GetString(
+                    WebEncoders.Base64UrlDecode(token));
+            }
+            catch
+            {
+                return BadRequest();
+            }
             return View(new ResetPasswordViewModel
             {
                 UserId = userId,
-                Token = token
+                Token = decodedToken
             });
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(
-            ResetPasswordViewModel model)
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);

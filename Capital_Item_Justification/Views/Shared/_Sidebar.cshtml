@@ -69,6 +69,19 @@
                         </a>
                     </li>
                 }
+                @if (User.IsInRole("Purchase"))
+                {
+                    <li class="nav-item">
+                        <a asp-controller="WorkFlow"
+                           asp-action="CompletedApproval"
+                           class="nav-link">
+                            <i class="nav-icon bi bi-check2-square me-2"></i>
+                            <p>
+                                Completed Approval
+                            </p>
+                        </a>
+                    </li>
+                }
                 @if (User.IsInRole("Requester"))
                 {
                     <!-- CIJ Request -->
