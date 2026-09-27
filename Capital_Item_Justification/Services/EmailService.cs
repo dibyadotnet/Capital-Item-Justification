@@ -480,5 +480,109 @@ namespace Capital_Item_Justification.Services
             email);
             }
         }
+
+        public async Task SendPasswordResetEmailAsync(string email, string resetLink)
+        {
+            try
+            {
+                var config = await _cijMainRepository.GetEmailConfig();
+
+                if (config == null)
+                {
+                    _logger.LogError("SMTP email configuration was not found.");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(config.Username))
+                {
+                    _logger.LogError("SMTP username is not configured.");
+                    return;
+                }
+
+                var subject = "CIJ Application - Reset Your Password";
+
+                var body = $"""
+            <!DOCTYPE html>
+            <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+
+                <p>Dear User,</p>
+
+                <p>
+                    We received a request to reset your password for the
+                    <strong>CIJ Application</strong>.
+                </p>
+
+                <p>
+                    Please click the button below to reset your password:
+                </p>
+
+                <p>
+                    <a href="{WebUtility.HtmlEncode(resetLink)}"
+                       style="
+                           display:inline-block;
+                           padding:10px 20px;
+                           background-color:#0d6efd;
+                           color:#ffffff;
+                           text-decoration:none;
+                           border-radius:5px;">
+                        Reset Password
+                    </a>
+                </p>
+
+                <p>
+                    If you did not request a password reset, you can safely
+                    ignore this email.
+                </p>
+
+                <p>
+                    For security reasons, this link will expire according to
+                    the application's password reset token settings.
+                </p>
+
+                <p>
+                    Regards,<br />
+                    <strong>CIJ Administration Team</strong>
+                </p>
+
+            </body>
+            </html>
+            """;
+
+                using var message = new MailMessage();
+
+                message.From = new MailAddress(
+                    config.Username,
+                    "CIJ System");
+
+                message.To.Add(email);
+                message.Subject = subject;
+                message.Body = body;
+                message.IsBodyHtml = true;
+
+                using var smtpClient =
+                    new SmtpClient(config.SmtpServer, config.SmtpPort);
+
+                smtpClient.EnableSsl = true;
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Credentials =
+                    new NetworkCredential(
+                        config.Username,
+                        config.Password);
+
+                await smtpClient.SendMailAsync(message);
+
+                _logger.LogInformation(
+                    "Password reset email sent successfully to {Email}",
+                    email);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to send password reset email to {Email}",
+                    email);
+            }
+        }
     }
 }

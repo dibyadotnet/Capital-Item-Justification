@@ -7,8 +7,14 @@ using Capital_Item_Justification.Repository.Interfaces;
 using Capital_Item_Justification.Repository;
 using Capital_Item_Justification.Services.Interfaces;
 using Capital_Item_Justification.Services;
+using PdfSharp.Fonts;
+using Capital_Item_Justification.PDF;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// PDFsharp font resolver
+GlobalFontSettings.FontResolver = new PdfSharpFontResolver();
+
 builder.Services.AddDbContext<CIJDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CIJConnection")));
 
@@ -67,6 +73,9 @@ builder.Services.AddScoped<IDeptService, DeptService>();
 builder.Services.AddScoped<IDeptRepository, DeptRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ICIJPdfService, CIJPdfService>();
+
+
 
 var app = builder.Build();
 

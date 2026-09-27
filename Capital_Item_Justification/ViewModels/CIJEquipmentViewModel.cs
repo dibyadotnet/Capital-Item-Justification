@@ -18,5 +18,6 @@ namespace Capital_Item_Justification.ViewModels
         public decimal EquipmentCost { get; set; }
         public int EquipmentQty { get; set; }
         public string? TotalEstEquipmentCost { get; set; }
+        public int SlNo { get; set; }
     }
 }

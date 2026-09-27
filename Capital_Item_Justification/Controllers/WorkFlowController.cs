@@ -53,6 +53,7 @@ namespace Capital_Item_Justification.Controllers
                     }
                 }
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
+                vm = vm.Where(a => a.StatusName != "Completed").ToList();
             }
             catch (Exception)
             {
@@ -61,6 +62,39 @@ namespace Capital_Item_Justification.Controllers
             }
 
             return View(vm);
+        }
+        public async Task<IActionResult> CompletedApproval()
+        {
+            List<MyApprovalViewModel> vm = new();
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+                List<string> roleIds = new();
+
+                foreach (var roleName in roles)
+                {
+                    var role = await _roleManager.FindByNameAsync(roleName);
+
+                    if (role != null)
+                    {
+                        roleIds.Add(role.Id);
+                    }
+                }
+                vm = await _service.GetMyApprovalAsync(user, roleIds);
+                vm = vm.Where(a => a.StatusName == "Completed").ToList();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return View("MyApproval",vm);
         }
         public async Task<IActionResult> ViewCIJRequest(int approvalId, int cijId)
         {
@@ -341,7 +375,7 @@ namespace Capital_Item_Justification.Controllers
                 ViewBag.StatusList = new SelectList(statusList, "StatusId", "StatusName", statusId);
 
                 var trackRequsetResults = await _service.TrackRequsterRequestAsync(user.Id, cijId, statusId);
-               
+
                 var totalRecords = trackRequsetResults.Count();
                 var trackMyRequests = trackRequsetResults.Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
@@ -358,7 +392,7 @@ namespace Capital_Item_Justification.Controllers
                         ActionName = "TrackRequest"
                     }
                 };
-                
+
 
                 return View(model);
 

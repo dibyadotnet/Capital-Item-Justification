@@ -1335,14 +1335,14 @@ namespace Capital_Item_Justification.Repository
             return nextStepFind;
         }
 
-        public async Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId,int? cijId, int? statusId)
+        public async Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId, int? cijId, int? statusId)
         {
             var results = await _context
                 .Set<RequestTrackingViewModel>()
                 .FromSqlInterpolated($@"
         EXEC dbo.SP_GetRequesterRequestTracking
             @UserId = {userId},
-            @CijId ={ cijId},
+            @CijId ={cijId},
             @StatusId ={statusId}"
             ).AsNoTracking().ToListAsync();
 
@@ -1473,10 +1473,10 @@ namespace Capital_Item_Justification.Repository
             else if (currentStep.StepCode.Equals("FINANCE", StringComparison.OrdinalIgnoreCase))
             {
                 var hodApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
-                                                   join role in _context.Roles
-                                                 on budget.RoleId equals role.Id
-                                                   where role.Name == "HOD" && role.IsActive == true && budget.IsActive == true
-                                                   select budget).FirstOrDefaultAsync();
+                                              join role in _context.Roles
+                                            on budget.RoleId equals role.Id
+                                              where role.Name == "Director SC" && role.IsActive == true && budget.IsActive == true
+                                              select budget).FirstOrDefaultAsync();
                 if (hodApprovalLimit == null)
                 {
                     throw new InvalidOperationException("Budget Limit is not configured for HOD Role.");
@@ -1762,7 +1762,7 @@ namespace Capital_Item_Justification.Repository
                                    on req.CreatedBy equals us.Id into usGroup
                                    from us in usGroup.DefaultIfEmpty()
 
-                                   where app.ApprovalId == approvalId
+                                   where req.Cijid == cijId //app.ApprovalId == approvalId
                                    && req.IsActive == true
                                    select new CIJRequestViewModel()
                                    {
@@ -1865,8 +1865,8 @@ namespace Capital_Item_Justification.Repository
                 cIJJustificationViewModel = justification,
                 attachmentViewModels = attachments,
                 committeeCommentViewModel = committeeComment,
-                Clarifications=clarificationHistory,
-                workflowHistory= approvalHistory
+                Clarifications = clarificationHistory,
+                workflowHistory = approvalHistory
             };
 
             return vm;

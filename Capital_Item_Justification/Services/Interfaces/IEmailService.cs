@@ -4,5 +4,6 @@
     {
         Task SendEmailAsync(int cijId, string cijNumber, string action, string comments);
         Task SendUserCreationEmailAsync(string userName, string email);
+        Task SendPasswordResetEmailAsync(string email, string resetLink);
     }
 }

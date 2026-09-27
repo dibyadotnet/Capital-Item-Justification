@@ -90,14 +90,14 @@
                                 Equipment Cost
                             </div>
                             <div class="col-sm-7">
-                                ₹@(Model.CIJRequest.TotalEquipmentCost.HasValue
+                                : ₹@(Model.CIJRequest.TotalEquipmentCost.HasValue
                                    ? Model.CIJRequest.TotalEquipmentCost.Value.ToString("N0")
                                    : "0")
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-6 fw-bold">
-                                Beneficiary Department
+                            <div class="col-sm-5 fw-bold">
+                                Benef Department
                             </div>
                             <div class="col-sm-6">
                                 : @Model.CIJRequest.BeneficiaryDepartment
@@ -582,7 +582,7 @@
                             {
                                 <tr>
                                     <td>
-                                        history.ActionDate
+                                        @history.ActionDate
                                     </td>
                                     <td>
                                         @history.UserName
