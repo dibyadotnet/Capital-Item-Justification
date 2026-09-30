@@ -83,30 +83,19 @@ namespace Capital_Item_Justification.Services
             page.Size = PdfSharp.PageSize.A4;
             var gfx = XGraphics.FromPdfPage(page);
             double y = MarginTop;
+            int pageNumber = 1;
+
             DrawHeader(gfx, model, ref y);
 
             DrawRequestInformation(gfx, page, model, ref y);
 
-            DrawEquipmentTable(document, gfx, page, model, ref y);
+            DrawEquipmentTable(document, gfx, page, model, ref y, ref pageNumber);
 
-            DrawJustification(
-                document,
-                gfx,
-                page,
-                model,
-                ref y);
+            DrawJustification(document, gfx, page, model, ref y, ref pageNumber);
 
-            DrawApprovalHistory(
-                document,
-                gfx,
-                page,
-                model,
-                ref y);
+            DrawApprovalHistory(document, gfx, page, model, ref y, ref pageNumber);
 
-            DrawFooter(
-                gfx,
-                page,
-                model);
+            //DrawFooter(gfx, page, model, pageNumber);
         }
         private void DrawHeader(XGraphics gfx, CIJPdfViewModel model, ref double y)
         {
@@ -363,12 +352,12 @@ namespace Capital_Item_Justification.Services
             y += rowHeight;
         }
 
-        private void DrawEquipmentTable(PdfDocument document, XGraphics gfx, PdfPage page, CIJPdfViewModel model, ref double y)
+        private void DrawEquipmentTable(PdfDocument document, XGraphics gfx, PdfPage page, CIJPdfViewModel model, ref double y, ref int pageNumber)
         {
             y += 10;
             DrawSectionTitle(gfx, "EQUIPMENT DETAILS", ref y);
 
-            double[] widths = { 40, 140, 95, 80, 55, 100 };//510
+            double[] widths = { 40, 140, 100, 80, 55, 100 };//510
 
             string[] headers =
             {
@@ -388,13 +377,13 @@ namespace Capital_Item_Justification.Services
                 totalEquipmentCost += item.EquipmentCost;
                 if (y > PageHeight - 100)
                 {
-                    DrawFooter(gfx, page, model);
+                    //DrawFooter(gfx, page, model, pageNumber);
 
                     page = document.AddPage();
                     page.Size = PdfSharp.PageSize.A4;
 
                     gfx = XGraphics.FromPdfPage(page);
-
+                    pageNumber++;
                     y = MarginTop;
 
                     DrawSectionTitle(gfx, "EQUIPMENT DETAILS - CONTINUED", ref y);
@@ -404,7 +393,22 @@ namespace Capital_Item_Justification.Services
 
                 DrawEquipmentRow(gfx, item, widths, ref y);
             }
+            if (y > PageHeight - MarginBottom - 70)
+            {
+                //DrawFooter(gfx, page, model, pageNumber);
 
+                page = document.AddPage();
+
+                page.Size =
+                    PdfSharp.PageSize.A4;
+
+                gfx =
+                    XGraphics.FromPdfPage(page);
+
+                pageNumber++;
+
+                y = MarginTop;
+            }
             DrawTotalRow(gfx, totalEquipmentCost, widths, ref y);
         }
         private void DrawSectionTitle(XGraphics gfx, string title, ref double y)
@@ -539,11 +543,7 @@ namespace Capital_Item_Justification.Services
         {
             return $"₹ {amount:N0}";
         }
-        private void DrawTotalRow(
-     XGraphics gfx,
-     decimal total,
-     double[] widths,
-     ref double y)
+        private void DrawTotalRow(XGraphics gfx, decimal total, double[] widths, ref double y)
         {
             double x = MarginLeft;
 
@@ -611,7 +611,7 @@ namespace Capital_Item_Justification.Services
 
             y += height + 15;
         }
-        private void DrawJustification(PdfDocument document, XGraphics gfx, PdfPage page, CIJPdfViewModel model, ref double y)
+        private void DrawJustification(PdfDocument document, XGraphics gfx, PdfPage page, CIJPdfViewModel model, ref double y, ref int pageNumber)
         {
             y += 5;
 
@@ -636,12 +636,12 @@ namespace Capital_Item_Justification.Services
             {
                 if (y > PageHeight - 80)
                 {
-                    DrawFooter(gfx, page, model);
+                    //DrawFooter(gfx, page, model, pageNumber);
 
                     page = document.AddPage();
 
                     gfx = XGraphics.FromPdfPage(page);
-
+                    pageNumber++;
                     y = MarginTop;
 
                     DrawSectionTitle(
@@ -723,7 +723,7 @@ namespace Capital_Item_Justification.Services
 
             return result;
         }
-        private void DrawApprovalHistory(PdfDocument document, XGraphics gfx, PdfPage page, CIJPdfViewModel model, ref double y)
+        private void DrawApprovalHistory(PdfDocument document, XGraphics gfx, PdfPage page, CIJPdfViewModel model, ref double y, ref int pageNumber)
         {
             if (model.workflowHistory == null ||
                 model.workflowHistory.Count == 0)
@@ -737,23 +737,21 @@ namespace Capital_Item_Justification.Services
                 ref y);
 
             double[] widths =
-            {
-        65,
-        75,
-        65,
-        100,
-        65,
-        125
+    {
+        80,   // Approved Date
+        100,  // Approved By
+        80,   // Role
+        185,  // Remarks
+        70    // Status
     };
 
             string[] headers =
             {
-        "Date",
-        "Step",
+        "Approved Date",
+        "Approved By",
         "Role",
-        "Approver",
-        "Action",
-        "Comments"
+        "Remarks",
+        "Status",
     };
 
             DrawTableHeader(
@@ -766,10 +764,7 @@ namespace Capital_Item_Justification.Services
             {
                 if (y > PageHeight - 100)
                 {
-                    DrawFooter(
-                        gfx,
-                        page,
-                        model);
+                    //DrawFooter(gfx, page, model, pageNumber);
 
                     page = document.AddPage();
 
@@ -778,7 +773,7 @@ namespace Capital_Item_Justification.Services
 
                     gfx =
                         XGraphics.FromPdfPage(page);
-
+                    pageNumber++;
                     y = MarginTop;
 
                     DrawSectionTitle(
@@ -810,12 +805,11 @@ namespace Capital_Item_Justification.Services
 
             string[] values =
             {
-        item.ActionDate?.ToString("dd-MMM-yyyy") ?? "",
-        //item.StepName,
-        item.RoleName,
+        item.ActionDate?.ToString("dd-MMM-yyyy hh:mm") ?? "",
         item.UserName,
-        //item.ac,
-        item.Remark
+        item.RoleName,
+        item.Remark,
+        item.StatusName
     };
 
             var border =
@@ -853,50 +847,57 @@ namespace Capital_Item_Justification.Services
 
             y += height;
         }
-        private void DrawFooter(XGraphics gfx,PdfPage page,CIJPdfViewModel model)
+        private void DrawFooter(XGraphics gfx, PdfPage page, CIJPdfViewModel model, int pageNumber)
         {
-            double y =
-                PageHeight - 35;
+            double footerY =
+                PageHeight - MarginBottom - 25;
 
+            double contentWidth =
+                PageWidth - MarginLeft - MarginRight;
+
+            // Footer separator
             gfx.DrawLine(
                 new XPen(
                     XColors.LightGray,
                     0.7),
                 MarginLeft,
-                y,
+                footerY,
                 PageWidth - MarginRight,
-                y);
+                footerY);
 
+            // CIJ Number - Left
             gfx.DrawString(
                 $"CIJ No: {model.CIJRequest.CIJSNumber}",
                 _smallFont,
                 XBrushes.Gray,
                 new XRect(
                     MarginLeft,
-                    y + 8,
-                    200,
+                    footerY + 6,
+                    contentWidth / 3,
                     15),
                 XStringFormats.TopLeft);
 
+            // Generated text - Center
             gfx.DrawString(
                 "Generated by CIJ System",
                 _smallFont,
                 XBrushes.Gray,
                 new XRect(
-                    200,
-                    y + 8,
-                    200,
+                    MarginLeft + contentWidth / 3,
+                    footerY + 6,
+                    contentWidth / 3,
                     15),
                 XStringFormats.TopCenter);
 
+            // Page number - Right
             gfx.DrawString(
-                $"Page {page}",
+                $"Page {pageNumber}",
                 _smallFont,
                 XBrushes.Gray,
                 new XRect(
-                    PageWidth - 120,
-                    y + 8,
-                    80,
+                    MarginLeft + (contentWidth * 2 / 3),
+                    footerY + 6,
+                    contentWidth / 3,
                     15),
                 XStringFormats.TopRight);
         }

@@ -39,10 +39,13 @@ namespace Capital_Item_Justification.Repository
                                           FullName = user.FullName ?? "",
                                           EmployeeCode = user.EmployeeCode ?? "",
                                           Email = user.Email ?? "",
+                                          DepartmentId = dept != null ? dept.DepartmentId : 0,
                                           DepartmentName = dept != null ? dept.DepartmentName : null,
+                                          LocationId = location != null ? location.LocationId : 0,
                                           LocationName = location != null ? location.LocationName : null,
                                           IsActive = user.IsActive,
                                           RoleName = role != null? role.Name: null,
+                                          RoleId = role != null ? role.Id : null,
                                       }).OrderBy(x => x.FullName).ToListAsync();
 
             return vm;
