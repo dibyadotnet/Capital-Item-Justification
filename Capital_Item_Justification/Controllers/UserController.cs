@@ -1,4 +1,5 @@
 ﻿
+using Azure.Core;
 using Capital_Item_Justification.Models;
 using Capital_Item_Justification.Models;
 using Capital_Item_Justification.Services.Interfaces;
@@ -32,27 +33,47 @@ namespace Capital_Item_Justification.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetUsers(UserListRequest filter)
         {
-            if (page < 1)
-                page = 1;
+            if (filter.page < 1)
+                filter.page = 1;
 
-            if (pageSize <= 0)
-                pageSize = 10;
+            if (filter.pageSize <= 0)
+                filter.pageSize = 10;
 
             var vm = await _userService.GetGetUsersAsync();
-
+            if (filter.departmentId.HasValue)
+            {
+                vm = vm.Where(x => x.DepartmentId == filter.departmentId.Value).ToList();
+            }
+            if (filter.locationId.HasValue)
+            {
+                vm = vm.Where(x => x.LocationId == filter.locationId.Value).ToList();
+            }
+            if (!string.IsNullOrEmpty(filter.roleId))
+            {
+                vm = vm.Where(x => x.RoleId == filter.roleId).ToList();
+            }
             var totalRecords = vm.Count();
-            var users = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+            var users = vm.Skip((filter.page - 1) * filter.pageSize).Take(filter.pageSize).ToList();
+            var totalPages = (int)Math.Ceiling((double)totalRecords / filter.pageSize);
+
+            var departmentsList = await _service.GetDepartment();
+            var locationList = await _service.GetLocation();
+            var roleList = await _roleManager.Roles.OrderBy(x => x.Name).ToListAsync();
+
+            ViewBag.DepartmentList = new SelectList(departmentsList, "DepartmentId", "DepartmentName", filter.departmentId);
+            ViewBag.LocationList = new SelectList(locationList, "LocationId", "LocationName", filter.locationId);
+            ViewBag.RoleList = new SelectList(roleList, "Id", "Name", filter.roleId);
+            
             var model = new UserListViewModel
             {
                 Users = users,
 
                 Pagination = new PaginationViewModel
                 {
-                    CurrentPage = page,
-                    PageSize = pageSize,
+                    CurrentPage = filter.page,
+                    PageSize = filter.pageSize,
                     TotalRecords = totalRecords,
                     TotalPages = totalPages,
                     ControllerName = "User",

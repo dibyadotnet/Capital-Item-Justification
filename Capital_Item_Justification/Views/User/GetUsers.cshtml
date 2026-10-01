@@ -30,6 +30,53 @@
 
         <div class="card-body">
 
+            <form asp-controller="User" asp-action="GetUsers" method="get">
+                <div class="row g-3 align-items-end mb-2">
+                    <!-- CIJ Number -->
+                    <div class="col-md-3">
+                        <label for="departmentId" class="form-label fw-semibold">
+                            Department
+                        </label>
+                        <select id="DepartmentId" name="departmentId" class="form-select" asp-items="ViewBag.DepartmentList">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                    <!-- Status -->
+                    <div class="col-md-3">
+                        <label for="LocationId" class="form-label fw-semibold">
+                            Location
+                        </label>
+                        <select id="LocationId" name="locationId" class="form-select" asp-items="ViewBag.LocationList">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="RoleId" class="form-label fw-semibold">
+                            Role
+                        </label>
+                        <select id="RoleId" name="roleId" class="form-select" asp-items="ViewBag.RoleList">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                    <!-- Buttons -->
+                    <div class="col-md-3">
+
+                        <button type="submit"
+                                class="btn btn-primary me-2">
+                            <i class="bi bi-search me-1"></i>
+                            Search
+                        </button>
+
+                        <a asp-action="GetUsers"
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>
+                            Reset
+                        </a>
+
+                    </div>
+                </div>
+            </form>
+
             <div class="table-responsive">
                 <div class="d-flex justify-content-end mb-3">
 

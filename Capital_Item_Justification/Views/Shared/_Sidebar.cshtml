@@ -1,21 +1,70 @@
-﻿<aside class="app-sidebar bg-body-secondary shadow"
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    bool isDepartmentActive =
+        currentController == "Department" &&
+        currentAction == "GetAllDept";
+
+    bool isProjectActive =
+        currentController == "Project" &&
+        currentAction == "GetProjects";
+
+    bool isLocationActive =
+        currentController == "Location" &&
+        currentAction == "GetAllLocation";
+
+    bool isUserActive =
+        currentController == "User" &&
+        currentAction == "GetUsers";
+
+    bool isRoleActive =
+        currentController == "Role" &&
+        currentAction == "GetRoles";
+
+    bool isRoleBudgetLimitActive =
+        currentController == "RoleBudgetLimit" &&
+        currentAction == "GeRoleBudgetLimit";
+
+    bool isMastersActive =
+        isDepartmentActive ||
+        isProjectActive ||
+        isLocationActive ||
+        isUserActive ||
+        isRoleActive ||
+        isRoleBudgetLimitActive;
+}
+@{
+    var currentController1 = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction1 = ViewContext.RouteData.Values["action"]?.ToString();
+
+    bool isCreateCIJActive =
+        currentController1 == "CIJ" &&
+        currentAction1 == "CreateCIJ";
+
+    bool isMyRequestsActive =
+        currentController1 == "CIJ" &&
+        currentAction1 == "MyRequests";
+
+    bool isTrackRequestActive =
+        currentController1 == "WorkFlow" &&
+        currentAction1 == "TrackRequest";
+
+    bool isCIJRequestActive = isCreateCIJActive || isMyRequestsActive || isTrackRequestActive;
+
+}
+<aside class="app-sidebar bg-body-secondary shadow"
        data-bs-theme="dark">
 
     <!-- Brand -->
     <div class="sidebar-brand">
-
-        <a asp-controller="Dashboard"
-           asp-action="Index"
-           class="brand-link">
-
-            <img src="~/adminlte/assets/img/AdminLTELogo.png"
-                 alt="CIJ"
+        <a>
+            <img src="~/image/Sceh-Logo.png"
+                 alt="SCEH Logo"
                  class="brand-image opacity-75 shadow">
-
-            <span class="brand-text fw-light">
-                CIJ Application
+            <span class="brand-text fw-semibold">
+                CIJ
             </span>
-
         </a>
 
     </div>
@@ -45,16 +94,7 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a asp-controller="WorkFlow"
-                           asp-action="TrackRequest"
-                           class="nav-link">
-                            <i class="nav-icon bi bi-check2-square me-2"></i>
-                            <p>
-                                Track MyRequest
-                            </p>
-                        </a>
-                    </li>
+
                 }
                 @if (!User.IsInRole("Requester"))
                 {
@@ -62,7 +102,7 @@
                         <a asp-controller="WorkFlow"
                            asp-action="MyApproval"
                            class="nav-link">
-                            <i class="nav-icon bi bi-check2-square me-2"></i>
+                            <i class="nav-icon bi bi-list-check"></i>
                             <p>
                                 Pending Approval
                             </p>
@@ -75,7 +115,7 @@
                         <a asp-controller="WorkFlow"
                            asp-action="CompletedApproval"
                            class="nav-link">
-                            <i class="nav-icon bi bi-check2-square me-2"></i>
+                            <i class="nav-icon bi bi-check2-all"></i>
                             <p>
                                 Completed Approval
                             </p>
@@ -84,20 +124,15 @@
                 }
                 @if (User.IsInRole("Requester"))
                 {
-                    <!-- CIJ Request -->
-                    <li class="nav-item">
 
-                        <a href="#"
-                           class="nav-link">
+                    <li class="nav-item @(isCIJRequestActive ? "menu-open" : "")">
 
+                        <a href="#" class="nav-link @(isCIJRequestActive ? "active" : "")">
                             <i class="nav-icon bi bi-file-earmark-text"></i>
-
                             <p>
                                 CIJ Request
-
                                 <i class="nav-arrow bi bi-chevron-right"></i>
                             </p>
-
                         </a>
 
 
@@ -106,19 +141,34 @@
 
                             <!-- Create CIJ -->
                             <li class="nav-item">
-
                                 <a asp-controller="CIJ"
                                    asp-action="CreateCIJ"
-                                   class="nav-link">
-
-                                    <i class="nav-icon bi bi-circle"></i>
-
+                                   class="nav-link @(isCreateCIJActive ? "active" : "")">
+                                    <i class="nav-icon bi bi-file-earmark-plus"></i>
                                     <p>
                                         Create CIJ
                                     </p>
-
                                 </a>
-
+                            </li>
+                            <li class="nav-item">
+                                <a asp-controller="CIJ"
+                                   asp-action="MyRequests"
+                                   class="nav-link @(isMyRequestsActive ? "active" : "")">
+                                    <i class="nav-icon bi bi-file-earmark-text"></i>
+                                    <p>
+                                        My Requests
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-controller="WorkFlow"
+                                   asp-action="TrackRequest"
+                                   class="nav-link @(isTrackRequestActive ? "active" : "")">
+                                    <i class="nav-icon bi bi-search"></i>
+                                    <p>
+                                        Request Tracking
+                                    </p>
+                                </a>
                             </li>
                         </ul>
 
@@ -127,9 +177,9 @@
 
                 @if (User.IsInRole("Admin"))
                 {
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon bi bi-database"></i>
+                    <li class="nav-item @(isMastersActive ? "menu-open" : "")">
+                        <a href="#" class="nav-link @(isMastersActive ? "active" : "")">
+                            <i class="nav-icon bi bi-sliders"></i>
                             <p>
                                 Masters
                                 <i class="nav-arrow bi bi-chevron-right"></i>
@@ -143,10 +193,9 @@
                             <!-- Department -->
                             <li class="nav-item">
 
-                                <a href="@Url.Action("GetAllDept","Department")"
-                                   class="nav-link">
+                                <a href="@Url.Action("GetAllDept","Department")" class="nav-link @(isDepartmentActive ? "active" : "")">
 
-                                    <i class="nav-icon bi bi-circle"></i>
+                                    <i class="nav-icon bi bi-diagram-3"></i>
 
                                     <p>
                                         Department
@@ -159,9 +208,9 @@
                             <li class="nav-item">
 
                                 <a href="@Url.Action("GetProjects","Project")"
-                                   class="nav-link">
+                                   class="nav-link @(isProjectActive ? "active" : "")">
 
-                                    <i class="nav-icon bi bi-circle"></i>
+                                    <i class="nav-icon bi bi-kanban"></i>
 
                                     <p>
                                         Project
@@ -175,9 +224,9 @@
                             <li class="nav-item">
 
                                 <a href="@Url.Action("GetAllLocation","Location")"
-                                   class="nav-link">
+                                   class="nav-link @(isLocationActive ? "active" : "")">
 
-                                    <i class="nav-icon bi bi-circle"></i>
+                                    <i class="nav-icon bi bi-geo-alt"></i>
 
                                     <p>
                                         Location
@@ -186,27 +235,10 @@
                                 </a>
 
                             </li>
-
-
-                            <!-- Project -->
-                            @*  <li class="nav-item">
-
-                        <a href="#"
-                        class="nav-link">
-
-                        <i class="nav-icon bi bi-circle"></i>
-
-                        <p>
-                        Project
-                        </p>
-
-                        </a>
-
-                        </li> *@
                             <li class="nav-item">
                                 <a href="@Url.Action("GetUsers","User")"
-                                   class="nav-link">
-                                    <i class="nav-icon bi bi-circle"></i>
+                                   class="nav-link @(isUserActive ? "active" : "")">
+                                    <i class="nav-icon bi bi-person"></i>
                                     <p>
                                         User
                                     </p>
@@ -215,8 +247,8 @@
                             </li>
                             <li class="nav-item">
                                 <a href="@Url.Action("GetRoles","Role")"
-                                   class="nav-link">
-                                    <i class="nav-icon bi bi-circle"></i>
+                                   class="nav-link @(isRoleActive ? "active" : "")">
+                                    <i class="nav-icon bi bi-person-badge"></i>
                                     <p>
                                         Role
                                     </p>
@@ -225,8 +257,8 @@
                             </li>
                             <li class="nav-item">
                                 <a href="@Url.Action("GeRoleBudgetLimit","RoleBudgetLimit")"
-                                   class="nav-link">
-                                    <i class="nav-icon bi bi-circle"></i>
+                                   class="nav-link @(isRoleBudgetLimitActive ? "active" : "")">
+                                    <i class="nav-icon bi bi-currency-rupee"></i>
                                     <p>
                                         Role BudgetLimit
                                     </p>
@@ -236,6 +268,7 @@
                         </ul>
 
                     </li>
+
                 }
             </ul>
 
