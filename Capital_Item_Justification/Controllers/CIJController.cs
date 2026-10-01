@@ -33,6 +33,30 @@ namespace Capital_Item_Justification.Controllers
         [Authorize]
         public async Task<IActionResult> Dashboard()
         {
+            TotalCountDashboardViewModel totalVM = new();
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                if (!User.IsInRole("Requester"))
+                {
+                    return RedirectToAction("MyApproval", "WorkFlow");
+                }
+                var requests = await _service.GetDashboard(user.Id);
+                totalVM.DraftCount = requests.Count;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return View(totalVM);
+        }
+        public async Task<IActionResult> MyRequests()
+        {
             List<DashboardViewModel> list = new();
             try
             {
@@ -49,7 +73,6 @@ namespace Capital_Item_Justification.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
             return View(list);
@@ -161,7 +184,8 @@ namespace Capital_Item_Justification.Controllers
             {
                 TempData["ToastMessage"] = "Error while Save CIJ.";
                 TempData["ToastType"] = "error";
-                if (cIJMainViewModel.CIJRequest.Cijid>0) {
+                if (cIJMainViewModel.CIJRequest.Cijid > 0)
+                {
                     return RedirectToAction(nameof(Edit), new { cijId = cIJMainViewModel.CIJRequest.Cijid });
                 }
                 else
@@ -412,13 +436,13 @@ namespace Capital_Item_Justification.Controllers
                     return Unauthorized();
                 }
                 var roles = await _userManager.GetRolesAsync(user);
-                cIJMainViewModel.userId=user.Id;
+                cIJMainViewModel.userId = user.Id;
                 cIJMainViewModel.userRoles = roles.ToList();
                 await _workflowService.SubmitCIJAsync(cIJMainViewModel);
-                await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.Cijid,cIJMainViewModel.CIJRequest.CIJSNumber, "Submitted", "CIJ Request Submitted");
+                await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.Cijid, cIJMainViewModel.CIJRequest.CIJSNumber, "Submitted", "CIJ Request Submitted");
                 TempData["ToastMessage"] = "CIJ request submitted successfully.";
                 TempData["ToastType"] = "success";
-            
+
                 return RedirectToAction("Dashboard", "CIJ");
             }
             catch (Exception)

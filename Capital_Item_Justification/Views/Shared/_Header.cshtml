@@ -7,7 +7,7 @@
 
 <nav class="app-header navbar navbar-expand bg-body">
 
-    <div class="container-fluid" >
+    <div class="container-fluid">
 
         <!-- Left side -->
         <ul class="navbar-nav">
@@ -23,39 +23,20 @@
                 </a>
             </li>
             <!-- Home -->
-           @*  <l class="nav-item d-none d-md-block">
-                <a asp-controller="CIJ" asp-action="Dashboard" class="nav-link">
-                    Dashboard
-                </a>
+            @*  <l class="nav-item d-none d-md-block">
+            <a asp-controller="CIJ" asp-action="Dashboard" class="nav-link">
+            Dashboard
+            </a>
             </l> *@
+            <div class="hospital-header text-primary">
+                <span class="hospital-name">
+                    DR. Shroff's Charity Eye Hospital
+                </span>
+            </div>
         </ul>
         <!-- Right side -->
         <ul class="navbar-nav ms-auto">
-            <!-- Notifications -->
-           @*  <li class="nav-item dropdown">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#">
-                    <i class="fa-regular fa-bell"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-
-                    <span class="dropdown-item dropdown-header">
-                        Notifications
-                    </span>
-
-                    <div class="dropdown-divider"></div>
-
-                    <a href="#" class="dropdown-item">
-
-                        <i class="fa-solid fa-envelope me-2"></i>
-
-                        No new notifications
-
-                    </a>
-
-                </div>
-
-            </li> *@
-            <!-- User Menu -->
+           
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <li class="nav-item dropdown">

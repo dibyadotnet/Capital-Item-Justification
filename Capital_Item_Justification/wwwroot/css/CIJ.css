@@ -233,3 +233,75 @@
     border-color: #86b7fe !important;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .25) !important;
 }
+
+.hospital-header {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+.hospital-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand-image {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.brand-text {
+    font-size: 20px;
+}
+.sidebar-menu .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff !important;
+}
+.dashboard-card {
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
+}
+
+.dashboard-total {
+    background: #f3f7ff;
+    border-left: 4px solid #3b82f6 !important;
+}
+
+.dashboard-draft {
+    background: #f7f7f8;
+    border-left: 4px solid #6b7280 !important;
+}
+
+.dashboard-pending {
+    background: #fff8e8;
+    border-left: 4px solid #f59e0b !important;
+}
+
+.dashboard-rejected {
+    background: #fff4f4;
+    border-left: 4px solid #dc3545 !important;
+}
+
+.dashboard-completed {
+    background: #f0faf5;
+    border-left: 4px solid #198754 !important;
+}
+
