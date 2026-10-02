@@ -97,7 +97,7 @@
                                     @if (item.IsActive)
                                     {
                                         <a asp-action="EditProject" title="Edit Project" asp-route-id="@item.ProjectId"
-                                           class="btn btn-sm btn-outline-primary">
+                                           class="btn btn-sm btn-primary btn-edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                     }
@@ -105,7 +105,7 @@
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@item.ProjectId" />
 
-                                        <button type="submit" title="Manage Status" class="btn btn-sm btn-outline-warning">
+                                        <button type="submit" title="Manage Status" class="btn btn-sm btn-warning btn-edit">
                                             <i class="bi bi-toggle-on"></i>
                                         </button>
                                     </form>

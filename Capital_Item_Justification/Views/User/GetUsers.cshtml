@@ -181,7 +181,7 @@
                                     {
                                         <a asp-action="EditUser" title="Edit User"
                                         asp-route-id="@user.Id"
-                                        class="btn btn-sm btn-outline-primary">
+                                        class="btn btn-sm btn-primary btn-edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                     }
@@ -195,8 +195,8 @@
                                                name="id"
                                                value="@user.Id" />
 
-                                        <button type="submit" title="Manage Status"                                   
-                                                class="btn btn-sm btn-outline-warning">
+                                        <button type="submit" title="Manage Status"
+                                                class="btn btn-sm btn-warning btn-edit">
                                             <i class="bi bi-toggle-on"></i>
 
                                         </button>
@@ -205,7 +205,7 @@
                                     @if(user.IsActive){
                                     <a asp-action="ManageRoles"
                                        asp-route-id="@user.Id"
-                                       class="btn btn-sm btn-outline-success"
+                                           class="btn btn-sm btn-success btn-edit"
                                        title="Manage Roles">
 
                                         <i class="bi bi-person-check"></i>

@@ -21,14 +21,16 @@ namespace Capital_Item_Justification.Controllers
         private readonly IWorkflowService _workflowService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         public CIJController(ICIJRequestService service, ILogger<WorkFlowController> logger, IWorkflowService workflowService,
-            UserManager<ApplicationUser> userManager, IEmailService emailService)
+            UserManager<ApplicationUser> userManager, IEmailService emailService, RoleManager<ApplicationRole> roleManager)
         {
             _service = service;
             _logger = logger;
             _workflowService = workflowService;
             _userManager = userManager;
             _emailService = emailService;
+            _roleManager = roleManager;
         }
         [Authorize]
         public async Task<IActionResult> Dashboard()
@@ -41,12 +43,30 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                if (!User.IsInRole("Requester"))
+                var roles = await _userManager.GetRolesAsync(user);
+                ViewBag.Roles = roles;
+                if (User.IsInRole("Requester"))
                 {
-                    return RedirectToAction("MyApproval", "WorkFlow");
+                    totalVM = await _service.GetDashboardRequestsCount(user.Id);
                 }
-                var requests = await _service.GetDashboard(user.Id);
-                totalVM.DraftCount = requests.Count;
+                else
+                {
+                    List<string> roleIds = new();
+                    foreach (var roleName in roles)
+                    {
+                        var role = await _roleManager.FindByNameAsync(roleName);
+
+                        if (role != null)
+                        {
+                            roleIds.Add(role.Id);
+                        }
+                    }
+                    var vm = await _workflowService.GetMyApprovalAsync(user, roleIds);
+                    totalVM.PendingCount = vm.Where(a => a.StatusName == "Pending").Count();
+                    totalVM.CompletedCount = vm.Where(a => a.StatusName == "Completed").Count();
+                    totalVM.QueryCount = vm.Where(a => a.StatusName == "Query").Count();
+                }
+
             }
             catch (Exception)
             {

@@ -20,7 +20,7 @@
 
         <div class="card-header">
             <strong class="bi bi-check2-square me-2">
-                Pending Approval
+                @ViewBag.Page Approval
             </strong>
         </div>
 
@@ -102,9 +102,8 @@
                                            asp-action="ViewCIJRequest"
                                            asp-route-approvalId="@item.ApprovalId"
                                            asp-route-cijId="@item.CIJId"
-                                           class="btn btn-sm btn-primary view-btn">
+                                           class="btn btn-sm btn-primary btn-edit" title="View CIJ">
                                             <i class="bi bi-eye me-1"></i>
-                                            View
                                         </a>
                                         @if (item.StatusName == "Pending" || (item.StatusName == "Query" && item.ClarificationUserType == "Target"))
                                         {
@@ -112,9 +111,8 @@
                                                asp-action="ApprovalAction"
                                                asp-route-approvalId="@item.ApprovalId"
                                                asp-route-cijId="@item.CIJId"
-                                               class="btn btn-sm btn-success">
+                                               class="btn btn-sm btn-success btn-edit" title="Take Action">
                                                 <i class="bi bi-check2-square me-1"></i>
-                                                Take Action
                                             </a>
                                         }
                                         @if (item.StatusName == "Completed" && item.ApproverRole=="Purchase")
@@ -122,8 +120,8 @@
                                             <a asp-controller="GeneratePDF"
                                                asp-action="DownloadCIJPDF"
                                                asp-route-cijId="@item.CIJId"
-                                               class="btn btn-sm btn-success view-btn">
-                                                CIJ Download
+                                               class="btn btn-sm btn-danger btn-edit" title="Download CIJ PDF">
+                                                <i class="bi bi-file-earmark-pdf"></i>
                                             </a>
                                         }
 

@@ -69,7 +69,7 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<WorkflowHistoryViewModel>().HasNoKey();
         modelBuilder.Entity<CIJJustificationViewModel>().HasNoKey();
         modelBuilder.Entity<RequestTrackingViewModel>().HasNoKey();
-
+        modelBuilder.Entity<TotalCountDashboardViewModel>().HasNoKey().ToView(null);
         modelBuilder.Entity<CijEmailConfiguration>(entity =>
         {
             entity.HasKey(e => e.EmailConfigurationId).HasName("PK__CIJ_Emai__1452379B4A3658F2");

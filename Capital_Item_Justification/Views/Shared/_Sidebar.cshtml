@@ -59,14 +59,11 @@
     <!-- Brand -->
     <div class="sidebar-brand">
         <a>
-            <img src="~/image/Sceh-Logo.png"
-                 alt="SCEH Logo"
-                 class="brand-image opacity-75 shadow">
+            <img src="~/image/Sceh-Logo2.png" alt="SCEH Logo">
             <span class="brand-text fw-semibold">
                 CIJ
             </span>
         </a>
-
     </div>
 
     <!-- Sidebar Wrapper -->
@@ -80,22 +77,18 @@
                 data-accordion="false">
 
                 <!-- Dashboard -->
-                @if (User.IsInRole("Requester"))
-                {
-                    <li class="nav-item">
 
-                        <a asp-controller="CIJ"
-                           asp-action="Dashboard"
-                           class="nav-link">
-                            <i class="nav-icon bi bi-speedometer2"></i>
-                            <p>
-                                My Dashboard
-                            </p>
-                        </a>
-                    </li>
+                <li class="nav-item">
 
-
-                }
+                    <a asp-controller="CIJ"
+                       asp-action="Dashboard"
+                       class="nav-link">
+                        <i class="nav-icon bi bi-speedometer2"></i>
+                        <p>
+                            My Dashboard
+                        </p>
+                    </a>
+                </li>
                 @if (!User.IsInRole("Requester"))
                 {
                     <li class="nav-item">
@@ -175,7 +168,7 @@
                     </li>
                 }
 
-                @if (User.IsInRole("Admin"))
+                @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
                 {
                     <li class="nav-item @(isMastersActive ? "menu-open" : "")">
                         <a href="#" class="nav-link @(isMastersActive ? "active" : "")">

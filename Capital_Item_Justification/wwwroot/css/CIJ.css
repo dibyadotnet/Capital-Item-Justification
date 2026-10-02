@@ -1,4 +1,29 @@
-﻿body {
+﻿html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+.app-wrapper {
+    min-height: 100vh;
+}
+
+.app-main {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.app-content {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+    .app-content > .container-fluid {
+        min-height: 0;
+    }
+
+body {
     background: #f4f7fb;
 }
 
@@ -257,8 +282,8 @@
 }
 
 .brand-image {
-    width: 40px;
-    height: 40px;
+   /* width: 40px;
+    height: 40px;*/
     object-fit: contain;
 }
 
@@ -304,4 +329,12 @@
     background: #f0faf5;
     border-left: 4px solid #198754 !important;
 }
+.dashboard-query {
+    color: #f39c12 !important;
+    border-left: 4px solid #f39c12 !important;
+}
+.btn-edit {
+    padding: 4px 10px;
+}
+
 
