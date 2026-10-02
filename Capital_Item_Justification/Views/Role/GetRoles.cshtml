@@ -103,7 +103,7 @@
                                 @if (role.IsActive){
                                     <a asp-action="Edit"
                                        asp-route-id="@role.Id"
-                                       class="btn btn-sm btn-outline-primary"
+                                       class="btn btn-sm btn-primary btn-edit"
                                        title="Edit Role">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
@@ -120,7 +120,7 @@
                                            value="@role.Id" />
 
                                     <button type="submit"
-                                            class="btn btn-sm btn-outline-danger"
+                                            class="btn btn-sm btn-warning btn-edit"
                                             title="Change Status">
                                         <i class="bi bi-toggle-off"></i>
                                     </button>

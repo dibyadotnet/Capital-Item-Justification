@@ -25,5 +25,7 @@ namespace Capital_Item_Justification.Services.Interfaces
 
         Task<List<RequestTrackingViewModel>> GetCijNumberListAsync(string userId);
         Task<List<StatusViewModel>> GetStatusListAsync();
+
+        Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(string userId);
     }
 }

@@ -84,5 +84,10 @@ namespace Capital_Item_Justification.Services
         {
             return await _cijMainRepository.GetStatusListAsync();
         }
+        public async Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(string userId)
+        {
+            return await _cijMainRepository.GetDashboardRequestsCount(userId);
+        }
+        
     }
 }

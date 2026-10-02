@@ -702,5 +702,17 @@ namespace Capital_Item_Justification.Repository
 
             return statusList;
         }
+        public async Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(string userId)
+        {
+            var dashboardData = await _context
+                .Set<TotalCountDashboardViewModel>()
+                .FromSqlRaw(
+                    "EXEC SP_GetCIJDashboardCount @UserId = {0}",
+                    userId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return dashboardData.FirstOrDefault() ?? new TotalCountDashboardViewModel();
+        }
     }
 }

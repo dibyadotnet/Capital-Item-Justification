@@ -8,5 +8,9 @@
         public int ApprovedCount { get; set; }
         public int RejectedCount { get; set; }
         public int CompletedCount { get; set; }
+        public int QueryCount { get; set; }
+        public int PendingStatusId { get; set; }
+        public int RejectedStatusId { get; set; }
+        public int CompletedStatusId { get; set; }
     }
 }

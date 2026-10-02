@@ -29,6 +29,6 @@ namespace Capital_Item_Justification.Repository.Interfaces
 
         Task<List<RequestTrackingViewModel>> GetCijNumberListAsync(string userId);
         Task<List<StatusViewModel>> GetStatusListAsync();
-
+        Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(string userId);
     }
 }

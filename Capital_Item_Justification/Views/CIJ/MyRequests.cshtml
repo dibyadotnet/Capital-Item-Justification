@@ -51,7 +51,9 @@
                                 @* <a asp-controller="WorkFlow" asp-action="ViewCIJRequest" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a> *@
                                 @if (User.IsInRole("Requester"))
                                 {
-                                    <a asp-action="Edit" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-warning">Edit</a>
+                                    <a asp-action="Edit" asp-route-cijId="@item.CIJId" title="CIJ Edit" class="btn btn-sm btn-primary btn-edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                 }
                             </td>
                         </tr>

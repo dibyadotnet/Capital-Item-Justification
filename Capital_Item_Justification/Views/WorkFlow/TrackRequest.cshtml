@@ -56,8 +56,8 @@
                           class="d-flex align-items-center gap-2">
 
                         @* <label class="mb-0">
-                            Show:
-                        </label> *@
+                    Show:
+                    </label> *@
 
                         <select name="pageSize"
                                 class="form-select form-select-sm"
@@ -80,10 +80,10 @@
                             </option>
 
                         </select>
-@* 
-                        <span class="text-muted">
-                            entries
-                        </span> *@
+                        @*
+                    <span class="text-muted">
+                    entries
+                    </span> *@
 
                         <input type="hidden"
                                name="page"
@@ -158,16 +158,16 @@
                                            asp-action="ViewCIJRequest"
                                            asp-route-approvalId="@item.WorkflowApprovalId"
                                            asp-route-cijId="@item.CijId"
-                                           class="btn btn-sm btn-primary view-btn">
-                                            View
+                                           class="btn btn-sm btn-primary btn-edit" title="View CIJ">
+                                            <i class="bi bi-eye me-1"></i>
                                         </a>
-                                        &nbsp;
-                                        @if(item.CurrentStatus =="Completed"){
+                                        @if (item.CurrentStatus == "Completed")
+                                        {
                                             <a asp-controller="GeneratePDF"
                                                asp-action="DownloadCIJPDF"
                                                asp-route-cijId="@item.CijId"
-                                               class="btn btn-sm btn-success view-btn">
-                                                CIJ Download
+                                               class="btn btn-sm btn-danger btn-edit" title="Download CIJ PDF">
+                                                <i class="bi bi-file-earmark-pdf"></i>
                                             </a>
                                         }
                                     </td>

@@ -15,7 +15,7 @@ namespace Capital_Item_Justification.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager,IEmailService emailService)
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailService emailService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -34,15 +34,15 @@ namespace Capital_Item_Justification.Controllers
                     return View();
                 }
                 var roles = await _userManager.GetRolesAsync(loggedinUser);
-
-                if (roles.Contains("Requester"))
-                {
-                    return RedirectToAction("Dashboard", "CIJ");
-                }
-                else
-                {
-                    return RedirectToAction("MyApproval", "WorkFlow");
-                }
+                return RedirectToAction("Dashboard", "CIJ");
+                //if (roles.Contains("Requester"))
+                //{
+                //    return RedirectToAction("Dashboard", "CIJ");
+                //}
+                //else
+                //{
+                //    return RedirectToAction("MyApproval", "WorkFlow");
+                //}
             }
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -92,26 +92,20 @@ namespace Capital_Item_Justification.Controllers
 
             if (result.Succeeded)
             {
-                if (!string.IsNullOrEmpty(returnUrl) &&
-                    Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
-                var loggedinUser = await _userManager.GetUserAsync(User);
-                if (loggedinUser == null)
-                {
-                    return View(model);
-                }
-                var roles = await _userManager.GetRolesAsync(loggedinUser);
+                //if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                //{
+                //    return Redirect(returnUrl);
+                //}
+                //var loggedinUser = await _userManager.GetUserAsync(User);
+                //if (loggedinUser == null)
+                //{
+                //    return View(model);
+                //}
+                //var roles = await _userManager.GetRolesAsync(loggedinUser);
 
-                if (roles.Contains("Requester"))
-                {
-                    return RedirectToAction("Dashboard", "CIJ");
-                }
-                else
-                {
-                    return RedirectToAction("MyApproval", "WorkFlow");
-                }
+
+                return RedirectToAction("Dashboard", "CIJ");
+                
             }
 
             if (result.IsLockedOut)
@@ -192,7 +186,7 @@ namespace Capital_Item_Justification.Controllers
                 Request.Scheme);
 
             // TODO: Send resetLink through your email service
-            await _emailService.SendPasswordResetEmailAsync(user.Email!,resetLink!);
+            await _emailService.SendPasswordResetEmailAsync(user.Email!, resetLink!);
 
             return RedirectToAction(nameof(ForgotPasswordConfirmation));
         }

@@ -54,6 +54,7 @@ namespace Capital_Item_Justification.Controllers
                 }
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName != "Completed").ToList();
+                ViewBag.Page = "Pending";
             }
             catch (Exception)
             {
@@ -87,6 +88,7 @@ namespace Capital_Item_Justification.Controllers
                 }
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName == "Completed").ToList();
+                ViewBag.Page = "Completed";
             }
             catch (Exception)
             {
