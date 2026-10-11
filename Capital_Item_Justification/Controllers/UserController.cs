@@ -112,13 +112,28 @@ namespace Capital_Item_Justification.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserViewModel model)
         {
+            var departmentsList = await _service.GetDepartment();
+            var departmentItems = departmentsList.Select(x => new SelectListItem
+            {
+                Value = x.DepartmentId.ToString(),
+                Text = x.DepartmentName
+            }).ToList();
+            var locationList = await _service.GetLocation();
+            var locationItems = locationList.Select(x => new SelectListItem
+            {
+                Value = x.LocationId.ToString(),
+                Text = x.LocationName
+            }).ToList();
+
+            model.Departments = departmentItems;
+            model.Locations = locationItems;
+
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View("CreateUser",model);
             }
-
+            
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
-
             if (existingUser != null)
             {
                 ModelState.AddModelError("Email", "A user with this email already exists.");
@@ -214,9 +229,25 @@ namespace Capital_Item_Justification.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserViewModel model)
         {
+            var departmentsList = await _service.GetDepartment();
+            var departmentItems = departmentsList.Select(x => new SelectListItem
+            {
+                Value = x.DepartmentId.ToString(),
+                Text = x.DepartmentName
+            }).ToList();
+            var locationList = await _service.GetLocation();
+            var locationItems = locationList.Select(x => new SelectListItem
+            {
+                Value = x.LocationId.ToString(),
+                Text = x.LocationName
+            }).ToList();
+
+            model.Departments = departmentItems;
+            model.Locations = locationItems;
+
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View("EditUser",model);
             }
 
             if (string.IsNullOrEmpty(model.Id))

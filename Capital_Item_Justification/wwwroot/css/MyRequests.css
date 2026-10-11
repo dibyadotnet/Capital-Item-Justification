@@ -1,0 +1,193 @@
+﻿
+/* ==============================
+   CIJ Requests Card
+================================= */
+.cij-requests-card {
+    border: 1px solid #dedede;
+    border-radius: 6px;
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+/* ==============================
+   Card Header
+================================= */
+
+.cij-requests-header {
+    padding: 16px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #dedede;
+}
+
+.cij-requests-title {
+    font-size: 20px;
+    color: #212529;
+}
+
+.cij-requests-description {
+    font-size: 14px;
+    color: #6c757d !important;
+}
+
+/* ==============================
+   Primary Buttons
+   Matching Login Page Red
+================================= */
+
+.cij-create-btn,
+.cij-edit-btn {
+    background-color: #dc171f;
+    border: 1px solid #dc171f;
+    color: #ffffff;
+}
+
+.cij-create-btn {
+    padding: 9px 14px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+    .cij-create-btn:hover,
+    .cij-edit-btn:hover {
+        background-color: #b91219;
+        border-color: #b91219;
+        color: #ffffff;
+    }
+
+    .cij-create-btn:focus-visible,
+    .cij-edit-btn:focus-visible {
+        outline: 2px solid #dc171f;
+        outline-offset: 3px;
+    }
+
+/* ==============================
+   Card Body
+================================= */
+
+.cij-requests-body {
+    padding: 16px;
+}
+
+/* ==============================
+   Table
+================================= */
+
+.cij-requests-table {
+    width: 100%;
+    margin-bottom: 0;
+    font-size: 14px;
+    color: #212529;
+    vertical-align: middle;
+    border-color: #dedede;
+}
+
+    /* Dark red table header */
+
+    .cij-requests-table thead th {
+        background-color: #b91219 !important;
+        color: #ffffff !important;
+        font-weight: 500;
+        padding: 11px 8px;
+        white-space: nowrap;
+        border-color: #c92a31;
+        border-bottom: 2px solid #a30f16;
+    }
+
+    /* Table rows */
+
+    .cij-requests-table tbody td {
+        padding: 6px 8px;
+        height: 36px;
+        white-space: nowrap;
+        background-color: #ffffff;
+    }
+
+    /* Alternating row background */
+
+    .cij-requests-table.table-striped > tbody > tr:nth-of-type(odd) > * {
+        background-color: #f1f2f4;
+        color: #212529;
+    }
+
+    /* Hover effect */
+
+    .cij-requests-table tbody tr:hover > * {
+        background-color: #fbe9ea !important;
+        color: #212529;
+    }
+
+    /* CIJ number */
+
+    .cij-requests-table .cij-number {
+        color: #b91219;
+        font-weight: 500;
+    }
+
+/* Status */
+
+.cij-status {
+    color: #343a40;
+    font-weight: 400;
+}
+
+/* ==============================
+   Edit Button
+================================= */
+
+.cij-edit-btn {
+    width: 36px;
+    height: 30px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 15px;
+    line-height: 22px;
+}
+
+/* ==============================
+   Empty State
+================================= */
+
+.cij-empty-state {
+    padding: 30px !important;
+    color: #6c757d !important;
+    background-color: #ffffff !important;
+}
+
+/* ==============================
+   Responsive Design
+================================= */
+
+@media (max-width: 991.98px) {
+
+    .cij-requests-description {
+        display: inline-block;
+        padding-top: 4px;
+    }
+
+    .cij-requests-header .text-lg-center {
+        text-align: left !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+
+    .cij-requests-header {
+        padding: 14px;
+    }
+
+    .cij-requests-body {
+        padding: 10px;
+    }
+
+    .cij-requests-title {
+        font-size: 18px;
+    }
+
+    .cij-create-btn {
+        margin-top: 4px;
+    }
+}
+
+
