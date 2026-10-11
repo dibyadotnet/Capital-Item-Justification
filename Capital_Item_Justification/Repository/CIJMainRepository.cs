@@ -411,7 +411,7 @@ namespace Capital_Item_Justification.Repository
             {
                 DepartmentId = a.DepartmentId,
                 DepartmentName = a.DepartmentName
-            }).ToListAsync();
+            }).OrderBy(a=>a.DepartmentName).ToListAsync();
         }
 
         public async Task<CIJMainViewModel> GetCIJById(int cijId)

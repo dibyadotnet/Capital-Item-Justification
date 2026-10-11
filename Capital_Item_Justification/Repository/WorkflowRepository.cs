@@ -133,7 +133,7 @@ namespace Capital_Item_Justification.Repository
                         workflowCode = "WF001";
                     }
                 }
-                if (locartiontype == "Secondary" && costCenter == "SCEH")
+                if (locartiontype == "Secondary")//&& costCenter == "SCEH"
                 {
                     workflowId = 2;
                     workflowCode = "WF002";

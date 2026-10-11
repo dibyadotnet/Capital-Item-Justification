@@ -15,9 +15,9 @@
                         <th>Equipment Name</th>                      
                         <th>Manufacturer</th>
                         <th>Model</th>
-                        <th>Qty</th>
-                        <th>Estimated Cost</th>
-                        @* <th>Doc Pref</th> *@
+                        <th>Quantity</th>
+                        <th>Equipment Cost</th>
+                        @* <th>Total Cost</th> *@
                         <th width="120" class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -27,6 +27,7 @@
 
                         @for (int i = 0; i < Model.Count(); i++)
                         {
+                            @* var totalCost = Model[i].EquipmentQty * Model[i].EquipmentCost; *@
                             <tr>
                                 <td class="d-none">@Model[i].EquipmentId</td>
                                 <td class="d-none">@Model[i].Cijid</td>
@@ -38,7 +39,7 @@
                                 <td>
                                     @($"₹ {Model[i].EquipmentCost:N0}")
                                 </td>
-                                @* <td>@Model[i].PreferenceOrder</td> *@
+                               @*  <td>@($"₹ {totalCost:N0}")</td> *@
                                 <td>
                                     <button type="button" class="btn btn-sm btn-warning me-1" onclick="EditEquipment(@i)">
                                         <i class="bi bi-pencil-square"></i>
