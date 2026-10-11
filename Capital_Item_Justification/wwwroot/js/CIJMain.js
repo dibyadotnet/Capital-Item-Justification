@@ -56,6 +56,19 @@ $("#CIJRequest_PurchasePurposeId").on("change", function () {
 $("#ddlItemType").on("change", function () {
     changeItemType();
 });
+$(document).on('input change', '#EquipmentQty, #EquipmentCost', function () {
+    calTotalCostToDisplayInModal();
+});
+function calTotalCostToDisplayInModal() {
+    const quantity = parseFloat($('#EquipmentQty').val()) || 0;
+    const unitCost = parseFloat($('#EquipmentCost').val()) || 0;
+
+    const totalCost = quantity * unitCost;
+
+    $('#totalEquipmentCost').text(
+        '₹' + totalCost.toLocaleString('en-IN')
+    );
+}
 function changeCostCenter() {
     var costCenterId = $("#CIJRequest_CostCenterId option:selected").val();
     if (costCenterId === "1" || !costCenterId) {
@@ -205,7 +218,6 @@ function loadEquipmentTable() {
 
     $("#tblEquipment tbody").empty();
     $.each(equipments, function (i, item) {
-
         $("#tblEquipment tbody").append(`
             <tr>
                 <td>${i + 1}</td>
@@ -232,7 +244,7 @@ function addEquipment() {
         EquipmentQty: parseInt($("#EquipmentQty").val()) || 0,
         Make: $("#Make").val(),
         Model: $("#Model").val(),
-        EquipmentCost: parseFloat($("#EquipmentCost").val()) || 0,
+        EquipmentCost:(parseFloat($("#EquipmentCost").val()) || 0) *(parseFloat($("#EquipmentQty").val()) || 0),
         /*PreferenceOrder: parseInt($("#PreferenceOrder").val())||0*/
     };
     var index = parseInt($("#EquipmentIndex").val()) || 0;
@@ -242,7 +254,6 @@ function addEquipment() {
     else {
         equipments[index] = equipment;
     }
-
     $("#EquipmentJson").val(JSON.stringify(equipments));
 
     $("#EquipmentIndex").val("-1");
@@ -274,8 +285,10 @@ function EditEquipment(index) {
 
     $("#Model").val(item.Model);
 
-    $("#EquipmentCost").val(item.EquipmentCost);
+    $("#EquipmentCost").val(item.EquipmentCost / item.EquipmentQty);
     /*$("#PreferenceOrder").val(item.PreferenceOrder) */
+
+    calTotalCostToDisplayInModal();
 
     $("#btnEquipmentSave").text("Update");
 
@@ -308,13 +321,14 @@ function clearEquipment() {
     $("#Model").val("");
 
     $("#EquipmentCost").val("");
-    /*$("#PreferenceOrder").val("");*/
+    $("#totalEquipmentCost").text("₹0");
+    $("#btnEquipmentSave").text("Save");
 
 }
 function calculateTotalEquipmentCost() {
     let total = 0;
     $.each(equipments, function (i, item) {
-        total += parseFloat(item.EquipmentCost || 0);
+        total += parseInt(item.EquipmentCost || 0);
     });
     var eqpCost = "₹ " + total.toLocaleString('en-IN')
     $("#TotalEstEquipmentCost").val(eqpCost);
@@ -520,4 +534,8 @@ $(document).on('keydown', '#CIJRequest_OldEquipmentCost', function (e) {
         e.preventDefault();
     }
 });
+
+
+
+
 

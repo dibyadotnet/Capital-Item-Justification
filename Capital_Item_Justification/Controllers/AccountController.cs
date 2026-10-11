@@ -15,11 +15,13 @@ namespace Capital_Item_Justification.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailService emailService)
+        private readonly ILogger<WorkFlowController> _logger;
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailService emailService, ILogger<WorkFlowController> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _emailService = emailService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -105,7 +107,7 @@ namespace Capital_Item_Justification.Controllers
 
 
                 return RedirectToAction("Dashboard", "CIJ");
-                
+
             }
 
             if (result.IsLockedOut)
@@ -162,33 +164,48 @@ namespace Capital_Item_Justification.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userManager.FindByEmailAsync(model.Email);
-
-            // Don't reveal whether the email exists
-            if (user == null || !user.IsActive)
+            try
             {
+                if (!ModelState.IsValid)
+                    return View(model);
+
+                var user = await _userManager.FindByEmailAsync(model.Email);
+
+                // Don't reveal whether the email exists
+                if (user == null || !user.IsActive)
+                {
+                    return RedirectToAction(nameof(ForgotPasswordConfirmation));
+                }
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                var resetLink = Url.Action(
+                    nameof(ResetPassword),
+                    "Account",
+                    new
+                    {
+                        userId = user.Id,
+                        token = encodedToken
+                    },
+                    Request.Scheme);
+
+                // TODO: Send resetLink through your email service
+                await _emailService.SendPasswordResetEmailAsync(user.Email!, resetLink!);
+
                 return RedirectToAction(nameof(ForgotPasswordConfirmation));
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "An error occurred while processing a password reset request.");
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var resetLink = Url.Action(
-                nameof(ResetPassword),
-                "Account",
-                new
-                {
-                    userId = user.Id,
-                    token = encodedToken
-                },
-                Request.Scheme);
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Unable to process your request. Please try again later.");
 
-            // TODO: Send resetLink through your email service
-            await _emailService.SendPasswordResetEmailAsync(user.Email!, resetLink!);
-
-            return RedirectToAction(nameof(ForgotPasswordConfirmation));
+                return View(model);
+            }
         }
 
         [HttpGet]
@@ -262,6 +279,50 @@ namespace Capital_Item_Justification.Controllers
 
             return View(model);
         }
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
 
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _userManager.ChangePasswordAsync(
+                user,
+                model.CurrentPassword,
+                model.NewPassword);
+
+            if (result.Succeeded)
+            {
+                TempData["ToastMessage"] = "Your password has been changed successfully.";
+                TempData["ToastType"] = "success";
+
+                return RedirectToAction("Dashboard", "CIJ");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
+            }
+
+            return View(model);
+        }
     }
 }

@@ -337,4 +337,18 @@ body {
     padding: 4px 10px;
 }
 
+.toggle-password {
+    width: 42px;
+    padding: 0;
+    border-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.toggle-password i {
+    font-size: 16px;
+}
+.sidebar-brand {
+    padding: 0.5rem 0.5rem !important;
+}
 

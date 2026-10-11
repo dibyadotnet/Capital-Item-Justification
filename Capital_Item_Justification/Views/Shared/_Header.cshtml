@@ -29,9 +29,10 @@
             </a>
             </l> *@
             <li class="hospital-header text-primary">
-                <span class="hospital-name">
+                <img src="~/image/Sceh-Logo2.png" alt="SCEH Logo">
+                @* <span class="hospital-name">
                     DR. Shroff's Charity Eye Hospital
-                </span>
+                </span> *@
             </li>
         </ul>
         <!-- Right side -->
@@ -72,6 +73,15 @@
                         <li>
                             <hr class="dropdown-divider" />
                         </li>
+                         <li>
+                            <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
+                                <i class="bi bi-key me-2"></i>
+                                Change Password
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider" />
+                        </li>
 
                         <li>
 
@@ -93,6 +103,7 @@
                             </form>
 
                         </li>
+
 
                     </ul>
 

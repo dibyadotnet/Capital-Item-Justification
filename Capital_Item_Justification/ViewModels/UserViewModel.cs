@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Capital_Item_Justification.Validation;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace Capital_Item_Justification.ViewModels
@@ -16,7 +17,7 @@ namespace Capital_Item_Justification.ViewModels
         public string FullName { get; set; } = string.Empty;
 
         [Required]
-        [EmailAddress]
+        [ValidEmail]
         public string Email { get; set; } = string.Empty;
 
         [Phone]

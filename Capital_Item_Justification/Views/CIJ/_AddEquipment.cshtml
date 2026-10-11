@@ -45,13 +45,13 @@
                     </div>
                     <!-- Quantity -->
                     <div class="col-md-6">
-                        <label asp-for="EquipmentQty" class="form-label required"></label>
+                        <label asp-for="EquipmentQty" class="form-label required">Quantity</label>
                         <input asp-for="EquipmentQty" type="number" class="form-control" />
                         <span asp-validation-for="EquipmentQty" class="text-danger"></span>
                     </div>
                     <!-- Estimated Cost -->
                     <div class="col-md-6">
-                        <label asp-for="EquipmentCost" class="form-label required"></label>
+                        <label asp-for="EquipmentCost" class="form-label required">Unit Cost</label>
                         <input asp-for="EquipmentCost" type="number" class="form-control" />
                         <span asp-validation-for="EquipmentCost" class="text-danger"></span>
                     </div>
@@ -59,6 +59,20 @@
                         <label asp-for="PreferenceOrder" class="form-label">Doctor’s Preference</label>
                         <input asp-for="PreferenceOrder" class="form-control" />
                     </div> *@
+
+                    <!-- Total Cost -->
+                    <div class="col-12 mt-4">
+                        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                            <label class="form-label fw-bold mb-0">
+                                Total Cost
+                            </label>
+
+                            <span id="totalEquipmentCost"
+                                  class="fw-bold fs-5 text-success">
+                                ₹0
+                            </span>
+                        </div>
+                    </div>
 
                 </div>
 
@@ -79,3 +93,20 @@
         </div>
     </div>
 </div>
+<style>
+    /* Equipment Modal Size */
+#equipmentModal .modal-dialog {
+    max-width: 750px;
+    width: 90%;
+}
+
+#equipmentModal .modal-content {
+    min-height: 500px;
+}
+
+/* Optional: Increase body spacing */
+#equipmentModal .modal-body {
+    padding: 25px;
+}
+
+</style>
