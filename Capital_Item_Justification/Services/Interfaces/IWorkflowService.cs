@@ -13,5 +13,6 @@ namespace Capital_Item_Justification.Services.Interfaces
         Task<List<RequestTrackingViewModel>> TrackRequsterRequestAsync(string userId, int? cijId, int? statusId);
         Task<ApprovalRequestDetailsViewModel?> GetRequestDetailsAsync(int approvalId, int cijId);
         Task<List<RoleViewModel>> GetRoleToSendQueryAsync(int approvalId, int cijId);
+        Task<List<MyApprovalViewModel>> GetOtherRoleRequestsAsync();
     }
 }

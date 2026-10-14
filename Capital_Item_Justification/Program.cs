@@ -76,7 +76,8 @@ builder.Services.AddScoped<IDeptRepository, DeptRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ICIJPdfService, CIJPdfService>();
-
+builder.Services.AddScoped<IFunctionHeadDepartmentService, FunctionHeadDepartmentService>();
+builder.Services.AddScoped<IFunctionHeadDepartmentRepository, FunctionHeadDepartmentRepository>();
 
 
 var app = builder.Build();

@@ -42,6 +42,9 @@ namespace Capital_Item_Justification.Services
         {
             return await _repository.GetRoleToSendQueryAsync(approvalId, cijId);
         }
-        
+        public async Task<List<MyApprovalViewModel>> GetOtherRoleRequestsAsync()
+        {
+            return await _repository.GetOtherRoleRequestsAsync();
+        }
     }
 }

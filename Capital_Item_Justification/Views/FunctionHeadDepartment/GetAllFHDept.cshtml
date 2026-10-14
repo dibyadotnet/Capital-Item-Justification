@@ -1,0 +1,124 @@
+﻿@model Capital_Item_Justification.ViewModels.FHDepartmentListViewModel
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>
+            <i class="bi bi-diagram-3 me-2"></i>
+            Function Head Department Master
+        </h4>
+        <a asp-action="AddFHDepartment" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>
+            Map Department
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <div class="d-flex justify-content-end mb-3">
+
+                    <form asp-action="GetFHAllDept"
+                          method="get"
+                          class="d-flex align-items-center gap-2">
+
+                        <label class="mb-0">
+                            Show:
+                        </label>
+
+                        <select name="pageSize"
+                                class="form-select form-select-sm"
+                                style="width:80px;"
+                                onchange="this.form.submit()">
+
+                            <option value="10"
+                                    selected="@(Model.Pagination.PageSize == 10)">
+                                10
+                            </option>
+
+                            <option value="25"
+                                    selected="@(Model.Pagination.PageSize == 25)">
+                                25
+                            </option>
+
+                            <option value="50"
+                                    selected="@(Model.Pagination.PageSize == 50)">
+                                50
+                            </option>
+
+                        </select>
+
+                        <span class="text-muted">
+                            entries
+                        </span>
+
+                        <input type="hidden"
+                               name="page"
+                               value="1" />
+
+                    </form>
+
+                </div>
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="d-none"></th>
+                            <th>Department Name</th>
+                            <th>Status</th>
+                            <th width="150">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.fhDepts)
+                        {
+                            <tr>
+                                <td class="d-none">@item.Id</td>
+                                <td>
+                                    @item.DepartmentName
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success">
+                                            Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            Inactive
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                   @*  @if (item.IsActive)
+                                    {
+                                        <a asp-action="EditDepartment" title="Edit Department" asp-route-id="@item.DepartmentId"
+                                           class="btn btn-sm btn-primary btn-edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    } *@
+                                    <form asp-action="ManageStaus" onsubmit="return confirm('Are you sure you want to change the status of this Mapping Department?');" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.Id" />
+
+                                        <button type="submit" title="Manage Status" class="btn btn-sm btn-warning btn-edit">
+                                            <i class="bi bi-toggle-on"></i>
+                                        </button>
+                                    </form>
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+                <partial name="_Pagination" model="Model.Pagination" />
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+

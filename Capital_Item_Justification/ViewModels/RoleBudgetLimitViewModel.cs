@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace Capital_Item_Justification.ViewModels
 {
@@ -10,6 +11,8 @@ namespace Capital_Item_Justification.ViewModels
 
         public string RoleName { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Budget Limit is required.")]
+        [Range(1, int.MaxValue,ErrorMessage = "Budget Limit must be greater than 0.")]
         public decimal BudgetLimit { get; set; }
 
         public bool IsActive { get; set; } = true;

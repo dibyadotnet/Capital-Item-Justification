@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using Capital_Item_Justification.Models;
+using Capital_Item_Justification.Services;
 using Capital_Item_Justification.Services.Interfaces;
 using Capital_Item_Justification.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -96,7 +97,7 @@ namespace Capital_Item_Justification.Controllers
                 throw;
             }
 
-            return View("MyApproval",vm);
+            return View("MyApproval", vm);
         }
         public async Task<IActionResult> ViewCIJRequest(int approvalId, int cijId)
         {
@@ -403,6 +404,34 @@ namespace Capital_Item_Justification.Controllers
             {
                 throw;
             }
+        }
+        [HttpGet]
+        public async Task<IActionResult> OtherRoleRequests()
+        {
+            List<MyApprovalViewModel> vm = new();
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                var roles = await _userManager.GetRolesAsync(user);
+
+                vm = await _service.GetOtherRoleRequestsAsync();
+
+                if (roles.Any(r => r.Contains("Purchase", StringComparison.OrdinalIgnoreCase)))
+                {
+                    vm = vm.Where(x => !(x.ApproverRole?.Contains("Purchase", StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+                }
+                ViewBag.Page = "Pending/Query/Rejected";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+            return View(vm);
         }
     }
 }

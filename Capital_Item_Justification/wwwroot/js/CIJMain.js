@@ -36,6 +36,49 @@ $(document).ready(function () {
     changePurchasePurpose();
 
     changeItemType();
+
+    $("form").on("submit", function () {
+
+        if ($(this).data("processing")) {
+            return false;
+        }
+
+        $(this).data("processing", true);
+
+        $("#processingMessage").text(
+            "Please wait, processing..."
+        );
+
+        $("#processingOverlay").css("display", "flex");
+
+        $(this).find(
+            'button[type="submit"], input[type="submit"]'
+        ).prop("disabled", true);
+    });
+
+    $(".btn-update").on("click", function () {
+        $("#processingMessage").text(
+            "Updating request, please wait..."
+        );
+    });
+
+    $(".btn-submit").on("click", function () {
+        $("#processingMessage").text(
+            "Submitting request, please wait..."
+        );
+    });
+
+    $(".btn-query").on("click", function () {
+        $("#processingMessage").text(
+            "Sending query, please wait..."
+        );
+    });
+
+    $(".btn-approve").on("click", function () {
+        $("#processingMessage").text(
+            "Processing approval, please wait..."
+        );
+    });
 });
 
 $("#CIJRequest_CostCenterId").on("change", function () {
@@ -534,6 +577,13 @@ $(document).on('keydown', '#CIJRequest_OldEquipmentCost', function (e) {
         e.preventDefault();
     }
 });
+$(document).on('keydown', '#BudgetLimit', function (e) {
+    debugger;
+    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+        e.preventDefault();
+    }
+});
+
 
 
 
