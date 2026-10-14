@@ -134,11 +134,14 @@ namespace Capital_Item_Justification.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
 
                 var departmentsList = await _cijService.GetDepartment();
-                var departmentItems = departmentsList.Select(x => new SelectListItem
-                {
-                    Value = x.DepartmentId.ToString(),
-                    Text = x.DepartmentName
-                }).ToList();
+                var allowedDepartments = new[] { "BME", "IT", "Admin" };
+                var departmentItems = departmentsList.Where(x => allowedDepartments.Contains(
+                                            x.DepartmentName.Trim(),StringComparer.OrdinalIgnoreCase))
+                                            .Select(x => new SelectListItem
+                                            {
+                                                Value = x.DepartmentId.ToString(),
+                                                Text = x.DepartmentName
+                                            }).ToList();
                 vm = await _service.GetApprovalDetailAsync(approvalId, cijId);
                 if (vm == null)
                     throw new InvalidOperationException();

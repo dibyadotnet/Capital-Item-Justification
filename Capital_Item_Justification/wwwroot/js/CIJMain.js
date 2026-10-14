@@ -37,48 +37,48 @@ $(document).ready(function () {
 
     changeItemType();
 
-    $("form").on("submit", function () {
+    //$("form").on("submit", function () {
 
-        if ($(this).data("processing")) {
-            return false;
-        }
+    //    if ($(this).data("processing")) {
+    //        return false;
+    //    }
 
-        $(this).data("processing", true);
+    //    $(this).data("processing", true);
 
-        $("#processingMessage").text(
-            "Please wait, processing..."
-        );
+    //    $("#processingMessage").text(
+    //        "Please wait, processing..."
+    //    );
 
-        $("#processingOverlay").css("display", "flex");
+    //    $("#processingOverlay").css("display", "flex");
 
-        $(this).find(
-            'button[type="submit"], input[type="submit"]'
-        ).prop("disabled", true);
-    });
+    //    $(this).find(
+    //        'button[type="submit"], input[type="submit"]'
+    //    ).prop("disabled", true);
+    //});
 
-    $(".btn-update").on("click", function () {
-        $("#processingMessage").text(
-            "Updating request, please wait..."
-        );
-    });
+    //$(".btn-update").on("click", function () {
+    //    $("#processingMessage").text(
+    //        "Updating request, please wait..."
+    //    );
+    //});
 
-    $(".btn-submit").on("click", function () {
-        $("#processingMessage").text(
-            "Submitting request, please wait..."
-        );
-    });
+    //$(".btn-submit").on("click", function () {
+    //    $("#processingMessage").text(
+    //        "Submitting request, please wait..."
+    //    );
+    //});
 
-    $(".btn-query").on("click", function () {
-        $("#processingMessage").text(
-            "Sending query, please wait..."
-        );
-    });
+    //$(".btn-query").on("click", function () {
+    //    $("#processingMessage").text(
+    //        "Sending query, please wait..."
+    //    );
+    //});
 
-    $(".btn-approve").on("click", function () {
-        $("#processingMessage").text(
-            "Processing approval, please wait..."
-        );
-    });
+    //$(".btn-approve").on("click", function () {
+    //    $("#processingMessage").text(
+    //        "Processing approval, please wait..."
+    //    );
+    //});
 });
 
 $("#CIJRequest_CostCenterId").on("change", function () {
@@ -223,7 +223,7 @@ function changeItemType() {
         $("#divCommiteeComments").show();
     } else {
         $("#divCommiteeComments").hide();
-        $("#txtCommiteeComments").val("");
+        //$("#txtCommiteeComments").val("");
     }
 }
 
@@ -470,11 +470,11 @@ $("#cijForm").on("submit", function (e) {
     if (!validateField("#ddlItemType", "Item type is required.")) {
         isValid = false;
     }
-    if ($("#ddlItemType").val() === "1") {
-        if (!validateField("#txtCommiteeComments", "Equipment Committee Comments is required.")) {
-            isValid = false;
-        }
-    }
+    //if ($("#ddlItemType").val() === "1") {
+    //    if (!validateField("#txtCommiteeComments", "Equipment Committee Comments is required.")) {
+    //        isValid = false;
+    //    }
+    //}
     if (!validateField("#CIJRequest_TotalEquipmentCostDisplay", "Equipment Cost is required.")) {
         isValid = false;
     }
@@ -578,7 +578,6 @@ $(document).on('keydown', '#CIJRequest_OldEquipmentCost', function (e) {
     }
 });
 $(document).on('keydown', '#BudgetLimit', function (e) {
-    debugger;
     if (e.key === '.' || e.key === 'e' || e.key === '-') {
         e.preventDefault();
     }

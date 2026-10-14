@@ -68,6 +68,11 @@
                             <select id="assignedDept" name="assignedDept" asp-items="Model.Departments" class="form-select" multiple>
                                 <option value="">-- Select Dept--</option>
                             </select>
+                            <span id="assignedDeptError"
+                                  class="text-danger"
+                                  style="display:none;">
+                                Please select at least one department.
+                            </span>
                         </div>
                     }
                     @if (Model.workFlowStepCode == "Purchase")
@@ -188,10 +193,35 @@
             );
         }
         function validateApprove() {
+                const departmentSelect = document.getElementById('assignedDept');
+            if (departmentSelect) {
+
+                const selected = $('#assignedDept').val();
+
+                if (!selected || selected.length === 0) {
+                    $('#assignedDeptError').removeClass('d-none').show();
+                    $('#assignedDept').next('.select2-container')
+                        .find('.select2-selection')
+                        .addClass('is-invalid');
+
+                    return false;
+                }
+
+                $('#assignedDeptError').addClass('d-none').hide();
+            }
             return confirm(
                 "Are you sure you want to approve this CIJ?"
             );
         }
+
+        $('#assignedDept').on('change', function () {
+            if ($(this).val() && $(this).val().length > 0) {
+                $('#assignedDeptError').addClass('d-none');
+                $(this).next('.select2-container')
+                    .find('.select2-selection')
+                    .removeClass('is-invalid');
+            }
+        });
 
         $('#assignedDept').select2({
             placeholder: '-- Select --',
@@ -200,3 +230,9 @@
         });
     </script>
 }
+<style>
+    .select2-container .select2-selection.is-invalid {
+        border: 1px solid #dc3545 !important;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.15);
+    }
+</style>

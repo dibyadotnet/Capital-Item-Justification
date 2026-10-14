@@ -1025,17 +1025,17 @@ namespace Capital_Item_Justification.Repository
         private async Task<CijWorkflowStep?> GetWorkflowNextStep(CijWorkflowStep currentStep, CijRequest cijRequest, int WorkflowId)
         {
             CijWorkflowStep? nextStep = new CijWorkflowStep();
-            List<string> FHDepartments = new List<string>() { "IT", "BME", "Admin", "Finance", "Purchase", "Civil", "Legal" };
-
+            //List<string> FHDepartments = new List<string>() { "IT", "BME", "Admin", "Finance", "Purchase", "Civil", "Legal" };
+            List<int> FHDepartmentIds = _context.CijFunctionHeadDepartments.Select(a => a.DepartmentId).ToList();
             if (currentStep.StepCode.Equals("REQUESTOR", StringComparison.OrdinalIgnoreCase))
             {
-                var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
+                //var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
                 var fhApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
                                              join role in _context.Roles
                                            on budget.RoleId equals role.Id
                                              where role.Name == "Function Head"
                                              select budget.BudgetLimit).FirstOrDefaultAsync();
-                if (FHDepartments.Contains(requestorDept ?? "", StringComparer.OrdinalIgnoreCase) && cijRequest.TotalEquipmentCost <= fhApprovalLimit)
+                if (FHDepartmentIds.Contains(cijRequest.RequestDepartmentId))//&& cijRequest.TotalEquipmentCost <= fhApprovalLimit
                 {
                     string stepCode = "Function_Head_Initial";
                     nextStep = await GetStep(stepCode, WorkflowId);
@@ -1090,13 +1090,13 @@ namespace Capital_Item_Justification.Repository
                 }
                 else
                 {
-                    var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
+                    //var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
                     var fhApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
                                                  join role in _context.Roles
                                                on budget.RoleId equals role.Id
                                                  where role.Name == "Function Head"
                                                  select budget.BudgetLimit).FirstOrDefaultAsync();
-                    if (FHDepartments.Contains(requestorDept ?? "", StringComparer.OrdinalIgnoreCase) && cijRequest.TotalEquipmentCost <= fhApprovalLimit)
+                    if (FHDepartmentIds.Contains(cijRequest.RequestDepartmentId) && cijRequest.TotalEquipmentCost <= fhApprovalLimit)
                     {
                         string stepCode = "Function_Head_Final";
                         nextStep = await GetStep(stepCode, WorkflowId);
@@ -1118,13 +1118,13 @@ namespace Capital_Item_Justification.Repository
             }
             else if (currentStep.StepCode.Equals("Purchase_Committee", StringComparison.OrdinalIgnoreCase))
             {
-                var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
+                //var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
                 var fhApprovalLimit = await (from budget in _context.CijRoleBudgetLimits
                                              join role in _context.Roles
                                            on budget.RoleId equals role.Id
                                              where role.Name == "Function Head"
                                              select budget.BudgetLimit).FirstOrDefaultAsync();
-                if (FHDepartments.Contains(requestorDept ?? "", StringComparer.OrdinalIgnoreCase) && cijRequest.TotalEquipmentCost <= fhApprovalLimit)
+                if (FHDepartmentIds.Contains(cijRequest.RequestDepartmentId) && cijRequest.TotalEquipmentCost <= fhApprovalLimit)
                 {
                     string stepCode = "Function_Head_Final";
                     nextStep = await GetStep(stepCode, WorkflowId);
