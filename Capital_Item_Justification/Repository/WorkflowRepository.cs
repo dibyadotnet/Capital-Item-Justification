@@ -1886,5 +1886,15 @@ namespace Capital_Item_Justification.Repository
 
             return approvedRoles;
         }
+
+        public async Task<List<MyApprovalViewModel>> GetOtherRoleRequestsAsync()
+        {
+
+            var result = await _context.Set<MyApprovalViewModel>()
+                .FromSqlRaw(
+                    "EXEC dbo.SP_GetOtherRoleRequests").AsNoTracking().ToListAsync();
+
+            return result;
+        }
     }
 }

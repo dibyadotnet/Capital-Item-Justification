@@ -16,6 +16,7 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
            : base(options)
     {
     }
+    public virtual DbSet<CijFunctionHeadDepartment> CijFunctionHeadDepartments { get; set; }
     public virtual DbSet<CijWorkflowClarification> CijWorkflowClarifications { get; set; }
     public virtual DbSet<CijApprovalHistory> CijApprovalHistories { get; set; }
 
@@ -103,6 +104,11 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
         .OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<CijFunctionHeadDepartment>(entity =>
+        {
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
         modelBuilder.Entity<CijWorkflowApprovalHistory>(entity =>
         {
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getdate())");

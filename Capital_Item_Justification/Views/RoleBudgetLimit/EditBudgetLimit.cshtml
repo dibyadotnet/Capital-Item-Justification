@@ -47,10 +47,8 @@
 
                     <input asp-for="BudgetLimit"
                            type="number"
-                           step="0.01"
-                           min="0"
                            class="form-control"
-                           placeholder="Enter budget limit" />
+                           placeholder="Enter budget limit" value="@(Model.BudgetLimit.ToString("N0", new System.Globalization.CultureInfo("en-IN")))" />
 
                     <span asp-validation-for="BudgetLimit"
                           class="text-danger">
@@ -62,26 +60,6 @@
                         <option value="">-- Select Item Type --</option>
                     </select>
                 </div>
-                @*  <div class="col-md-6 mb-3">
-
-                <label class="form-label">
-                Status
-                </label>
-
-                <div class="form-check form-switch">
-
-                <input asp-for="IsActive"
-                class="form-check-input"
-                type="checkbox" />
-
-                <label asp-for="IsActive"
-                class="form-check-label">
-                Active
-                </label>
-
-                </div>
-
-                </div> *@
 
             </div>
 
@@ -107,5 +85,27 @@
 </div>
 
 @section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            // Prevent decimal, negative, and scientific notation input
+            $(document).on('keydown', '#BudgetLimit', function (e) {
+                if (['.', ',', 'e', 'E', '-', '+'].includes(e.key)) {
+                    e.preventDefault();
+                }
+            });
+
+            // Prevent decimal values entered through paste or other methods
+            $(document).on('input', '#BudgetLimit', function () {
+                let value = this.value;
+
+                if (value.includes('.')) {
+                    this.value = value.split('.')[0];
+                }
+            });
+
+        });
+    </script>
+
     <partial name="_ValidationScriptsPartial" />
 }

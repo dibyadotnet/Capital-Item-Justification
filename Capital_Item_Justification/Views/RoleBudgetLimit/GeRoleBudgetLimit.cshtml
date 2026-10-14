@@ -69,19 +69,29 @@
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">
+                                            <span class="badge bg-danger">
                                                 Inactive
                                             </span>
                                         }
                                     </td>
 
                                     <td>
+                                        @if(item.IsActive){
                                         <a asp-action="Edit"
                                            asp-route-id="@item.RoleBudgetLimitId"
-                                           class="btn btn-sm btn-warning btn-edit"
+                                           class="btn btn-sm btn-primary btn-edit"
                                            title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        }
+                                        <form asp-action="ChangeStatus" onsubmit="return confirm('Are you sure you want to change the status of this Budget Limit?');" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.RoleBudgetLimitId" />
+
+                                        <button type="submit" title="Manage Status" class="btn btn-sm btn-warning btn-edit">
+                                            <i class="bi bi-toggle-on"></i>
+                                        </button>
+                                    </form>
                                     </td>
                                 </tr>
                             }

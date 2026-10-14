@@ -16,220 +16,316 @@ namespace Capital_Item_Justification.Controllers
         private readonly CIJDbContext _context;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ICIJRequestService _service;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<WorkFlowController> _logger;
         public RoleBudgetLimitController(CIJDbContext context, RoleManager<ApplicationRole> roleManager,
-            ICIJRequestService service)
+            ICIJRequestService service, UserManager<ApplicationUser> userManager, ILogger<WorkFlowController> logger)
         {
             _context = context;
             _roleManager = roleManager;
             _service = service;
+            _userManager = userManager;
+            _logger = logger;
         }
-        // GET: /RoleBudgetLimit
         public async Task<IActionResult> GeRoleBudgetLimit()
         {
-            //var data = await _context.CijRoleBudgetLimits
-            //    .Include(x => x.Role)
-            //    .OrderBy(x => x.Role!.Name)
-            //    .Select(x => new RoleBudgetLimitViewModel
-            //    {
-            //        RoleBudgetLimitId = x.RoleBudgetLimitId,
-            //        RoleId = x.RoleId,
-            //        RoleName = x.Role!.Name!,
-            //        BudgetLimit = x.BudgetLimit,
-            //        IsActive = x.IsActive
-            //    })
-            //    .ToListAsync();
-            var data = await (
-    from budget in _context.CijRoleBudgetLimits
+            try
+            {
+                var data = await (
+                    from budget in _context.CijRoleBudgetLimits
 
-    join role in _context.Roles
-        on budget.RoleId equals role.Id into roleGroup
-    from role in roleGroup.DefaultIfEmpty()
+                    join role in _context.Roles
+                        on budget.RoleId equals role.Id into roleGroup
+                    from role in roleGroup.DefaultIfEmpty()
 
-    join itemType in _context.CijItemTypes
-        on budget.ItemTypeId equals itemType.ItemTypeId into itemTypeGroup
-    from itemType in itemTypeGroup.DefaultIfEmpty()
+                    join itemType in _context.CijItemTypes
+                        on budget.ItemTypeId equals itemType.ItemTypeId into itemTypeGroup
+                    from itemType in itemTypeGroup.DefaultIfEmpty()
 
-    orderby role.Name
+                    orderby role.Name
 
-    select new RoleBudgetLimitViewModel
-    {
-        RoleBudgetLimitId = budget.RoleBudgetLimitId,
-        RoleId = budget.RoleId,
-        RoleName = role != null ? role.Name : "",
-        ItemTypeId = budget.ItemTypeId,
-        ItemTypeName = itemType != null ? itemType.ItemTypeName : "",
-        BudgetLimit = budget.BudgetLimit,
-        IsActive = budget.IsActive
-    }
-).ToListAsync();
+                    select new RoleBudgetLimitViewModel
+                    {
+                        RoleBudgetLimitId = budget.RoleBudgetLimitId,
+                        RoleId = budget.RoleId,
+                        RoleName = role != null ? role.Name : "",
+                        ItemTypeId = budget.ItemTypeId,
+                        ItemTypeName = itemType != null
+                            ? itemType.ItemTypeName
+                            : "",
+                        BudgetLimit = budget.BudgetLimit,
+                        IsActive = budget.IsActive
+                    }).ToListAsync();
 
-            return View(data);
+                return View(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "An error occurred while retrieving role budget limits.");
+
+                TempData["ToastMessage"] =
+                    "An error occurred while retrieving role budget limits.";
+                TempData["ToastType"] = "error";
+
+                return View(new List<RoleBudgetLimitViewModel>());
+            }
         }
 
-        // GET: /RoleBudgetLimit/Create
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var roles = await _roleManager.Roles
-                .Where(x => x.IsActive)
-                .OrderBy(x => x.Name)
-                .ToListAsync();
-
-            ViewBag.Roles = roles;
-
-            //Item Type Master
-            var itemTypes = await _service.GetItemType();
-            var itemTypesItem = itemTypes.Select(x => new SelectListItem
+            try
             {
-                Value = x.ItemTypeId.ToString(),
-                Text = x.ItemTypeCode
-            }).ToList();
+                var roles = await _roleManager.Roles
+                    .Where(x => x.IsActive)
+                    .OrderBy(x => x.Name)
+                    .ToListAsync();
 
-            return View("CreateBudgetLimit", new RoleBudgetLimitViewModel
+                ViewBag.Roles = roles;
+
+                // Item Type Master
+                var itemTypes = await _service.GetItemType();
+
+                var itemTypesItem = itemTypes.Select(x => new SelectListItem
+                {
+                    Value = x.ItemTypeId.ToString(),
+                    Text = x.ItemTypeCode
+                }).ToList();
+
+                return View("CreateBudgetLimit", new RoleBudgetLimitViewModel
+                {
+                    ItemTypes = itemTypesItem,
+                    IsActive = true
+                });
+            }
+            catch (Exception ex)
             {
-                ItemTypes = itemTypesItem,
-                IsActive = true
-            });
+                _logger.LogError(ex,
+                    "An error occurred while loading the Create Budget Limit page.");
+
+                TempData["ToastMessage"] =
+                    "An error occurred while loading the page. Please try again.";
+                TempData["ToastType"] = "error";
+
+                return RedirectToAction(nameof(GeRoleBudgetLimit));
+            }
         }
 
-        // POST: /RoleBudgetLimit/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(RoleBudgetLimitViewModel model)
         {
-            if (!ModelState.IsValid)
+            try
             {
+                if (!ModelState.IsValid)
+                {
+                    await LoadRoles();
+                    return View("CreateBudgetLimit", model);
+                }
+
+                // Prevent duplicate role budget
+                bool exists = await _context.CijRoleBudgetLimits
+                    .AnyAsync(x => x.RoleId == model.RoleId);
+
+                if (exists)
+                {
+                    ModelState.AddModelError(
+                        "RoleId",
+                        "Budget limit is already configured for this role.");
+
+                    await LoadRoles();
+                    return View("CreateBudgetLimit", model);
+                }
+
+                var role = await _roleManager.FindByIdAsync(model.RoleId);
+
+                if (role == null)
+                {
+                    ModelState.AddModelError(
+                        "RoleId",
+                        "Invalid role selected.");
+
+                    await LoadRoles();
+                    return View("CreateBudgetLimit", model);
+                }
+
+                var entity = new CijRoleBudgetLimit
+                {
+                    RoleId = model.RoleId,
+                    BudgetLimit = model.BudgetLimit,
+                    IsActive = true,
+                    CreatedBy = User.Identity?.Name,
+                    CreatedOn = DateTime.Now,
+                    ItemTypeId = model.ItemTypeId
+                };
+
+                _context.CijRoleBudgetLimits.Add(entity);
+
+                int count = await _context.SaveChangesAsync();
+
+                if (count > 0)
+                {
+                    TempData["ToastMessage"] =
+                        "Role budget limit added successfully.";
+                    TempData["ToastType"] = "success";
+                }
+                else
+                {
+                    TempData["ToastMessage"] =
+                        "Role budget limit failed to add.";
+                    TempData["ToastType"] = "error";
+                }
+
+                return RedirectToAction(nameof(GeRoleBudgetLimit));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Error occurred while creating a role budget limit for RoleId: {RoleId}",
+                    model.RoleId);
+
+                TempData["ToastMessage"] =
+                    "An unexpected error occurred while adding the role budget limit.";
+                TempData["ToastType"] = "error";
+
                 await LoadRoles();
+
                 return View("CreateBudgetLimit", model);
             }
-
-            // Prevent duplicate role budget
-            bool exists = await _context.CijRoleBudgetLimits
-                .AnyAsync(x => x.RoleId == model.RoleId);
-
-            if (exists)
-            {
-                ModelState.AddModelError(
-                    "RoleId",
-                    "Budget limit is already configured for this role.");
-
-                await LoadRoles();
-                return View("CreateBudgetLimit", model);
-            }
-
-            var role = await _roleManager.FindByIdAsync(model.RoleId);
-
-            if (role == null)
-            {
-                ModelState.AddModelError("RoleId", "Invalid role selected.");
-
-                await LoadRoles();
-                return View("CreateBudgetLimit", model);
-            }
-
-            var entity = new CijRoleBudgetLimit
-            {
-                RoleId = model.RoleId,
-                BudgetLimit = model.BudgetLimit,
-                IsActive = true,
-                CreatedBy = User.Identity?.Name,
-                CreatedOn = DateTime.Now,
-                ItemTypeId = model.ItemTypeId
-            };
-
-            _context.CijRoleBudgetLimits.Add(entity);
-
-            await _context.SaveChangesAsync();
-
-            //TempData["SuccessMessage"] ="Role budget limit added successfully.";
-            TempData["ToastMessage"] = "Role budget limit added successfully.";
-            TempData["ToastType"] = "success";
-
-            return RedirectToAction(nameof(GeRoleBudgetLimit));
         }
 
-        // GET: /RoleBudgetLimit/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var entity = await _context.CijRoleBudgetLimits
-                .Include(x => x.Role)
-                .FirstOrDefaultAsync(x => x.RoleBudgetLimitId == id);
-
-            if (entity == null)
-                return NotFound();
-            //Item Type Master
-            var itemTypes = await _service.GetItemType();
-            var itemTypesItem = itemTypes.Select(x => new SelectListItem
+            try
             {
-                Value = x.ItemTypeId.ToString(),
-                Text = x.ItemTypeCode
-            }).ToList();
+                var entity = await _context.CijRoleBudgetLimits
+                    .Include(x => x.Role)
+                    .FirstOrDefaultAsync(x => x.RoleBudgetLimitId == id);
 
-            var model = new RoleBudgetLimitViewModel
+                if (entity == null)
+                {
+                    return NotFound();
+                }
+
+                // Item Type Master
+                var itemTypes = await _service.GetItemType();
+
+                var itemTypesItem = itemTypes.Select(x => new SelectListItem
+                {
+                    Value = x.ItemTypeId.ToString(),
+                    Text = x.ItemTypeCode
+                }).ToList();
+
+                var model = new RoleBudgetLimitViewModel
+                {
+                    RoleBudgetLimitId = entity.RoleBudgetLimitId,
+                    RoleId = entity.RoleId,
+                    RoleName = entity.Role?.Name ?? "",
+                    BudgetLimit = entity.BudgetLimit,
+                    IsActive = entity.IsActive,
+                    ItemTypeId = entity.ItemTypeId,
+                    ItemTypes = itemTypesItem
+                };
+
+                await LoadRoles();
+
+                return View("EditBudgetLimit", model);
+            }
+            catch (Exception ex)
             {
-                RoleBudgetLimitId = entity.RoleBudgetLimitId,
-                RoleId = entity.RoleId,
-                RoleName = entity.Role?.Name ?? "",
-                BudgetLimit = entity.BudgetLimit,
-                IsActive = entity.IsActive,
-                ItemTypeId = entity.ItemTypeId,
-                ItemTypes = itemTypesItem,
-            };
+                _logger.LogError(ex,
+                    "An error occurred while loading the Edit Budget Limit page for ID: {Id}",
+                    id);
 
-            await LoadRoles();
+                TempData["ToastMessage"] =
+                    "An error occurred while loading the budget limit details.";
+                TempData["ToastType"] = "error";
 
-            return View("EditBudgetLimit", model);
+                return RedirectToAction(nameof(GeRoleBudgetLimit));
+            }
         }
 
-        // POST: /RoleBudgetLimit/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(RoleBudgetLimitViewModel model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                await LoadRoles();
-                return View(model);
+                if (!ModelState.IsValid)
+                {
+                    await LoadRoles();
+
+                    // Reload Item Type dropdown
+                    var itemTypes = await _service.GetItemType();
+
+                    model.ItemTypes = itemTypes.Select(x => new SelectListItem
+                    {
+                        Value = x.ItemTypeId.ToString(),
+                        Text = x.ItemTypeCode
+                    }).ToList();
+
+                    return View("EditBudgetLimit", model);
+                }
+
+                var entity = await _context.CijRoleBudgetLimits
+                    .FirstOrDefaultAsync(x =>
+                        x.RoleBudgetLimitId == model.RoleBudgetLimitId);
+
+                if (entity == null)
+                {
+                    return NotFound();
+                }
+
+                // Update role budget limit details
+                entity.RoleId = model.RoleId;
+                entity.BudgetLimit = model.BudgetLimit;
+                entity.IsActive = model.IsActive;
+                entity.ModifiedBy = User.Identity?.Name;
+                entity.ModifiedOn = DateTime.Now;
+                entity.ItemTypeId = model.ItemTypeId;
+
+                int count = await _context.SaveChangesAsync();
+
+                if (count > 0)
+                {
+                    TempData["ToastMessage"] =
+                        "Role budget limit updated successfully.";
+                    TempData["ToastType"] = "success";
+                }
+                else
+                {
+                    TempData["ToastMessage"] =
+                        "Role budget limit failed to update.";
+                    TempData["ToastType"] = "error";
+                }
+
+                return RedirectToAction(nameof(GeRoleBudgetLimit));
             }
-
-            var entity = await _context.CijRoleBudgetLimits
-                .FirstOrDefaultAsync(x =>
-                    x.RoleBudgetLimitId == model.RoleBudgetLimitId);
-
-            if (entity == null)
-                return NotFound();
-
-            // Check whether another record already uses this role
-            bool duplicate = await _context.CijRoleBudgetLimits
-                .AnyAsync(x =>
-                    x.RoleId == model.RoleId &&
-                    x.RoleBudgetLimitId != model.RoleBudgetLimitId);
-
-            if (duplicate)
+            catch (Exception ex)
             {
-                ModelState.AddModelError(
-                    "RoleId",
-                    "Budget limit is already configured for this role.");
+                _logger.LogError(ex,
+                    "An error occurred while updating RoleBudgetLimitId: {Id}",
+                    model.RoleBudgetLimitId);
+
+                TempData["ToastMessage"] =
+                    "An unexpected error occurred while updating the role budget limit.";
+                TempData["ToastType"] = "error";
 
                 await LoadRoles();
-                return View("CreateBudgetLimit", model);
+
+                // Reload Item Type dropdown
+                var itemTypes = await _service.GetItemType();
+
+                model.ItemTypes = itemTypes.Select(x => new SelectListItem
+                {
+                    Value = x.ItemTypeId.ToString(),
+                    Text = x.ItemTypeCode
+                }).ToList();
+
+                return View("EditBudgetLimit", model);
             }
-
-            entity.RoleId = model.RoleId;
-            entity.BudgetLimit = model.BudgetLimit;
-            entity.IsActive = model.IsActive;
-            entity.ModifiedBy = User.Identity?.Name;
-            entity.ModifiedOn = DateTime.Now;
-            entity.ItemTypeId = model.ItemTypeId;
-
-            await _context.SaveChangesAsync();
-
-            //TempData["SuccessMessage"] ="Role budget limit updated successfully.";
-            TempData["ToastMessage"] = "Role budget limit updated successfully.";
-            TempData["ToastType"] = "success";
-
-            return RedirectToAction(nameof(GeRoleBudgetLimit));
         }
 
         private async Task LoadRoles()
@@ -238,6 +334,62 @@ namespace Capital_Item_Justification.Controllers
                 .Where(x => x.IsActive)
                 .OrderBy(x => x.Name)
                 .ToListAsync();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeStatus(int id)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+
+                var entity = await _context.CijRoleBudgetLimits
+                    .FirstOrDefaultAsync(x => x.RoleBudgetLimitId == id);
+
+                if (entity == null)
+                {
+                    TempData["ToastMessage"] = "Budget limit record not found.";
+                    TempData["ToastType"] = "error";
+
+                    return RedirectToAction(nameof(GeRoleBudgetLimit));
+                }
+
+                // Toggle active status
+                entity.IsActive = !entity.IsActive;
+                entity.ModifiedBy = User.Identity?.Name;
+                entity.ModifiedOn = DateTime.Now;
+
+                int count = await _context.SaveChangesAsync();
+
+                if (count > 0)
+                {
+                    TempData["ToastMessage"] = "Status updated successfully.";
+                    TempData["ToastType"] = "success";
+                }
+                else
+                {
+                    TempData["ToastMessage"] = "Status failed to update.";
+                    TempData["ToastType"] = "error";
+                }
+
+                return RedirectToAction(nameof(GeRoleBudgetLimit));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "An error occurred while changing the status for RoleBudgetLimitId: {Id}",
+                    id);
+
+                TempData["ToastMessage"] = "An error occurred while updating the status.";
+                TempData["ToastType"] = "error";
+
+                return RedirectToAction(nameof(GeRoleBudgetLimit));
+            }
         }
     }
 
