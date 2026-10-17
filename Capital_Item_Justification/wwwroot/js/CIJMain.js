@@ -583,6 +583,44 @@ $(document).on('keydown', '#BudgetLimit', function (e) {
     }
 });
 
+//$('#cijForm').on('submit', function (e) {
+
+//    const $form = $(this);
+//    const $saveButton = $('#btnSave');
+//    const $updateButton = $('#btnUpdate');
+
+//    // Prevent duplicate submissions
+//    if ($form.data('processing')) {
+//        e.preventDefault();
+//        return false;
+//    }
+
+//    // Validate the form
+//    if (!$form.valid()) {
+//        e.preventDefault();
+
+//        $saveButton
+//            .prop('disabled', false)
+//            .text('Save');
+
+//        $updateButton
+//            .prop('disabled', false)
+//            .text('Update');
+
+//        return false;
+//    }
+
+//    // Form is valid
+//    $form.data('processing', true);
+
+//    $saveButton
+//        .prop('disabled', true)
+//        .text('Saving...');
+
+//    $updateButton
+//        .prop('disabled', true)
+//        .text('Updating...');
+//});
 
 
 

@@ -516,7 +516,11 @@
                     fillDropdown('#assignmentLocation', data.locations);
                 })
                 .fail(function () {
-                    showAssignmentMessage('Unable to load dropdown options.');
+                    //showAssignmentMessage('Unable to load dropdown options.');
+                    displayToast(
+                        'Unable to load dropdown options.',
+                        response.toastType || 'error'
+                    );
                 });
         }
 
@@ -571,9 +575,13 @@
 
                 success: function (response) {
                     debugger;
-                    showAssignmentMessage(
-                        response.message || 'Assignment saved.',
-                        'success'
+                    // showAssignmentMessage(
+                    //     response.message || 'Assignment saved.',
+                    //     'success'
+                    // );
+                    displayToast(
+                        response.message || 'Assignment saved successfully.',
+                        response.toastType || 'success'
                     );
 
                     $('#assignmentFormPanel').addClass('d-none');
@@ -584,9 +592,13 @@
                 },
 
                 error: function (xhr) {
-                    const message = xhr.responseJSON?.message
-                        || 'Unable to save assignment.';
-                    showAssignmentMessage(message);
+                    const response = xhr.responseJSON;
+
+                    displayToast(
+                        response?.message || 'Unable to save assignment.',
+                        response?.toastType || 'error'
+                    );
+                    //showAssignmentMessage(message);
                 },
 
                 complete: function () {
@@ -657,5 +669,30 @@
             });
         });
 
+        function displayToast(message, type = 'success') {
+
+            const toastElement = document.getElementById("appToast");
+            const toastTitle = document.getElementById("toastTitle");
+            const toastMessage = document.getElementById("toastMessage");
+
+            toastElement.classList.remove("bg-success", "bg-danger");
+
+            if (type === "success") {
+                toastElement.classList.add("bg-success");
+                toastTitle.textContent = "Success";
+            } else {
+                toastElement.classList.add("bg-danger");
+                toastTitle.textContent = "Error";
+            }
+
+            toastMessage.textContent = message;
+
+            const toast = bootstrap.Toast.getOrCreateInstance(toastElement, {
+                delay: 3000,
+                autohide: true
+            });
+
+            toast.show();
+        }
     </script>
 }

@@ -62,7 +62,10 @@ namespace Capital_Item_Justification.Repository
         Email = user.Email ?? "",
         IsActive = user.IsActive,
         RoleCount = userRoleGroup.Select(x => x.RoleId).Distinct().Count(),
-        DepartmentCount = _context.CijUserRoleAssignments.Where(x => x.UserId == user.Id && x.IsActive).Select(x => x.DepartmentId).Distinct().Count()
+        DepartmentCount = _context.CijUserRoleAssignments.Where(x => x.UserId == user.Id && x.IsActive).Select(x => x.DepartmentId).Distinct().Count(),
+        RoleIds = _context.CijUserRoleAssignments.Where(x => x.UserId == user.Id && x.IsActive).Select(x => x.RoleId).Distinct().ToList(),
+        DepartmentIds = _context.CijUserRoleAssignments.Where(x => x.UserId == user.Id && x.IsActive).Select(x => x.DepartmentId).Distinct().ToList(),
+        LocationIds = _context.CijUserRoleAssignments.Where(x => x.UserId == user.Id && x.IsActive).Select(x => x.LocationId).Distinct().ToList()
     }).OrderBy(x => x.FullName).ToListAsync();
 
             return vm;

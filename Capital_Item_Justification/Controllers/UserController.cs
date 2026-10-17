@@ -47,15 +47,15 @@ namespace Capital_Item_Justification.Controllers
             var vm = await _userService.GetUsersAsync();
             if (filter.departmentId.HasValue)
             {
-                vm = vm.Where(x => x.DepartmentId == filter.departmentId.Value).ToList();
+                vm = vm.Where(x => x.DepartmentIds.Contains(filter.departmentId.Value)).ToList();
             }
             if (filter.locationId.HasValue)
             {
-                vm = vm.Where(x => x.LocationId == filter.locationId.Value).ToList();
+                vm = vm.Where(x => x.LocationIds.Contains(filter.locationId.Value)).ToList();
             }
             if (!string.IsNullOrEmpty(filter.roleId))
             {
-                vm = vm.Where(x => x.RoleId == filter.roleId).ToList();
+                vm = vm.Where(x => x.RoleIds.Contains(filter.roleId)).ToList();
             }
             var totalRecords = vm.Count();
             var users = vm.Skip((filter.page - 1) * filter.pageSize).Take(filter.pageSize).ToList();
@@ -517,9 +517,8 @@ namespace Capital_Item_Justification.Controllers
                 a.UserId == request.UserId &&
                 a.RoleId == request.RoleId &&
                 a.DepartmentId == request.DepartmentId &&
-                //a.LocationId == request.LocationId &&
-                //a.ScopeType == "Department" &&
-                a.IsActive);
+                a.IsActive &&
+                a.AssignmentId != (request.AssignmentId > 0 ? request.AssignmentId : 0));
 
             if (duplicate)
                 return Conflict(new
