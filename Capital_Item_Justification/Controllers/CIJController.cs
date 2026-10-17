@@ -22,6 +22,11 @@ namespace Capital_Item_Justification.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private string? workingRoleId => HttpContext.Session.GetString("WorkingRoleId");
+        private string? workingRoleName => HttpContext.Session.GetString("WorkingRoleName");
+        private string? assignmentId => HttpContext.Session.GetString("WorkingAssignmentId");
+        private int? workingDepartmentId => HttpContext.Session.GetInt32("WorkingDepartmentId");
+        private int? workingLocationId => HttpContext.Session.GetInt32("WorkingLocationId");
         public CIJController(ICIJRequestService service, ILogger<WorkFlowController> logger, IWorkflowService workflowService,
             UserManager<ApplicationUser> userManager, IEmailService emailService, RoleManager<ApplicationRole> roleManager)
         {
@@ -45,22 +50,34 @@ namespace Capital_Item_Justification.Controllers
                 }
                 var roles = await _userManager.GetRolesAsync(user);
                 ViewBag.Roles = roles;
-                if (User.IsInRole("Requester"))
+                if (string.IsNullOrEmpty(workingRoleName) || string.IsNullOrEmpty(assignmentId))
+                {
+                    return RedirectToAction("SelectRole", "Account");
+                }
+                //if (User.IsInRole("Requester"))
+                if (workingRoleName == "Requester")
                 {
                     totalVM = await _service.GetDashboardRequestsCount(user.Id);
                 }
                 else
                 {
                     List<string> roleIds = new();
-                    foreach (var roleName in roles)
-                    {
-                        var role = await _roleManager.FindByNameAsync(roleName);
+                    //foreach (var roleName in roles)
+                    //{
+                    //    var role = await _roleManager.FindByNameAsync(roleName);
 
-                        if (role != null)
-                        {
-                            roleIds.Add(role.Id);
-                        }
+                    //    if (role != null)
+                    //    {
+                    //        roleIds.Add(role.Id);
+                    //    }
+                    //}
+                    if (string.IsNullOrEmpty(workingRoleId) || string.IsNullOrEmpty(assignmentId))
+                    {
+                        return RedirectToAction("SelectRole", "Account");
                     }
+                    roleIds = new() { workingRoleId };
+                    user.DepartmentId = workingDepartmentId ?? 0;
+                    user.LocationId = workingLocationId ?? 0;
                     var vm = await _workflowService.GetMyApprovalAsync(user, roleIds);
                     totalVM.PendingCount = vm.Where(a => a.StatusName == "Pending").Count();
                     totalVM.CompletedCount = vm.Where(a => a.StatusName == "Completed").Count();
@@ -70,7 +87,6 @@ namespace Capital_Item_Justification.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
             return View(totalVM);
@@ -85,7 +101,12 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                if (!User.IsInRole("Requester"))
+                if (string.IsNullOrEmpty(workingRoleName) || string.IsNullOrEmpty(assignmentId))
+                {
+                    return RedirectToAction("SelectRole", "Account");
+                }
+                //if (!User.IsInRole("Requester"))
+                if (workingRoleName != "Requester")
                 {
                     return RedirectToAction("MyApproval", "WorkFlow");
                 }
@@ -114,7 +135,7 @@ namespace Capital_Item_Justification.Controllers
                 {
                     ItemTypes = dropDowns.ItemTypes,
                     Departments = dropDowns.Departments,
-                    Locations = dropDowns.Locations.Where(a => a.Value == user.LocationId.ToString()),
+                    Locations = dropDowns.Locations.Where(a => a.Value == workingLocationId.ToString()),
                     BeneficiaryLocationItem = dropDowns.Locations,
                     BudgetProvisionList = dropDowns.BudgetProvisionList,
                     PurchagePurposeList = dropDowns.PurchagePurposeList,
@@ -171,7 +192,7 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.CIJRequest.BeneficiaryDepartment = beneficieryDept;
                 cIJMainViewModel.CIJRequest.BeneficiaryLocation = beneficieryLoc;
                 cIJMainViewModel.userId = user.Id;
-                cIJMainViewModel.userDepartmentId = user.DepartmentId;
+                cIJMainViewModel.userDepartmentId = workingDepartmentId; //user.DepartmentId;
                 cIJMainViewModel.userRoles = roles.ToList();
                 if (cIJMainViewModel?.CIJRequest?.Cijid > 0)
                 {
@@ -259,7 +280,7 @@ namespace Capital_Item_Justification.Controllers
 
                 cIJMainViewModel.CIJRequest.ItemTypes = dropDowns.ItemTypes;
                 cIJMainViewModel.CIJRequest.Departments = dropDowns.Departments;
-                cIJMainViewModel.CIJRequest.Locations = dropDowns.Locations.Where(a => a.Value == user.LocationId.ToString());
+                cIJMainViewModel.CIJRequest.Locations = dropDowns.Locations.Where(a => a.Value == workingLocationId.ToString());
                 cIJMainViewModel.CIJRequest.BeneficiaryLocationItem = dropDowns.Locations;
                 cIJMainViewModel.CIJRequest.BudgetProvisionList = dropDowns.BudgetProvisionList;
                 cIJMainViewModel.CIJRequest.PurchagePurposeList = dropDowns.PurchagePurposeList;
@@ -455,9 +476,10 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
+                //var roles = await _userManager.GetRolesAsync(user);
+
                 cIJMainViewModel.userId = user.Id;
-                cIJMainViewModel.userRoles = roles.ToList();
+                cIJMainViewModel.userRoles = string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName };//roles.ToList();
                 await _workflowService.SubmitCIJAsync(cIJMainViewModel);
                 await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.Cijid, cIJMainViewModel.CIJRequest.CIJSNumber, "Submitted", "CIJ Request Submitted");
                 TempData["ToastMessage"] = "CIJ request submitted successfully.";

@@ -7,6 +7,7 @@ using System.Data;
 using Capital_Item_Justification.Services.Interfaces;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -16,12 +17,15 @@ namespace Capital_Item_Justification.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
         private readonly ILogger<WorkFlowController> _logger;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailService emailService, ILogger<WorkFlowController> logger)
+        private readonly CIJDbContext _context;
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailService emailService, ILogger<WorkFlowController> logger
+            , CIJDbContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _emailService = emailService;
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet]
@@ -37,18 +41,8 @@ namespace Capital_Item_Justification.Controllers
                 }
                 var roles = await _userManager.GetRolesAsync(loggedinUser);
                 return RedirectToAction("Dashboard", "CIJ");
-                //if (roles.Contains("Requester"))
-                //{
-                //    return RedirectToAction("Dashboard", "CIJ");
-                //}
-                //else
-                //{
-                //    return RedirectToAction("MyApproval", "WorkFlow");
-                //}
             }
-
             ViewData["ReturnUrl"] = returnUrl;
-
             return View();
         }
 
@@ -105,8 +99,9 @@ namespace Capital_Item_Justification.Controllers
                 //}
                 //var roles = await _userManager.GetRolesAsync(loggedinUser);
 
+                return RedirectToAction(nameof(SelectRole));
 
-                return RedirectToAction("Dashboard", "CIJ");
+                //return RedirectToAction("Dashboard", "CIJ");
 
             }
 
@@ -323,6 +318,264 @@ namespace Capital_Item_Justification.Controllers
             }
 
             return View(model);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> SelectRole()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Challenge();
+
+            // Load the user's active role assignments.
+            var assignments = await _context.CijUserRoleAssignments
+                .Where(x => x.UserId == user.Id && x.IsActive)
+                .Join(
+                    _context.Roles,
+                    assignment => assignment.RoleId,
+                    role => role.Id,
+                    (assignment, role) => new
+                    {
+                        Assignment = assignment,
+                        Role = role
+                    })
+                .ToListAsync();
+
+            // Only display roles the user is actually permitted to use.
+            var identityRoles = await _userManager.GetRolesAsync(user);
+
+            assignments = assignments
+                .Where(x => identityRoles.Contains(x.Role.Name!))
+                .ToList();
+
+            if (assignments.Count == 0)
+            {
+                TempData["ErrorMessage"] =
+                    "No active role assignments were found for your account.";
+
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            // One assignment: select it automatically.
+            if (assignments.Count == 1)
+            {
+                return await SetWorkingRole(assignments[0].Assignment.AssignmentId);
+            }
+
+            var assignmentIds = assignments
+                .Select(x => x.Assignment.DepartmentId)
+                .Where(x => x.HasValue)
+                .Select(x => x!.Value)
+                .Distinct()
+                .ToList();
+
+            var locationIds = assignments
+                .Select(x => x.Assignment.LocationId)
+                .Where(x => x.HasValue)
+                .Select(x => x!.Value)
+                .Distinct()
+                .ToList();
+
+            var departments = await _context.CijDepartments
+                .Where(x => assignmentIds.Contains(x.DepartmentId))
+                .ToDictionaryAsync(x => x.DepartmentId, x => x.DepartmentName);
+
+            var locations = await _context.CijLocations
+                .Where(x => locationIds.Contains(x.LocationId))
+                .ToDictionaryAsync(x => x.LocationId, x => x.LocationName);
+
+            var vm = new SelectRoleViewModel
+            {
+                Roles = assignments.Select(x =>
+                {
+                    var a = x.Assignment;
+
+                    return new RoleAssignmentOptionViewModel
+                    {
+                        AssignmentId = a.AssignmentId,
+                        RoleId = a.RoleId,
+                        RoleName = x.Role.Name ?? string.Empty,
+                        DepartmentId = a.DepartmentId,
+                        DepartmentName = a.DepartmentId.HasValue
+                            ? departments.GetValueOrDefault(
+                                a.DepartmentId.Value, "Unknown Department")
+                            : "All Departments",
+                        LocationId = a.LocationId,
+                        LocationName = a.LocationId.HasValue
+                            ? locations.GetValueOrDefault(
+                                a.LocationId.Value, "Unknown Location")
+                            : "All Locations",
+                        ScopeType = a.ScopeType ?? string.Empty
+                    };
+                }).ToList()
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SelectRole(SelectRoleViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Challenge();
+
+            if (!ModelState.IsValid)
+            {
+                return await ReloadRoleSelection(user.Id, model);
+            }
+
+            // Revalidate the assignment against the logged-in user.
+            var assignment = await _context.CijUserRoleAssignments
+                .FirstOrDefaultAsync(x =>
+                    x.AssignmentId == model.AssignmentId &&
+                    x.UserId == user.Id &&
+                    x.IsActive);
+
+            if (assignment == null)
+            {
+                ModelState.AddModelError(
+                    nameof(model.AssignmentId),
+                    "The selected role assignment is invalid or inactive.");
+
+                return await ReloadRoleSelection(user.Id, model);
+            }
+
+            // Confirm the role is also assigned in ASP.NET Core Identity.
+            var identityRoles = await _userManager.GetRolesAsync(user);
+
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(x => x.Id == assignment.RoleId);
+
+            if (role == null ||
+                string.IsNullOrWhiteSpace(role.Name) ||
+                !identityRoles.Contains(role.Name))
+            {
+                return Forbid();
+            }
+
+            return await SetWorkingRole(assignment.AssignmentId);
+        }
+        private async Task<IActionResult> ReloadRoleSelection(string userId, SelectRoleViewModel model)
+        {
+            var assignments = await _context.CijUserRoleAssignments
+                .Where(x => x.UserId == userId && x.IsActive)
+            .Join(
+                    _context.Roles,
+                    a => a.RoleId,
+                    r => r.Id,
+                    (a, r) => new { Assignment = a, Role = r })
+                .ToListAsync();
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return Challenge();
+
+            var identityRoles = await _userManager.GetRolesAsync(user);
+
+            assignments = assignments
+                .Where(x => identityRoles.Contains(x.Role.Name!))
+                .ToList();
+
+            var departmentIds = assignments
+                .Where(x => x.Assignment.DepartmentId.HasValue)
+                .Select(x => x.Assignment.DepartmentId!.Value)
+                .Distinct()
+                .ToList();
+
+            var locationIds = assignments
+                .Where(x => x.Assignment.LocationId.HasValue)
+                .Select(x => x.Assignment.LocationId!.Value)
+                .Distinct()
+            .ToList();
+
+            var departments = await _context.CijDepartments
+                .Where(x => departmentIds.Contains(x.DepartmentId))
+                .ToDictionaryAsync(x => x.DepartmentId, x => x.DepartmentName);
+
+            var locations = await _context.CijLocations
+                .Where(x => locationIds.Contains(x.LocationId))
+                .ToDictionaryAsync(x => x.LocationId, x => x.LocationName);
+
+            model.Roles = assignments.Select(x => new RoleAssignmentOptionViewModel
+            {
+                AssignmentId = x.Assignment.AssignmentId,
+                RoleId = x.Assignment.RoleId,
+                RoleName = x.Role.Name ?? string.Empty,
+                DepartmentId = x.Assignment.DepartmentId,
+                DepartmentName = x.Assignment.DepartmentId.HasValue
+                    ? departments.GetValueOrDefault(
+                        x.Assignment.DepartmentId.Value, "Unknown Department")
+                    : "All Departments",
+                LocationId = x.Assignment.LocationId,
+                LocationName = x.Assignment.LocationId.HasValue
+                    ? locations.GetValueOrDefault(
+                        x.Assignment.LocationId.Value, "Unknown Location")
+                    : "All Locations",
+                ScopeType = x.Assignment.ScopeType ?? string.Empty
+            }).ToList();
+
+            return View("SelectRole", model);
+        }
+        private async Task<IActionResult> SetWorkingRole(int assignmentId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Challenge();
+
+            var assignment = await _context.CijUserRoleAssignments
+                .FirstOrDefaultAsync(x =>
+                    x.AssignmentId == assignmentId &&
+                    x.UserId == user.Id &&
+                    x.IsActive);
+
+            if (assignment == null)
+                return Forbid();
+
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(x => x.Id == assignment.RoleId);
+
+            var identityRoles = await _userManager.GetRolesAsync(user);
+
+            if (role?.Name == null || !identityRoles.Contains(role.Name))
+                return Forbid();
+
+            // Store only the validated, selected working context.
+            HttpContext.Session.SetString("WorkingAssignmentId",
+                assignment.AssignmentId.ToString());
+
+            HttpContext.Session.SetString("WorkingRoleId",
+                assignment.RoleId);
+
+            HttpContext.Session.SetString("WorkingRoleName",
+                role.Name);
+
+            if (assignment.DepartmentId.HasValue)
+            {
+                HttpContext.Session.SetInt32(
+                    "WorkingDepartmentId", assignment.DepartmentId.Value);
+            }
+            else
+            {
+                HttpContext.Session.Remove("WorkingDepartmentId");
+            }
+
+            if (assignment.LocationId.HasValue)
+            {
+                HttpContext.Session.SetInt32(
+                    "WorkingLocationId", assignment.LocationId.Value);
+            }
+            else
+            {
+                HttpContext.Session.Remove("WorkingLocationId");
+            }
+            return RedirectToAction("Dashboard", "CIJ");
         }
     }
 }

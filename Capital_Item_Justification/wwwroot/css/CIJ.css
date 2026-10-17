@@ -376,5 +376,10 @@ body {
 .processing-overlay .progress {
     height: 4px;
 }
+table thead th {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
 
 

@@ -501,9 +501,9 @@ namespace Capital_Item_Justification.Repository
                 CijWorkflowStep? nextStep = null;
                 if (cijRequest.WorkflowId == 1)
                     nextStep = await GetWorkflowNextStep(currentStep, cijRequest, cijRequest.WorkflowId ?? 0);
-                else if (cijRequest.WorkflowId == 2)
+                else if (cijRequest.WorkflowId == 2)//Secondary center
                     nextStep = await GetSecondWorkflowNextStep(currentStep, cijRequest, cijRequest.WorkflowId ?? 0);
-                else if (cijRequest.WorkflowId == 3)
+                else if (cijRequest.WorkflowId == 3)//Fully funded
                     nextStep = await GetThirdWorkflowNextStep(currentStep, cijRequest, cijRequest.WorkflowId ?? 0);
 
 
@@ -1026,7 +1026,7 @@ namespace Capital_Item_Justification.Repository
         {
             CijWorkflowStep? nextStep = new CijWorkflowStep();
             //List<string> FHDepartments = new List<string>() { "IT", "BME", "Admin", "Finance", "Purchase", "Civil", "Legal" };
-            List<int> FHDepartmentIds = _context.CijFunctionHeadDepartments.Select(a => a.DepartmentId).ToList();
+            List<int> FHDepartmentIds = _context.CijFunctionHeadDepartments.Where(a=>a.IsActive).Select(a => a.DepartmentId).ToList();
             if (currentStep.StepCode.Equals("REQUESTOR", StringComparison.OrdinalIgnoreCase))
             {
                 //var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
@@ -1379,20 +1379,54 @@ namespace Capital_Item_Justification.Repository
             }
             else if (currentStep.StepCode.Equals("Consultant_Incharge", StringComparison.OrdinalIgnoreCase))
             {
-                string stepCode = "Director_SC_Initial";
-                nextStep = await GetStep(stepCode, WorkflowId);
-                if (nextStep == null)
+                var conInchargeLimit = await (from budget in _context.CijRoleBudgetLimits
+                                               join role in _context.Roles
+                                             on budget.RoleId equals role.Id
+                                               where role.Name == "Consultant Incharge"
+                                               select budget.BudgetLimit).FirstOrDefaultAsync();
+                if (conInchargeLimit >= cijRequest.TotalEquipmentCost)
                 {
-                    throw new InvalidOperationException("Director SC Initial Approval step is not configured.");
+                    string stepCode = "FINANCE";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Finance Approval step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "Director_SC_Initial";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Director SC Initial Approval step is not configured.");
+                    }
                 }
             }
             else if (currentStep.StepCode.Equals("Administrator", StringComparison.OrdinalIgnoreCase))
             {
-                string stepCode = "Director_SC_Initial";
-                nextStep = await GetStep(stepCode, WorkflowId);
-                if (nextStep == null)
+                var adminstratorLimit = await (from budget in _context.CijRoleBudgetLimits
+                                             join role in _context.Roles
+                                           on budget.RoleId equals role.Id
+                                             where role.Name == "Administrator"
+                                               select budget.BudgetLimit).FirstOrDefaultAsync();
+                if (adminstratorLimit >= cijRequest.TotalEquipmentCost)
                 {
-                    throw new InvalidOperationException("Director SC Initial Approval step is not configured.");
+                    string stepCode = "FINANCE";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Finance Approval step is not configured.");
+                    }
+                }
+                else
+                {
+                    string stepCode = "Director_SC_Initial";
+                    nextStep = await GetStep(stepCode, WorkflowId);
+                    if (nextStep == null)
+                    {
+                        throw new InvalidOperationException("Director SC Initial Approval step is not configured.");
+                    }
                 }
             }
             else if (currentStep.StepCode.Equals("Director_SC_Initial", StringComparison.OrdinalIgnoreCase))

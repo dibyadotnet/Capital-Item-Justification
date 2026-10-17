@@ -57,6 +57,8 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<CijRoleBudgetLimit> CijRoleBudgetLimits { get; set; }
     public virtual DbSet<CijWorkflowApproval> CijWorkflowApprovals { get; set; }
     public virtual DbSet<CijEmailConfiguration> CijEmailConfigurations { get; set; }
+
+    public virtual DbSet<CijUserRoleAssignment> CijUserRoleAssignments { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CIJConnection");
 
@@ -71,6 +73,16 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<CIJJustificationViewModel>().HasNoKey();
         modelBuilder.Entity<RequestTrackingViewModel>().HasNoKey();
         modelBuilder.Entity<TotalCountDashboardViewModel>().HasNoKey().ToView(null);
+
+        modelBuilder.Entity<CijUserRoleAssignment>(entity =>
+        {
+            entity.HasKey(e => e.AssignmentId).HasName("PK_UserRoleAssignments");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.ScopeType).HasDefaultValue("Department");
+        });
+
         modelBuilder.Entity<CijEmailConfiguration>(entity =>
         {
             entity.HasKey(e => e.EmailConfigurationId).HasName("PK__CIJ_Emai__1452379B4A3658F2");

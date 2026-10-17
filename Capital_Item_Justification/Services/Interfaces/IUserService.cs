@@ -4,6 +4,6 @@ namespace Capital_Item_Justification.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<List<UserViewModel>> GetGetUsersAsync();
+        Task<List<UserViewModel>> GetUsersAsync();
     }
 }

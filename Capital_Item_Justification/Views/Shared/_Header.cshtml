@@ -3,6 +3,7 @@
 
 @{
     var currentUser = await UserManager.GetUserAsync(User);
+    var workingRoleName = Context.Session.GetString("WorkingRoleName");
 }
 
 <nav class="app-header navbar navbar-expand bg-body">
@@ -36,10 +37,27 @@
             </li>
         </ul>
         <!-- Right side -->
-        <ul class="navbar-nav ms-auto">
-           
+        <ul class="navbar-nav ms-auto align-items-center">
+            <!-- Current Working Role -->
+            @if (!string.IsNullOrWhiteSpace(workingRoleName))
+            {
+                <li class="nav-item me-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small d-none d-md-inline">
+                            Current Role:
+                        </span>
+
+                        <span class="badge bg-danger px-3 py-2">
+                            <i class="bi bi-person-badge me-1"></i>
+                            @workingRoleName
+                        </span>
+                    </div>
+                </li>
+            }
+
             @if (User.Identity?.IsAuthenticated == true)
             {
+
                 <li class="nav-item dropdown">
 
                     <a class="nav-link dropdown-toggle"

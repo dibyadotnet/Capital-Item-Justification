@@ -21,6 +21,11 @@ namespace Capital_Item_Justification.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ICIJRequestService _cijService;
         private readonly IEmailService _emailService;
+        private string? workingRoleId => HttpContext.Session.GetString("WorkingRoleId");
+        private string? workingRoleName => HttpContext.Session.GetString("WorkingRoleName");
+        private string? assignmentId => HttpContext.Session.GetString("WorkingAssignmentId");
+        private int? workingDepartmentId => HttpContext.Session.GetInt32("WorkingDepartmentId");
+        private int? workingLocationId => HttpContext.Session.GetInt32("WorkingLocationId");
         public WorkFlowController(ILogger<WorkFlowController> logger, IWorkflowService service, UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager, ICIJRequestService cijService, IEmailService emailService)
         {
@@ -41,18 +46,26 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
+
                 List<string> roleIds = new();
 
-                foreach (var roleName in roles)
-                {
-                    var role = await _roleManager.FindByNameAsync(roleName);
+                //var roles = await _userManager.GetRolesAsync(user);
+                //foreach (var roleName in roles)
+                //{
+                //    var role = await _roleManager.FindByNameAsync(roleName);
 
-                    if (role != null)
-                    {
-                        roleIds.Add(role.Id);
-                    }
+                //    if (role != null)
+                //    {
+                //        roleIds.Add(role.Id);
+                //    }
+                //}
+                if (string.IsNullOrEmpty(workingRoleId) || string.IsNullOrEmpty(assignmentId))
+                {
+                    return RedirectToAction("SelectRole", "Account");
                 }
+                roleIds = new() { workingRoleId };
+                user.DepartmentId = workingDepartmentId;
+                user.LocationId = workingLocationId;
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName != "Completed").ToList();
                 ViewBag.Page = "Pending";
@@ -75,28 +88,32 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
                 List<string> roleIds = new();
 
-                foreach (var roleName in roles)
-                {
-                    var role = await _roleManager.FindByNameAsync(roleName);
+                //var roles = await _userManager.GetRolesAsync(user);
+                //foreach (var roleName in roles)
+                //{
+                //    var role = await _roleManager.FindByNameAsync(roleName);
 
-                    if (role != null)
-                    {
-                        roleIds.Add(role.Id);
-                    }
+                //    if (role != null)
+                //    {
+                //        roleIds.Add(role.Id);
+                //    }
+                //}
+
+                if (string.IsNullOrEmpty(workingRoleId) || string.IsNullOrEmpty(assignmentId))
+                {
+                    return RedirectToAction("SelectRole", "Account");
                 }
+                roleIds = new() { workingRoleId };
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName == "Completed").ToList();
                 ViewBag.Page = "Completed";
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
                 throw;
             }
-
             return View("MyApproval", vm);
         }
         public async Task<IActionResult> ViewCIJRequest(int approvalId, int cijId)
@@ -109,7 +126,7 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
+                //var roles = await _userManager.GetRolesAsync(user);
 
                 vm = await _service.GetRequestDetailsAsync(approvalId, cijId);
 
@@ -131,12 +148,11 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
-
+                //var roles = await _userManager.GetRolesAsync(user);
                 var departmentsList = await _cijService.GetDepartment();
                 var allowedDepartments = new[] { "BME", "IT", "Admin" };
                 var departmentItems = departmentsList.Where(x => allowedDepartments.Contains(
-                                            x.DepartmentName.Trim(),StringComparer.OrdinalIgnoreCase))
+                                            x.DepartmentName.Trim(), StringComparer.OrdinalIgnoreCase))
                                             .Select(x => new SelectListItem
                                             {
                                                 Value = x.DepartmentId.ToString(),
@@ -150,7 +166,8 @@ namespace Capital_Item_Justification.Controllers
                 //HOD or Function head
                 var hasPendingClarification = vm?.Clarifications.Any(x => x.StatusName == "Query"
                                                 && x.TargetRoleName != null
-                                                && roles.Contains(x.TargetRoleName));
+                                                && workingRoleName != null
+                                                && workingRoleName.Contains(x.TargetRoleName));
 
                 if (hasPendingClarification == true)
                 {
@@ -176,7 +193,6 @@ namespace Capital_Item_Justification.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
             return View(vm);
@@ -194,11 +210,13 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
+                //var roles = await _userManager.GetRolesAsync(user);
+                user.DepartmentId = workingDepartmentId;
+                user.LocationId = workingLocationId;
                 vm = new ApproveRejectViewModel()
                 {
                     userId = user.Id,
-                    userRoles = roles.ToList(),
+                    userRoles = string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName },
                     cijId = cijId,
                     assignedDept = assignedDept,
                     remarks = remarks,
@@ -241,12 +259,14 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
+                //var roles = await _userManager.GetRolesAsync(user);
+                user.DepartmentId = workingDepartmentId;
+                user.LocationId = workingLocationId;
                 string action = "Query";
                 vm = new ApproveRejectViewModel()
                 {
                     userId = user.Id,
-                    userRoles = roles.ToList(),
+                    userRoles = string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName }, //roles.ToList(),
                     cijId = cijId,
                     workflowApprovalId = workflowApprovalId,
                     userDepartmentId = user.DepartmentId,
@@ -286,12 +306,14 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
+                //var roles = await _userManager.GetRolesAsync(user);
+                user.DepartmentId = workingDepartmentId;
+                user.LocationId = workingLocationId;
                 string action = "Answer";
                 vm = new ApproveRejectViewModel()
                 {
                     userId = user.Id,
-                    userRoles = roles.ToList(),
+                    userRoles = string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName }, //roles.ToList(),
                     cijId = cijId,
                     ClarificationId = clarificationId,
                     userDepartmentId = user.DepartmentId,
@@ -331,12 +353,14 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
+                //var roles = await _userManager.GetRolesAsync(user);
+                user.DepartmentId = workingDepartmentId;
+                user.LocationId = workingLocationId;
                 string action = "Rejected";
                 vm = new ApproveRejectViewModel()
                 {
                     userId = user.Id,
-                    userRoles = roles.ToList(),
+                    userRoles = string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName }, //roles.ToList(),
                     cijId = cijId,
                     remarks = remarks,
                     workflowApprovalId = workflowApprovalId,
@@ -419,10 +443,11 @@ namespace Capital_Item_Justification.Controllers
                 {
                     return Unauthorized();
                 }
-                var roles = await _userManager.GetRolesAsync(user);
+                //var roles = await _userManager.GetRolesAsync(user);
 
                 vm = await _service.GetOtherRoleRequestsAsync();
-
+                List<string> roles= string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName };
+                
                 if (roles.Any(r => r.Contains("Purchase", StringComparison.OrdinalIgnoreCase)))
                 {
                     vm = vm.Where(x => !(x.ApproverRole?.Contains("Purchase", StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
