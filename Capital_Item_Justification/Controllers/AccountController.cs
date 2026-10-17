@@ -99,9 +99,9 @@ namespace Capital_Item_Justification.Controllers
                 //}
                 //var roles = await _userManager.GetRolesAsync(loggedinUser);
 
-                return RedirectToAction(nameof(SelectRole));
+                //return RedirectToAction(nameof(SelectRole));
 
-                //return RedirectToAction("Dashboard", "CIJ");
+                return RedirectToAction("Dashboard", "CIJ");
 
             }
 
