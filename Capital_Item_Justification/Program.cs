@@ -10,6 +10,8 @@ using Capital_Item_Justification.Services;
 using PdfSharp.Fonts;
 using Capital_Item_Justification.PDF;
 using Serilog;
+using System.IO;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,19 +25,29 @@ var logDirectory = builder.Configuration["Serilog:LogDirectory"]
 
 Directory.CreateDirectory(logDirectory);
 
+var retainedFileCountLimit =
+    builder.Configuration.GetValue<int?>("Serilog:RetainedFileCountLimit") ?? 14;
+
 Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
     .MinimumLevel.Information()
     .MinimumLevel.Override(
+        "Microsoft",
+        Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override(
         "Microsoft.AspNetCore",
+        Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override(
+        "Microsoft.EntityFrameworkCore",
         Serilog.Events.LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.File(
         Path.Combine(logDirectory, "cij-.log"),
         rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 14,
+        retainedFileCountLimit: retainedFileCountLimit,
         shared: true,
         outputTemplate:
-            "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+            "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -45,6 +57,12 @@ builder.Host.UseSerilog();
 // =====================================================
 
 GlobalFontSettings.FontResolver = new PdfSharpFontResolver();
+
+//builder.Services.AddDataProtection()
+//    .PersistKeysToFileSystem(
+//        new DirectoryInfo(
+//            @"E:\CIJ_Software\CIJ_DataProtectionKeys"))
+//    .SetApplicationName("CIJ");
 
 // =====================================================
 // DATABASE CONFIGURATION

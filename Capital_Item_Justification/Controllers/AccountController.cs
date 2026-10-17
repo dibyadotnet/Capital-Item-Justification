@@ -88,6 +88,7 @@ namespace Capital_Item_Justification.Controllers
 
             if (result.Succeeded)
             {
+                _logger.LogInformation("Login Successfully {isSuccess}", result.Succeeded);
                 //if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 //{
                 //    return Redirect(returnUrl);
@@ -323,14 +324,13 @@ namespace Capital_Item_Justification.Controllers
 
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> SelectRole()
         {
             var correlationId = HttpContext.TraceIdentifier;
 
             _logger.LogInformation(
-                "SelectRole started. TraceId={TraceId}, IsAuthenticated={IsAuthenticated}",
-                correlationId,
-                User.Identity?.IsAuthenticated);
+                "SelectRole started. IsAuthenticated={IsAuthenticated}", User.Identity?.IsAuthenticated);
 
             try
             {
