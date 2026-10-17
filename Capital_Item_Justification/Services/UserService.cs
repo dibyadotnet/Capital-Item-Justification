@@ -11,9 +11,9 @@ namespace Capital_Item_Justification.Services
         {
             _userRepository = userRepository;
         }
-        public async Task<List<UserViewModel>> GetGetUsersAsync()
+        public async Task<List<UserViewModel>> GetUsersAsync()
         {
-            return await _userRepository.GetGetUsersAsync();
+            return await _userRepository.GetUsersAsync();
         }
     }
 }

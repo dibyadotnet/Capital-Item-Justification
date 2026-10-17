@@ -126,14 +126,14 @@
                     <thead class="table-light">
 
                         <tr>
-                            <th>Employee Code</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Department</th>
+                            <th>Employee Code</th>
+                           @*  <th>Department</th> *@
                             <th>Role</th>
-                            <th>Location</th>
+                            @*  <th>Location</th> *@
                             <th>Status</th>
-                            <th width="150">Action</th>
+                            <th width="170">Action</th>
                         </tr>
 
                     </thead>
@@ -142,10 +142,7 @@
 
                         @foreach (var user in Model.Users)
                         {
-                            <tr>                            
-                                <td>
-                                    @user.EmployeeCode
-                                </td>
+                            <tr>
                                 <td>
                                     @user.FullName
                                 </td>
@@ -153,14 +150,18 @@
                                     @user.Email
                                 </td>
                                 <td>
-                                    @user.DepartmentName
+                                    @user.EmployeeCode
                                 </td>
+                               @*  <td>
+                                    @user.DepartmentCount
+                                </td> *@
                                 <td>
-                                    @user.RoleName
+                                    @user.RoleCount
+                                    @(user.RoleCount == 1 ? "Role" : "Roles")
                                 </td>
-                                <td>
-                                    @user.LocationName
-                                </td>
+                                @*  <td>
+                            @user.LocationName
+                            </td> *@
                                 <td>
                                     @if (user.IsActive)
                                     {
@@ -180,8 +181,8 @@
                                     @if (user.IsActive)
                                     {
                                         <a asp-action="EditUser" title="Edit User"
-                                        asp-route-id="@user.Id"
-                                        class="btn btn-sm btn-primary btn-edit">
+                                           asp-route-id="@user.Id"
+                                           class="btn btn-sm btn-primary btn-edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                     }
@@ -202,15 +203,24 @@
                                         </button>
 
                                     </form>
-                                    @if(user.IsActive){
-                                    <a asp-action="ManageRoles"
-                                       asp-route-id="@user.Id"
+                                    @if (user.IsActive)
+                                    {
+                                        <a asp-action="ManageRoles"
+                                           asp-route-id="@user.Id"
                                            class="btn btn-sm btn-success btn-edit"
-                                       title="Manage Roles">
+                                           title="Manage Roles">
 
-                                        <i class="bi bi-person-check"></i>
+                                            <i class="bi bi-person-check"></i>
 
-                                    </a>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-sm btn-primary btn-edit manage-assignments"
+                                                data-id="@user.Id"
+                                                data-full-name="@user.FullName"
+                                                data-employee-code="@user.EmployeeCode"
+                                                title="Manage Role & Department Assignments">
+                                            <i class="bi bi-diagram-3"></i>
+                                        </button>
                                     }
                                 </td>
 
@@ -227,3 +237,425 @@
 
     </div>
 </div>
+
+@* Manage USER Role Department Modal PopUp *@
+
+<div class="modal fade" id="assignmentsModal" tabindex="-1"
+     aria-labelledby="assignmentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered
+                modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header text-white py-2" style="background:#0d6efd">
+                <div>
+                    <h6 class="modal-title" id="assignmentsModalLabel">
+                        Manage Role & Department Assignments
+                    </h6>
+                    <small id="assignmentUserInfo"></small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="assignmentMessage"
+                     class="alert d-none"></div>
+
+                <div class="d-flex justify-content-between
+                            align-items-center mb-1">
+                    <h6 class="mb-0">Assigned Roles</h6>
+                    <i class="bi bi-plus-circle text-primary"
+                       id="btnAddAssignment"
+                       style="font-size: 18px; cursor: pointer;"
+                       title="Add Assignment"></i>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Role</th>
+                                <th>Department</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th style="width:110px">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assignmentTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    Select a user to view assignments.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr />
+
+                <div id="assignmentFormPanel" class="d-none">
+                    <h6 id="assignmentFormTitle">Add Assignment</h6>
+
+                    <form id="assignmentForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="assignmentId" value="0" />
+                        <input type="hidden" id="assignmentUserId" name="UserId" />
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="assignmentRole"
+                                       class="form-label">Role</label>
+                                <select id="assignmentRole"
+                                        class="form-select" required>
+                                    <option value="">-- Select Role --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="assignmentDepartment"
+                                       class="form-label">Department</label>
+                                <select id="assignmentDepartment"
+                                        class="form-select" required>
+                                    <option value="">-- Select Department --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="assignmentLocation"
+                                       class="form-label">Location</label>
+                                <select id="assignmentLocation"
+                                        class="form-select" required>
+                                    <option value="">-- Select Location --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        @*   <div class="form-check mt-3">
+                        <input type="checkbox" id="assignmentActive"
+                        class="form-check-input" checked />
+                        <label for="assignmentActive"
+                        class="form-check-label">Active</label>
+                        </div> *@
+
+                        <div class="mt-3 d-flex gap-2">
+                            <button type="submit" id="btnSaveAssignment"
+                                    class="btn btn-primary">
+                                Save
+                            </button>
+                            <button type="button" id="btnCancelAssignment"
+                                    class="btn btn-secondary">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            $(document).on('click', '.manage-assignments', function (e) {
+                e.preventDefault();
+                console.log(this.dataset.id)
+
+                const userId = this.dataset.id;
+                const userName = this.dataset.fullName;
+                const employeeCode = this.dataset.employeeCode;
+                $('#assignmentUserId').val(userId);
+                document.getElementById('assignmentUserInfo').textContent = userName;
+
+                const modalElement =
+                    document.getElementById('assignmentsModal');
+
+                if (!modalElement) {
+                    console.error('assignmentsModal was not found.');
+                    return;
+                }
+
+                if (typeof bootstrap === 'undefined') {
+                    console.error('Bootstrap JavaScript is not loaded.');
+                    return;
+                }
+
+                bootstrap.Modal
+                    .getOrCreateInstance(modalElement)
+                    .show();
+
+                console.log('Opening assignments for user:', userId);
+                loadAssignments(userId)
+            });
+
+            $('#btnCancelAssignment').on('click', function () {
+                $('#assignmentFormPanel').addClass('d-none');
+                $('#assignmentForm')[0].reset();
+            });
+        });
+
+        function loadAssignments(userId) {
+            const $tbody = $('#assignmentTableBody');
+
+            $tbody.html(`
+                                        <tr>
+                                            <td colspan="5" class="text-center">
+                                                <span class="spinner-border spinner-border-sm"></span>
+                                                Loading assignments...
+                                            </td>
+                                        </tr>
+                                    `);
+
+            $.ajax({
+                url: '@Url.Action("GetAssignments", "User")',
+                type: 'GET',
+                data: { userId: userId },
+
+                success: function (assignments) {
+                    $tbody.empty();
+
+                    if (!assignments || assignments.length === 0) {
+                        $tbody.html(`
+                                                    <tr>
+                                                        <td colspan="5" class="text-center text-muted">
+                                                            No assignments found. Click Add Assignment.
+                                                        </td>
+                                                    </tr>
+                                                `);
+                        return;
+                    }
+
+                    assignments.forEach(function (a) {
+                        const status = a.isActive
+                            ? '<span class="badge bg-success">Active</span>'
+                            : '<span class="badge bg-danger">Inactive</span>';
+
+                        const createdOn = a.createdOn
+                            ? new Date(a.createdOn).toLocaleDateString('en-GB')
+                            : '-';
+
+                        const row = $('<tr></tr>');
+
+                        row.append($('<td></td>').text(a.roleName || '-'));
+                        row.append($('<td></td>').text(a.departmentName || '-'));
+                        row.append($('<td></td>').text(a.locationName || '-'));
+                        row.append($('<td></td>').html(status));
+                        let editButton = '';
+                        if (a.isActive) {
+                            editButton = $('<i>', {
+                                class: 'bi bi-pencil btn-primary btn-edit edit-assignment',
+                                title: 'Edit',
+                                'data-id': a.assignmentId
+                            });
+                        }
+                        // Toggle status button
+                        const statusButton = $('<i>', {
+                            class: a.isActive
+                                ? 'bi bi-toggle-on btn-warning btn-edit toggle-assignment-status'
+                                : 'bi bi-toggle-off btn-warning btn-edit toggle-assignment-status',
+                            title: 'Manage Status',
+                            'data-id': a.assignmentId,
+                            'data-active': a.isActive
+                        });
+
+                        const actionCell = $('<td></td>');
+                        actionCell.append(editButton, statusButton);
+
+                        row.append(actionCell);
+
+                        $tbody.append(row);
+                    });
+                },
+
+                error: function (xhr) {
+                    console.error('Failed to load assignments:', xhr.responseText);
+
+                    $tbody.html(`
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-danger">
+                                                        Unable to load assignments. Please try again.
+                                                    </td>
+                                                </tr>
+                                            `);
+                }
+            });
+        }
+
+        let selectedAssignmentUserId = null;
+
+        function showAssignmentMessage(message, type = 'danger') {
+            $('#assignmentMessage')
+                .removeClass('d-none alert-danger alert-success alert-warning')
+                .addClass('alert-' + type)
+                .text(message);
+        }
+
+        function loadAssignmentOptions(userId) {
+            return $.get('@Url.Action("GetAssignmentOptions", "User")', { userId: userId })
+                .done(function (data) {
+                    const fillDropdown = function (selector, items) {
+                        const $select = $(selector);
+                        $select.empty().append(
+                            $('<option>').val('').text('-- Select --')
+                        );
+
+                        items.forEach(function (item) {
+                            $select.append(
+                                $('<option>').val(item.id).text(item.name)
+                            );
+                        });
+                    };
+
+                    fillDropdown('#assignmentRole', data.roles);
+                    fillDropdown('#assignmentDepartment', data.departments);
+                    fillDropdown('#assignmentLocation', data.locations);
+                })
+                .fail(function () {
+                    showAssignmentMessage('Unable to load dropdown options.');
+                });
+        }
+
+        $('#btnAddAssignment').on('click', function () {
+            $('#assignmentForm')[0].reset();
+            $('#assignmentId').val('0');
+            $('#assignmentActive').prop('checked', true);
+            $('#assignmentFormTitle').text('Add Assignment');
+            $('#assignmentFormPanel').removeClass('d-none');
+            selectedAssignmentUserId = $('#assignmentUserId').val();
+            loadAssignmentOptions(selectedAssignmentUserId);
+        });
+
+        $('#btnCancelAssignment').on('click', function () {
+            $('#assignmentFormPanel').addClass('d-none');
+        });
+
+        $('#assignmentForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const token = $(this).find(
+                'input[name="__RequestVerificationToken"]'
+            ).val();
+
+            const request = {
+                assignmentId: parseInt($('#assignmentId').val()) || 0,
+                userId: $('#assignmentUserId').val(),
+                roleId: $('#assignmentRole').val(),
+                departmentId: Number($('#assignmentDepartment').val()) || null,
+                locationId: Number($('#assignmentLocation').val()) || null
+            };
+            selectedAssignmentUserId: $('#assignmentUserId').val();
+            // if (!payload.userId || !payload.roleId ||
+            //     !payload.departmentId || !payload.locationId) {
+            //     showAssignmentMessage(
+            //         'Please select a role, department and location.'
+            //     );
+            //     return;
+            // }
+
+            const $saveButton = $('#btnSaveAssignment');
+            $saveButton.prop('disabled', true).text('Saving...');
+
+            $.ajax({
+                url: '@Url.Action("SaveAssignment", "User")',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: JSON.stringify(request),
+
+                success: function (response) {
+                    debugger;
+                    showAssignmentMessage(
+                        response.message || 'Assignment saved.',
+                        'success'
+                    );
+
+                    $('#assignmentFormPanel').addClass('d-none');
+                    loadAssignments(request.userId);
+
+                    // Refresh the main grid if needed to update role counts.
+                    // Use your existing DataTables instance if available.
+                },
+
+                error: function (xhr) {
+                    const message = xhr.responseJSON?.message
+                        || 'Unable to save assignment.';
+                    showAssignmentMessage(message);
+                },
+
+                complete: function () {
+                    $saveButton.prop('disabled', false)
+                        .text('Save');
+                }
+            });
+        });
+
+        $(document).on('click', '.edit-assignment', function () {
+            const assignmentId = $(this).data('id');
+
+            $.get('@Url.Action("GetAssignmentById", "User")',
+                { assignmentId: assignmentId },
+                function (a) {
+
+                    $('#assignmentForm')[0].reset();
+
+                    $('#assignmentId').val(a.assignmentId);
+                    $('#assignmentUserId').val(a.userId);
+
+                    $('#assignmentFormTitle').text('Edit Assignment');
+                    $('#assignmentFormPanel').removeClass('d-none');
+
+                    loadAssignmentOptions(a.userId).done(function () {
+                        $('#assignmentRole').val(a.roleId);
+                        $('#assignmentDepartment').val(a.departmentId);
+                        $('#assignmentLocation').val(a.locationId);
+                    });
+                }
+            ).fail(function (xhr) {
+                alert(xhr.responseJSON?.message || 'Unable to load assignment.');
+            });
+        });
+
+        $(document).on('click', '.toggle-assignment-status', function () {
+            const assignmentId = $(this).data('id');
+            const isActive = $(this).data('active');
+
+            const action = isActive ? 'deactivate' : 'activate';
+
+            if (!confirm(`Are you sure you want to ${action} this assignment?`)) {
+                return;
+            }
+
+            const token = $('input[name="__RequestVerificationToken"]').first().val();
+
+            $.ajax({
+                url: '@Url.Action("ToggleAssignmentStatus", "User")',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    assignmentId: assignmentId
+                }),
+                success: function (response) {
+                    if (response.success) {
+                        loadAssignments($('#assignmentUserId').val());
+                    } else {
+                        alert(response.message || 'Unable to update status.');
+                    }
+                },
+                error: function (xhr) {
+                    alert(xhr.responseJSON?.message || 'Failed to update status.');
+                }
+            });
+        });
+
+    </script>
+}

@@ -4,6 +4,6 @@ namespace Capital_Item_Justification.Repository.Interfaces
 {
     public interface IUserRepository
     {
-        Task<List<UserViewModel>> GetGetUsersAsync();
+        Task<List<UserViewModel>> GetUsersAsync();
     }
 }

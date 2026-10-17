@@ -14,39 +14,56 @@ namespace Capital_Item_Justification.Repository
         {
             _context = context;
         }
-        public async Task<List<UserViewModel>> GetGetUsersAsync()
+        public async Task<List<UserViewModel>> GetUsersAsync()
         {
 
-            List<UserViewModel> vm = await (from user in _context.Users
-                                      join dept in _context.CijDepartments
-                                          on user.DepartmentId equals dept.DepartmentId into departmentGroup
-                                      from dept in departmentGroup.DefaultIfEmpty()
+            //List<UserViewModel> vm = await (from user in _context.Users
+            //                          join dept in _context.CijDepartments
+            //                              on user.DepartmentId equals dept.DepartmentId into departmentGroup
+            //                          from dept in departmentGroup.DefaultIfEmpty()
 
-                                      join location in _context.CijLocations
-                                          on user.LocationId equals location.LocationId into locationGroup
-                                      from location in locationGroup.DefaultIfEmpty()
+            //                          join location in _context.CijLocations
+            //                              on user.LocationId equals location.LocationId into locationGroup
+            //                          from location in locationGroup.DefaultIfEmpty()
 
-                                      join userRole in _context.UserRoles
-                                      on user.Id equals userRole.UserId into userRoleGroup
-                                      from userRole in userRoleGroup.DefaultIfEmpty()
+            //                          join userRole in _context.UserRoles
+            //                          on user.Id equals userRole.UserId into userRoleGroup
+            //                          from userRole in userRoleGroup.DefaultIfEmpty()
 
-                                      join role in _context.Roles
-                                          on userRole.RoleId equals role.Id into roleGroup
-                                      from role in roleGroup.DefaultIfEmpty()
-                                      select new UserViewModel
-                                      {
-                                          Id = user.Id,
-                                          FullName = user.FullName ?? "",
-                                          EmployeeCode = user.EmployeeCode ?? "",
-                                          Email = user.Email ?? "",
-                                          DepartmentId = dept != null ? dept.DepartmentId : 0,
-                                          DepartmentName = dept != null ? dept.DepartmentName : null,
-                                          LocationId = location != null ? location.LocationId : 0,
-                                          LocationName = location != null ? location.LocationName : null,
-                                          IsActive = user.IsActive,
-                                          RoleName = role != null? role.Name: null,
-                                          RoleId = role != null ? role.Id : null,
-                                      }).OrderBy(x => x.FullName).ToListAsync();
+            //                          join role in _context.Roles
+            //                              on userRole.RoleId equals role.Id into roleGroup
+            //                          from role in roleGroup.DefaultIfEmpty()
+            //                          select new UserViewModel
+            //                          {
+            //                              Id = user.Id,
+            //                              FullName = user.FullName ?? "",
+            //                              EmployeeCode = user.EmployeeCode ?? "",
+            //                              Email = user.Email ?? "",
+            //                              DepartmentId = dept != null ? dept.DepartmentId : 0,
+            //                              DepartmentName = dept != null ? dept.DepartmentName : null,
+            //                              LocationId = location != null ? location.LocationId : 0,
+            //                              LocationName = location != null ? location.LocationName : null,
+            //                              IsActive = user.IsActive,
+            //                              RoleName = role != null? role.Name: null,
+            //                              RoleId = role != null ? role.Id : null,
+            //                          }).OrderBy(x => x.FullName).ToListAsync();
+
+            List<UserViewModel> vm = await (
+    from user in _context.Users
+    join userRole in _context.UserRoles
+        on user.Id equals userRole.UserId
+        into userRoleGroup
+
+    select new UserViewModel
+    {
+        Id = user.Id,
+        FullName = user.FullName ?? "",
+        EmployeeCode = user.EmployeeCode ?? "",
+        Email = user.Email ?? "",
+        IsActive = user.IsActive,
+        RoleCount = userRoleGroup.Select(x => x.RoleId).Distinct().Count(),
+        DepartmentCount = _context.CijUserRoleAssignments.Where(x => x.UserId == user.Id && x.IsActive).Select(x => x.DepartmentId).Distinct().Count()
+    }).OrderBy(x => x.FullName).ToListAsync();
 
             return vm;
         }

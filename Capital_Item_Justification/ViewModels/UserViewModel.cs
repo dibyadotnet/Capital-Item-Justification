@@ -36,5 +36,7 @@ namespace Capital_Item_Justification.ViewModels
         public string? LocationName { get; set; }
         public IEnumerable<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
         public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
+        public int RoleCount { get; set; }
+        public int DepartmentCount { get; set; }
     }
 }
