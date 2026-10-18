@@ -15,11 +15,6 @@ using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =====================================================
-// SERILOG CONFIGURATION
-// =====================================================
-
-//var logDirectory = @"E:\CIJ_Software\CIJ_Log";
 var logDirectory = builder.Configuration["Serilog:LogDirectory"]
     ?? @"E:\CIJ_Software\CIJ_Log";
 
@@ -52,10 +47,6 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// =====================================================
-// PDFSHARP FONT RESOLVER
-// =====================================================
-
 GlobalFontSettings.FontResolver = new PdfSharpFontResolver();
 
 //builder.Services.AddDataProtection()
@@ -64,17 +55,10 @@ GlobalFontSettings.FontResolver = new PdfSharpFontResolver();
 //            @"E:\CIJ_Software\CIJ_DataProtectionKeys"))
 //    .SetApplicationName("CIJ");
 
-// =====================================================
-// DATABASE CONFIGURATION
-// =====================================================
 
 builder.Services.AddDbContext<CIJDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("CIJConnection")));
-
-// =====================================================
-// ASP.NET CORE IDENTITY CONFIGURATION
-// =====================================================
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -101,10 +85,6 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddEntityFrameworkStores<CIJDbContext>()
 .AddDefaultTokenProviders();
 
-// =====================================================
-// AUTHENTICATION COOKIE CONFIGURATION
-// =====================================================
-
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
@@ -118,12 +98,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.IsEssential = true;
 
     // Production should use HTTPS.
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
-
-// =====================================================
-// SESSION CONFIGURATION
-// =====================================================
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -134,18 +110,10 @@ builder.Services.AddSession(options =>
     options.Cookie.Name = ".CIJ.Session";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
-// =====================================================
-// MVC CONFIGURATION
-// =====================================================
-
 builder.Services.AddControllersWithViews();
-
-// =====================================================
-// DEPENDENCY INJECTION - SERVICES AND REPOSITORIES
-// =====================================================
 
 builder.Services.AddScoped<ICIJRequestService, CIJRequestService>();
 builder.Services.AddScoped<ICIJMainRepository, CIJMainRepository>();
@@ -177,15 +145,7 @@ builder.Services.AddScoped<
     IFunctionHeadDepartmentRepository,
     FunctionHeadDepartmentRepository>();
 
-// =====================================================
-// BUILD APPLICATION
-// =====================================================
-
 var app = builder.Build();
-
-// =====================================================
-// STARTUP LOGGING
-// =====================================================
 
 app.Logger.LogInformation(
     "CIJ application started. Environment={Environment}",
@@ -193,10 +153,6 @@ app.Logger.LogInformation(
 
 // Log HTTP request information, including status codes and elapsed time.
 app.UseSerilogRequestLogging();
-
-// =====================================================
-// HTTP REQUEST PIPELINE
-// =====================================================
 
 if (!app.Environment.IsDevelopment())
 {
@@ -210,23 +166,15 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession();
+//session
 
 app.UseAuthentication();
-
+app.UseSession();
 app.UseAuthorization();
-
-// =====================================================
-// ROUTE CONFIGURATION
-// =====================================================
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=CIJ}/{action=Dashboard}/{id?}");
-
-// =====================================================
-// DATABASE ROLE SEEDING
-// =====================================================
 
 try
 {
@@ -246,10 +194,6 @@ catch (Exception ex)
 
     throw;
 }
-
-// =====================================================
-// RUN APPLICATION
-// =====================================================
 
 try
 {

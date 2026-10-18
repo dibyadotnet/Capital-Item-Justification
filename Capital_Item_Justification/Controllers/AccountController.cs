@@ -324,7 +324,6 @@ namespace Capital_Item_Justification.Controllers
 
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> SelectRole()
         {
             var correlationId = HttpContext.TraceIdentifier;

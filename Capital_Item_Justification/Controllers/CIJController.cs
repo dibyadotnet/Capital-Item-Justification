@@ -17,7 +17,7 @@ namespace Capital_Item_Justification.Controllers
     public class CIJController : Controller
     {
         private readonly ICIJRequestService _service;
-        private readonly ILogger<WorkFlowController> _logger;
+        private readonly ILogger<CIJController> _logger;
         private readonly IWorkflowService _workflowService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
@@ -27,7 +27,7 @@ namespace Capital_Item_Justification.Controllers
         private string? assignmentId => HttpContext.Session.GetString("WorkingAssignmentId");
         private int? workingDepartmentId => HttpContext.Session.GetInt32("WorkingDepartmentId");
         private int? workingLocationId => HttpContext.Session.GetInt32("WorkingLocationId");
-        public CIJController(ICIJRequestService service, ILogger<WorkFlowController> logger, IWorkflowService workflowService,
+        public CIJController(ICIJRequestService service, ILogger<CIJController> logger, IWorkflowService workflowService,
             UserManager<ApplicationUser> userManager, IEmailService emailService, RoleManager<ApplicationRole> roleManager)
         {
             _service = service;
@@ -43,6 +43,17 @@ namespace Capital_Item_Justification.Controllers
             TotalCountDashboardViewModel totalVM = new();
             try
             {
+                _logger.LogInformation(
+                                    "Dashboard STARTED. " +
+                                    "IsAuthenticated={IsAuthenticated}, " +
+                                    "UserId={UserId}, SessionId={SessionId}, " +
+                                    "WorkingAssignmentId={AssignmentId}, " +
+                                    "WorkingRoleName={RoleName}",
+                                    User.Identity?.IsAuthenticated,
+                                    _userManager.GetUserId(User),
+                                    HttpContext.Session.Id,
+                                    HttpContext.Session.GetString("WorkingAssignmentId"),
+                                    HttpContext.Session.GetString("WorkingRoleName"));
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
