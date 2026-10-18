@@ -34,13 +34,17 @@ namespace Capital_Item_Justification.Controllers
         {
             if (User.Identity?.IsAuthenticated == true)
             {
-                var loggedinUser = await _userManager.GetUserAsync(User);
-                if (loggedinUser == null)
-                {
-                    return View();
-                }
-                var roles = await _userManager.GetRolesAsync(loggedinUser);
-                return RedirectToAction("Dashboard", "CIJ");
+                //var loggedinUser = await _userManager.GetUserAsync(User);
+                //if (loggedinUser == null)
+                //{
+                //    return View();
+                //}
+                //var roles = await _userManager.GetRolesAsync(loggedinUser);
+                //return RedirectToAction("Dashboard", "CIJ");
+
+                // Clear the existing Identity authentication cookie
+                await _signInManager.SignOutAsync();
+                HttpContext.Session.Clear();
             }
             ViewData["ReturnUrl"] = returnUrl;
             return View();

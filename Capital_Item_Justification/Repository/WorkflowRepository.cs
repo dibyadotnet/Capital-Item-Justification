@@ -132,17 +132,18 @@ namespace Capital_Item_Justification.Repository
                         workflowId = 1;
                         workflowCode = "WF001";
                     }
+                    if (fundingType == "Fully Funded")
+                    {
+                        workflowId = 3;
+                        workflowCode = "WF003";
+                    }
                 }
                 if (locartiontype == "Secondary")//&& costCenter == "SCEH"
                 {
                     workflowId = 2;
                     workflowCode = "WF002";
                 }
-                if (fundingType == "Fully Funded")
-                {
-                    workflowId = 3;
-                    workflowCode = "WF003";
-                }
+               
                 //------
                 var firstStep = await _context.CijWorkflowSteps.Where(x => x.IsActive && x.WorkflowId == workflowId).OrderBy(x => x.StepNo).FirstOrDefaultAsync();
                 if (firstStep == null)
@@ -573,8 +574,11 @@ namespace Capital_Item_Justification.Repository
                 _context.CijWorkflowTransactions.Add(nextTransaction);
                 await _context.SaveChangesAsync();
 
-                if (currentStep.StepCode.Equals("HOD_Initial", StringComparison.OrdinalIgnoreCase) || currentStep.StepCode.Equals("Function_Head_Initial", StringComparison.OrdinalIgnoreCase))
+                if (currentStep.StepCode.Equals("HOD_Initial", StringComparison.OrdinalIgnoreCase)
+                    || currentStep.StepCode.Equals("Function_Head_Initial", StringComparison.OrdinalIgnoreCase)
+                    || currentStep.StepCode.Equals("Director_SC_Initial", StringComparison.OrdinalIgnoreCase))
                 {
+
                     if (vm.assignedDept == null || !vm.assignedDept.Any())
                     {
                         throw new InvalidOperationException("No departments were selected by HOD/Function Head");
@@ -1026,7 +1030,7 @@ namespace Capital_Item_Justification.Repository
         {
             CijWorkflowStep? nextStep = new CijWorkflowStep();
             //List<string> FHDepartments = new List<string>() { "IT", "BME", "Admin", "Finance", "Purchase", "Civil", "Legal" };
-            List<int> FHDepartmentIds = _context.CijFunctionHeadDepartments.Where(a=>a.IsActive).Select(a => a.DepartmentId).ToList();
+            List<int> FHDepartmentIds = _context.CijFunctionHeadDepartments.Where(a => a.IsActive).Select(a => a.DepartmentId).ToList();
             if (currentStep.StepCode.Equals("REQUESTOR", StringComparison.OrdinalIgnoreCase))
             {
                 //var requestorDept = await _context.CijDepartments.Where(x => x.DepartmentId == cijRequest.RequestDepartmentId).Select(x => x.DepartmentName).FirstOrDefaultAsync();
@@ -1380,10 +1384,10 @@ namespace Capital_Item_Justification.Repository
             else if (currentStep.StepCode.Equals("Consultant_Incharge", StringComparison.OrdinalIgnoreCase))
             {
                 var conInchargeLimit = await (from budget in _context.CijRoleBudgetLimits
-                                               join role in _context.Roles
-                                             on budget.RoleId equals role.Id
-                                               where role.Name == "Consultant Incharge"
-                                               select budget.BudgetLimit).FirstOrDefaultAsync();
+                                              join role in _context.Roles
+                                            on budget.RoleId equals role.Id
+                                              where role.Name == "Consultant Incharge"
+                                              select budget.BudgetLimit).FirstOrDefaultAsync();
                 if (conInchargeLimit >= cijRequest.TotalEquipmentCost)
                 {
                     string stepCode = "FINANCE";
@@ -1406,9 +1410,9 @@ namespace Capital_Item_Justification.Repository
             else if (currentStep.StepCode.Equals("Administrator", StringComparison.OrdinalIgnoreCase))
             {
                 var adminstratorLimit = await (from budget in _context.CijRoleBudgetLimits
-                                             join role in _context.Roles
-                                           on budget.RoleId equals role.Id
-                                             where role.Name == "Administrator"
+                                               join role in _context.Roles
+                                             on budget.RoleId equals role.Id
+                                               where role.Name == "Administrator"
                                                select budget.BudgetLimit).FirstOrDefaultAsync();
                 if (adminstratorLimit >= cijRequest.TotalEquipmentCost)
                 {
