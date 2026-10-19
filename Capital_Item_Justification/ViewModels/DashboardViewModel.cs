@@ -11,5 +11,6 @@
         public string? ProjectName { get; set; }
         public string? Status { get; set; }
         public string? Location { get; set; }
+        public string? Department { get; set; }
     }
 }

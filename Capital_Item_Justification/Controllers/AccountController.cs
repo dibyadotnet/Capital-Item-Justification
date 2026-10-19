@@ -217,7 +217,7 @@ namespace Capital_Item_Justification.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ResetPassword(string? userId, string? token)
+        public async Task<IActionResult> ResetPassword(string? userId, string? token)
         {
             if (string.IsNullOrEmpty(userId) ||
                 string.IsNullOrEmpty(token))
@@ -225,19 +225,27 @@ namespace Capital_Item_Justification.Controllers
                 return BadRequest();
             }
             string decodedToken;
+
             try
             {
                 decodedToken = Encoding.UTF8.GetString(
                     WebEncoders.Base64UrlDecode(token));
             }
-            catch
+            catch (FormatException)
             {
-                return BadRequest();
+                return BadRequest("Invalid token format.");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null || string.IsNullOrEmpty(user.Email))
+            {
+                return BadRequest("Invalid user or email.");
             }
             return View(new ResetPasswordViewModel
             {
-                UserId = userId,
-                Token = decodedToken
+                Email = user.Email,
+                Token = token,
+                UserId=userId
             });
         }
 

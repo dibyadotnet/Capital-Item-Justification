@@ -22,8 +22,9 @@
                     <thead class="table-light">
                         <tr>
                             <th>CIJ Number</th>
-                            <th>Assigned Date</th>
+                            <th>Request Date</th>
                             <th>Approver Role</th>
+                            <th>Assigned Date</th>
                             <th>Department</th>
                             <th>Location</th>
                             <th>Status</th>
@@ -47,12 +48,15 @@
                                         </strong>
                                     </td>
                                     <td>
-                                        @item.AssignedDate?.ToString("dd-MMM-yyyy")
+                                        @item.RequestDate?.ToString("dd-MMM-yyyy")
                                     </td>
+                                    
                                     <td>
                                         @item.ApproverRole
                                     </td>
-
+                                    <td>
+                                        @item.AssignedDate?.ToString("dd-MMM-yyyy")
+                                    </td>
                                     <td>
                                         @if (!string.IsNullOrEmpty(item.DepartmentName))
                                         {
