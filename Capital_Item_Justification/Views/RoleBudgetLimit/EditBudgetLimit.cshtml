@@ -48,7 +48,7 @@
                     <input asp-for="BudgetLimit"
                            type="number"
                            class="form-control"
-                           placeholder="Enter budget limit" value="@(Model.BudgetLimit.ToString("N0", new System.Globalization.CultureInfo("en-IN")))" />
+                           placeholder="Enter budget limit" value="@(Model.BudgetLimit.ToString("0", new System.Globalization.CultureInfo("en-IN")))" />
 
                     <span asp-validation-for="BudgetLimit"
                           class="text-danger">

@@ -26,12 +26,13 @@
                     <tr>
                         <th class="d-none"></th>
                         <th>CIJ No</th>
+                       <th>Request Date</th>
+                       <th>Department</th>
                         <th>Location</th>
-                        <th>Item Type</th>
-                        <th>Project Name</th>
+                       @*  <th>Item Type</th>
+                        <th>Project Name</th> *@
                         <th>Equipment Cost</th>
                         <th>Status</th>
-                        <th>Request Date</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -41,12 +42,14 @@
                         <tr>
                             <td class="d-none">@item.CIJId</td>
                             <td>@item.CIJNumber</td>
+                            <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
+                            <td>@item.Department</td>
                             <td>@item.Location</td>
-                            <td>@item.ItemType</td>
-                            <td>@item.ProjectName</td>
+                            @* <td>@item.ItemType</td>
+                            <td>@item.ProjectName</td> *@
                             <td>@($"₹ {item.TotalEquipmentCost:N0}")</td>
                             <td>@item.Status</td>
-                            <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
+                          
                             <td>
                                 @* <a asp-controller="WorkFlow" asp-action="ViewCIJRequest" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a> *@
                                 @if (User.IsInRole("Requester"))

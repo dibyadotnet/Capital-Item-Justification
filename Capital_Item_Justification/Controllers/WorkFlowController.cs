@@ -106,6 +106,8 @@ namespace Capital_Item_Justification.Controllers
                     return RedirectToAction("SelectRole", "Account");
                 }
                 roleIds = new() { workingRoleId };
+                user.DepartmentId = workingDepartmentId;
+                user.LocationId=workingLocationId;
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName == "Completed").ToList();
                 ViewBag.Page = "Completed";

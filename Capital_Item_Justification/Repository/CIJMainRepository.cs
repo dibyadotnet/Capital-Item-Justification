@@ -380,6 +380,11 @@ namespace Capital_Item_Justification.Repository
                        join st in _context.CijStatuses
                       on r.StatusId equals st.StatusId into stGroup
                        from st in stGroup.DefaultIfEmpty()
+
+                       join dept in _context.CijDepartments
+                       on r.RequestDepartmentId equals dept.DepartmentId into deptGroup
+                       from dept in deptGroup.DefaultIfEmpty()
+
                        where r.IsActive == true && r.StatusId == draftStatusId
                        && r.CreatedBy == userId
                        select new DashboardViewModel
@@ -391,7 +396,8 @@ namespace Capital_Item_Justification.Repository
                            ItemType = it != null ? it.ItemTypeName : "",
                            Location = loc != null ? loc.LocationName : "",
                            TotalEquipmentCost = r.TotalEquipmentCost,
-                           Status = st != null ? st.StatusName : ""
+                           Status = st != null ? st.StatusName : "",
+                           Department = dept != null ? dept.DepartmentName : "",
                        }).AsNoTracking().ToListAsync();
 
             return dashboardViewModels;
