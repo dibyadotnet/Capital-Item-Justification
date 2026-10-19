@@ -4,6 +4,9 @@ using Capital_Item_Justification.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using PdfSharp;
+using System.Collections.Generic;
+using System.Drawing.Printing;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -18,19 +21,35 @@ namespace Capital_Item_Justification.Controllers
             _logger = logger;
             _userManager = userManager;
         }
-        public async Task<IActionResult> GetAllLocation()
+        public async Task<IActionResult> GetAllLocation(int page = 1, int pageSize = 10)
         {
             List<LocationViewModel> locations = new List<LocationViewModel>();
+            LocationListViewModel model = new LocationListViewModel();
             try
             {
                 locations = await _service.GetAllAsync();
+                var totalRecords = locations.Count();
+                var listLocations = locations.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                model = new LocationListViewModel
+                {
+                    locationViewModels = listLocations,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalRecords = totalRecords,
+                        TotalPages = totalPages,
+                        ControllerName = "Location",
+                        ActionName = "GetAllLocation"
+                    }
+                };
             }
             catch (Exception)
             {
-
                 throw;
             }
-            return View(locations);
+            return View(model);
         }
         [HttpGet]
         public IActionResult CreateLocation()
