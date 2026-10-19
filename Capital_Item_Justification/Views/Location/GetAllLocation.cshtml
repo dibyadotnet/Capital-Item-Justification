@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Capital_Item_Justification.ViewModels.LocationViewModel>
+﻿@model Capital_Item_Justification.ViewModels.LocationListViewModel
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -15,6 +15,49 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="table-responsive">
+                <div class="d-flex justify-content-end mb-3">
+
+                    <form asp-action="GetAllLocation"
+                          method="get"
+                          class="d-flex align-items-center gap-2">
+
+                        <label class="mb-0">
+                            Show:
+                        </label>
+
+                        <select name="pageSize"
+                                class="form-select form-select-sm"
+                                style="width:80px;"
+                                onchange="this.form.submit()">
+
+                            <option value="10"
+                                    selected="@(Model.Pagination.PageSize == 10)">
+                                10
+                            </option>
+
+                            <option value="25"
+                                    selected="@(Model.Pagination.PageSize == 25)">
+                                25
+                            </option>
+
+                            <option value="50"
+                                    selected="@(Model.Pagination.PageSize == 50)">
+                                50
+                            </option>
+
+                        </select>
+
+                       @*  <span class="text-muted">
+                            entries
+                        </span> *@
+
+                        <input type="hidden"
+                               name="page"
+                               value="1" />
+
+                    </form>
+
+                </div>
                 <table class="table table-bordered table-hover">
                     <thead class="table-light">
                         <tr>
@@ -26,7 +69,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @foreach (var item in Model.locationViewModels)
                         {
                             <tr>
                                 <td class="d-none">@item.LocationId</td>
@@ -48,8 +91,8 @@
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@item.LocationId" />
 
-                                        <button type="submit" title="Delete Location" class="btn btn-sm btn-danger btn-edit">
-                                            <i class="bi bi-trash"></i>
+                                        <button type="submit" title="Delete Location" class="btn btn-sm btn-warning btn-edit">
+                                            <i class="bi bi-toggle-on"></i>
                                         </button>
                                     </form>                                 
                                 </td>
@@ -60,7 +103,7 @@
                     </tbody>
 
                 </table>
-
+                <partial name="_Pagination" model="Model.Pagination" />
             </div>
 
         </div>

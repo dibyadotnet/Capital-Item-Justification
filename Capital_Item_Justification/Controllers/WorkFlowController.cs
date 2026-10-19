@@ -36,9 +36,10 @@ namespace Capital_Item_Justification.Controllers
             _cijService = cijService;
             _emailService = emailService;
         }
-        public async Task<IActionResult> MyApproval()
+        public async Task<IActionResult> MyApproval(int page = 1, int pageSize = 10)
         {
             List<MyApprovalViewModel> vm = new();
+            MyApprovalListViewModel model = new MyApprovalListViewModel();
             try
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -69,6 +70,23 @@ namespace Capital_Item_Justification.Controllers
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName != "Completed").ToList();
                 ViewBag.Page = "Pending";
+
+                var totalRecords = vm.Count();
+                var otherRequests = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                model = new MyApprovalListViewModel
+                {
+                    myApprovalViewModels = otherRequests,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalRecords = totalRecords,
+                        TotalPages = totalPages,
+                        ControllerName = "WorkFlow",
+                        ActionName = "MyApproval"
+                    }
+                };
             }
             catch (Exception)
             {
@@ -76,11 +94,12 @@ namespace Capital_Item_Justification.Controllers
                 throw;
             }
 
-            return View(vm);
+            return View(model);
         }
-        public async Task<IActionResult> CompletedApproval()
+        public async Task<IActionResult> CompletedApproval(int page = 1, int pageSize = 10)
         {
             List<MyApprovalViewModel> vm = new();
+            MyApprovalListViewModel model = new MyApprovalListViewModel();
             try
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -111,12 +130,29 @@ namespace Capital_Item_Justification.Controllers
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName == "Completed").ToList();
                 ViewBag.Page = "Completed";
+
+                var totalRecords = vm.Count();
+                var otherRequests = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                model = new MyApprovalListViewModel
+                {
+                    myApprovalViewModels = otherRequests,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalRecords = totalRecords,
+                        TotalPages = totalPages,
+                        ControllerName = "WorkFlow",
+                        ActionName = "MyApproval"
+                    }
+                };
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return View("MyApproval", vm);
+            return View("MyApproval", model);
         }
         public async Task<IActionResult> ViewCIJRequest(int approvalId, int cijId)
         {
@@ -435,9 +471,10 @@ namespace Capital_Item_Justification.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> OtherRoleRequests()
+        public async Task<IActionResult> OtherRoleRequests(int page = 1, int pageSize = 10)
         {
             List<MyApprovalViewModel> vm = new();
+            MyApprovalListViewModel model = new MyApprovalListViewModel();
             try
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -455,13 +492,30 @@ namespace Capital_Item_Justification.Controllers
                     vm = vm.Where(x => !(x.ApproverRole?.Contains("Purchase", StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
                 }
                 ViewBag.Page = "Pending/Query/Rejected";
+
+                var totalRecords = vm.Count();
+                var otherRequests = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                model = new MyApprovalListViewModel
+                {
+                    myApprovalViewModels = otherRequests,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalRecords = totalRecords,
+                        TotalPages = totalPages,
+                        ControllerName = "WorkFlow",
+                        ActionName = "OtherRoleRequests"
+                    }
+                };
             }
             catch (Exception ex)
             {
                 throw;
             }
 
-            return View(vm);
+            return View(model);
         }
     }
 }

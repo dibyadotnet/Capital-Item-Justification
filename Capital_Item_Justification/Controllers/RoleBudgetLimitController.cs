@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using PdfSharp;
 using System.Collections.Generic;
 using System.Data;
 
@@ -27,8 +28,9 @@ namespace Capital_Item_Justification.Controllers
             _userManager = userManager;
             _logger = logger;
         }
-        public async Task<IActionResult> GeRoleBudgetLimit()
+        public async Task<IActionResult> GeRoleBudgetLimit(int page = 1, int pageSize = 10)
         {
+            RoleBudgetListViewModel model = new RoleBudgetListViewModel();
             try
             {
                 var data = await (
@@ -57,7 +59,24 @@ namespace Capital_Item_Justification.Controllers
                         IsActive = budget.IsActive
                     }).ToListAsync();
 
-                return View(data);
+                var totalRecords = data.Count();
+                var budgets = data.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                model = new RoleBudgetListViewModel
+                {
+                    roleBudgetLimitViewModels = budgets,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalRecords = totalRecords,
+                        TotalPages = totalPages,
+                        ControllerName = "RoleBudgetLimit",
+                        ActionName = "GeRoleBudgetLimit"
+                    }
+                };
+
+                return View(model);
             }
             catch (Exception ex)
             {

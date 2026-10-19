@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Capital_Item_Justification.ViewModels.DashboardViewModel>
+﻿@model Capital_Item_Justification.ViewModels.DashboardListViewModel
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-white">
         <div class="d-flex justify-content-between align-items-center">
@@ -20,16 +20,42 @@
     </div>
 
     <div class="card-body p-3">
+        <div class="d-flex justify-content-end align-items-center px-3 mt-1">
+
+            <form asp-controller="CIJ"
+                  asp-action="MyRequests"
+                  method="get"
+                  class="d-flex align-items-center gap-2 mb-0">
+
+                <label for="pageSize" class="mb-0">Show:</label>
+
+                <select id="pageSize"
+                        name="pageSize"
+                        class="form-select form-select-sm"
+                        style="width: 80px;"
+                        onchange="this.form.submit()">
+
+                    <option value="10" selected="@(Model.Pagination.PageSize == 10)">10</option>
+                    <option value="25" selected="@(Model.Pagination.PageSize == 25)">25</option>
+                    <option value="50" selected="@(Model.Pagination.PageSize == 50)">50</option>
+
+                </select>
+
+                <input type="hidden" name="page" value="1" />
+
+            </form>
+
+        </div>
         <div class="table-responsive">
             <table class="table table-bordered table-striped">
                 <thead class="table-light">
                     <tr>
                         <th class="d-none"></th>
                         <th>CIJ No</th>
-                       <th>Request Date</th>
-                       <th>Department</th>
+                        <th>Request Date</th>
+                        <th>Department</th>
                         <th>Location</th>
-                       @*  <th>Item Type</th>
+                        @*  <th>Item Type</th>
                         <th>Project Name</th> *@
                         <th>Equipment Cost</th>
                         <th>Status</th>
@@ -37,32 +63,50 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @if (Model.dashboardViewModels != null &&
+                    Model.dashboardViewModels.Any())
+                    {
+                        @foreach (var item in Model.dashboardViewModels)
+                        {
+                            <tr>
+                                <td class="d-none">@item.CIJId</td>
+                                <td>@item.CIJNumber</td>
+                                <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
+                                <td>@item.Department</td>
+                                <td>@item.Location</td>
+                                @* <td>@item.ItemType</td>
+                        <td>@item.ProjectName</td> *@
+                                <td>@($"₹ {item.TotalEquipmentCost:N0}")</td>
+                                <td>@item.Status</td>
+
+                                <td>
+                                    @* <a asp-controller="WorkFlow" asp-action="ViewCIJRequest" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a> *@
+                                    @if (User.IsInRole("Requester"))
+                                    {
+                                        <a asp-action="Edit" asp-route-cijId="@item.CIJId" title="CIJ Edit" class="btn btn-sm btn-primary btn-edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td class="d-none">@item.CIJId</td>
-                            <td>@item.CIJNumber</td>
-                            <td>@item.RequestDate?.ToString("dd-MMM-yyyy")</td>
-                            <td>@item.Department</td>
-                            <td>@item.Location</td>
-                            @* <td>@item.ItemType</td>
-                            <td>@item.ProjectName</td> *@
-                            <td>@($"₹ {item.TotalEquipmentCost:N0}")</td>
-                            <td>@item.Status</td>
-                          
-                            <td>
-                                @* <a asp-controller="WorkFlow" asp-action="ViewCIJRequest" asp-route-cijId="@item.CIJId" class="btn btn-sm btn-info">View</a> *@
-                                @if (User.IsInRole("Requester"))
-                                {
-                                    <a asp-action="Edit" asp-route-cijId="@item.CIJId" title="CIJ Edit" class="btn btn-sm btn-primary btn-edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                }
+                            <td colspan="8" class="text-center">
+                                <div class="text-muted">
+                                    <h6>No CIJ requests found</h6>
+                                    <small>
+                                        You haven't created any CIJ requests yet.
+                                    </small>
+                                </div>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+            <partial name="_Pagination" model="Model.Pagination" />
         </div>
     </div>
 </div>

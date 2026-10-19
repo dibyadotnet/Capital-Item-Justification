@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Capital_Item_Justification.ViewModels.MyApprovalViewModel>
+﻿@model Capital_Item_Justification.ViewModels.MyApprovalListViewModel
 
 <div class="container-fluid">
     <!-- Page Header -->
@@ -13,6 +13,34 @@
             </strong>
         </div>
 
+        <!-- Show entries control -->
+        <div class="d-flex justify-content-end align-items-center px-3 mt-1">
+
+            <form asp-controller="WorkFlow"
+                  asp-action="OtherRoleRequests"
+                  method="get"
+                  class="d-flex align-items-center gap-2 mb-0">
+
+                <label for="pageSize" class="mb-0">Show:</label>
+
+                <select id="pageSize"
+                        name="pageSize"
+                        class="form-select form-select-sm"
+                        style="width: 80px;"
+                        onchange="this.form.submit()">
+
+                    <option value="10" selected="@(Model.Pagination.PageSize == 10)">10</option>
+                    <option value="25" selected="@(Model.Pagination.PageSize == 25)">25</option>
+                    <option value="50" selected="@(Model.Pagination.PageSize == 50)">50</option>
+
+                </select>
+
+                <input type="hidden" name="page" value="1" />
+
+            </form>
+
+        </div>
+     
         <div class="card-body">
 
             <div class="table-responsive">
@@ -34,11 +62,11 @@
 
                     <tbody>
 
-                        @if (Model != null && Model.Any())
+                        @if (Model != null && Model.myApprovalViewModels.Any())
                         {
                             var index = 1;
 
-                            foreach (var item in Model)
+                            foreach (var item in Model.myApprovalViewModels)
                             {
                                 <tr>
 
@@ -152,7 +180,7 @@
                     </tbody>
 
                 </table>
-
+                <partial name="_Pagination" model="Model.Pagination" />
             </div>
 
         </div>

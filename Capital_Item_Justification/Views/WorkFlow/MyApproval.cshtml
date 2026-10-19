@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Capital_Item_Justification.ViewModels.MyApprovalViewModel>
+﻿@model Capital_Item_Justification.ViewModels.MyApprovalListViewModel
 
 <div class="container-fluid">
     <!-- Page Header -->
@@ -12,7 +12,36 @@
                 @ViewBag.Page Approval
             </strong>
         </div>
+        <div class="d-flex justify-content-end align-items-center px-3 mt-1">
+            @{
+                var actionName = ViewBag.Page?.ToString() == "Completed"
+                ? "CompletedApproval"
+                : "MyApproval";
+            }
+           
+                    <form asp-controller="WorkFlow"
+                          asp-action="@actionName"
+                          method="get"
+                          class="d-flex align-items-center gap-2 mb-0">
+                <label for="pageSize" class="mb-0">Show:</label>
 
+                <select id="pageSize"
+                        name="pageSize"
+                        class="form-select form-select-sm"
+                        style="width: 80px;"
+                        onchange="this.form.submit()">
+
+                    <option value="10" selected="@(Model.Pagination.PageSize == 10)">10</option>
+                    <option value="25" selected="@(Model.Pagination.PageSize == 25)">25</option>
+                    <option value="50" selected="@(Model.Pagination.PageSize == 50)">50</option>
+
+                </select>
+
+                <input type="hidden" name="page" value="1" />
+
+            </form>
+
+        </div>
         <div class="card-body">
 
             <div class="table-responsive">
@@ -34,11 +63,11 @@
 
                     <tbody>
 
-                        @if (Model != null && Model.Any())
+                        @if (Model != null && Model.myApprovalViewModels.Any())
                         {
                             var index = 1;
 
-                            foreach (var item in Model)
+                            foreach (var item in Model.myApprovalViewModels)
                             {
                                 <tr>
 
@@ -50,7 +79,7 @@
                                     <td>
                                         @item.RequestDate?.ToString("dd-MMM-yyyy")
                                     </td>
-                                    
+
                                     <td>
                                         @item.ApproverRole
                                     </td>
@@ -142,31 +171,22 @@
                         else
                         {
                             <tr>
-
-                                <td colspan="8"
-                                    class="text-center py-5">
-
+                                <td colspan="8" class="text-center">
                                     <div class="text-muted">
-
-                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-
                                         <h6>No pending approvals</h6>
-
                                         <small>
                                             You currently have no CIJ requests waiting for your approval.
                                         </small>
-
                                     </div>
 
                                 </td>
-
                             </tr>
                         }
 
                     </tbody>
 
                 </table>
-
+                <partial name="_Pagination" model="Model.Pagination" />
             </div>
 
         </div>

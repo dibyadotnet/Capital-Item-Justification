@@ -102,9 +102,10 @@ namespace Capital_Item_Justification.Controllers
             }
             return View(totalVM);
         }
-        public async Task<IActionResult> MyRequests()
+        public async Task<IActionResult> MyRequests(int page = 1, int pageSize = 10)
         {
             List<DashboardViewModel> list = new();
+            DashboardListViewModel model = new DashboardListViewModel();
             try
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -122,12 +123,29 @@ namespace Capital_Item_Justification.Controllers
                     return RedirectToAction("MyApproval", "WorkFlow");
                 }
                 list = await _service.GetDashboard(user.Id);
+
+                var totalRecords = list.Count();
+                var cijRequests = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                model = new DashboardListViewModel
+                {
+                    dashboardViewModels = cijRequests,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalRecords = totalRecords,
+                        TotalPages = totalPages,
+                        ControllerName = "CIJ",
+                        ActionName = "MyRequests"
+                    }
+                };
             }
             catch (Exception)
             {
                 throw;
             }
-            return View(list);
+            return View(model);
         }
         [Authorize(Roles = "Requester")]
         public async Task<IActionResult> CreateCIJ()
