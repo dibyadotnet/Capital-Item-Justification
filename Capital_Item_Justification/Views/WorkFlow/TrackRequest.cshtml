@@ -1,98 +1,98 @@
 ﻿@model Capital_Item_Justification.ViewModels.TrackMyRequestListViewModel
-<div class="card shadow-sm mb-4">
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-search me-2"></i>
+                Track My Request
+            </h5>
+        </div>
+        <div class="px-3 pt-3">
+            @{
+                var fromDate = Context.Request.Query["fromDate"].ToString();
+                var toDate = Context.Request.Query["toDate"].ToString();
+            }
+            <form asp-controller="WorkFlow" asp-action="TrackRequest" method="get" class="mb-0">
 
-    <div class="card-header bg-white">
-        <h5 class="mb-0">
-            <i class="bi bi-search me-2"></i>
-            Track My Request
-        </h5>
-    </div>
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-3 col-md-6">
+                        <label for="cijNumber" class="form-label">CIJ Number</label>
+                        <select id="CijId" name="cijId" class="form-select" asp-items="ViewBag.CIJNumberList">
+                            <option value="">-- Select CIJNumber --</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <label for="statusId" class="form-label">Status</label>
+                        <select id="StausId" name="statusId" class="form-select" asp-items="ViewBag.StatusList">
+                            <option value="">-- Select Status --</option>
+                        </select>
+                    </div>
 
-    <div class="card-body">
-        <form asp-controller="WorkFlow" asp-action="TrackRequest" method="get">
-            <div class="row g-3 align-items-end mb-2">
-                <!-- CIJ Number -->
-                <div class="col-md-4">
-                    <label for="cijNumber" class="form-label fw-semibold">
-                        CIJ Number
-                    </label>
-                    <select id="CijId" name="cijId" class="form-select" asp-items="ViewBag.CIJNumberList">
-                        <option value="">-- Select CIJNumber --</option>
-                    </select>
+                    <!-- Date From -->
+                    <div class="col-lg-2 col-md-6">
+                        <label for="fromDate" class="form-label">Date From</label>
+                        <input type="date" id="fromDate" name="fromDate"
+                               value="@fromDate"
+                               class="form-control form-control-sm" />
+                    </div>
+
+                    <!-- Date To -->
+                    <div class="col-lg-2 col-md-6">
+                        <label for="toDate" class="form-label">Date To</label>
+                        <input type="date" id="toDate" name="toDate"
+                               value="@toDate"
+                               class="form-control form-control-sm" />
+                    </div>
+
+                    <!-- Filter and Reset -->
+                    <div class="col-lg-1 col-md-6">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                 Filter
+                            </button>
+
+                            <a asp-controller="WorkFlow"
+                               asp-action="TrackRequest" style="height: 37px;"
+                               class="btn btn-secondary btn-sm">
+                                Reset
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Show page size -->
+                    <div class="col-lg-2 col-md-6">
+                        <div class="d-flex justify-content-lg-end align-items-center gap-2">
+                           @*  <label for="pageSize" class="mb-0">Show:</label> *@
+
+                            <select id="pageSize" name="pageSize"
+                                    class="form-select form-select-sm"
+                                    style="width: 80px;"
+                                    onchange="this.form.submit()">
+                                <option value="10"
+                                        selected="@(Model.Pagination.PageSize == 10)">10</option>
+                                <option value="25"
+                                        selected="@(Model.Pagination.PageSize == 25)">25</option>
+                                <option value="50"
+                                        selected="@(Model.Pagination.PageSize == 50)">50</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="page" value="1" />
+
                 </div>
-                <!-- Status -->
-                <div class="col-md-4">
-                    <label for="statusId" class="form-label fw-semibold">
-                        Status
-                    </label>
-                    <select id="StausId" name="statusId" class="form-select" asp-items="ViewBag.StatusList">
-                        <option value="">-- Select Status --</option>
-                    </select>
-                </div>
-                <!-- Buttons -->
-                <div class="col-md-4">
-
-                    <button type="submit"
-                            class="btn btn-primary me-2">
-                        <i class="bi bi-search me-1"></i>
-                        Search
-                    </button>
-
-                    <a asp-action="TrackRequest"
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-clockwise me-1"></i>
-                        Reset
-                    </a>
-
-                </div>
-            </div>
-        </form>
-        <div>
+            </form>
+        </div>
+        <div class="card-body">
             @if (Model.requestTrackings.Any())
             {
-                <div class="d-flex justify-content-end mb-3">
-                    <form asp-action="TrackRequest"
-                          method="get"
-                          class="d-flex align-items-center gap-2">
-                        <label class="mb-0">Show:</label>
-                        <select name="pageSize"
-                                class="form-select form-select-sm"
-                                style="width:80px;"
-                                onchange="this.form.submit()">
-
-                            <option value="10"
-                                    selected="@(Model.Pagination.PageSize == 10)">
-                                10
-                            </option>
-
-                            <option value="25"
-                                    selected="@(Model.Pagination.PageSize == 25)">
-                                25
-                            </option>
-
-                            <option value="50"
-                                    selected="@(Model.Pagination.PageSize == 50)">
-                                50
-                            </option>
-
-                        </select>
-                        @*
-                    <span class="text-muted">
-                    entries
-                    </span> *@
-
-                        <input type="hidden"
-                               name="page"
-                               value="1" />
-
-                    </form>
-                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                @* <th>#</th> *@
                                 <th>CIJ Number</th>
+                                <th>Request Date</th>
                                 <th>Current Owner</th>
                                 <th>Department</th>
                                 <th>Location</th>
@@ -111,30 +111,23 @@
                             @foreach (var item in Model.requestTrackings)
                             {
                                 <tr>
-
-                                    <td>
+                                    @*  <td>
                                         @index
-                                    </td>
-
+                                        </td>*@
                                     <td>
-                                        <strong>
-                                            @item.CIJNumber
-                                        </strong>
+                                        @item.CIJNumber
                                     </td>
                                     <td>
-                                        <strong>
-                                            @item.ApproverRole
-                                        </strong>
+                                        @item.RequestDate?.ToString("dd-MMM-yyyy")
                                     </td>
                                     <td>
-                                        <strong>
-                                            @item.DepartmentName
-                                        </strong>
+                                        @item.ApproverRole
                                     </td>
                                     <td>
-                                        <strong>
-                                            @item.LocationName
-                                        </strong>
+                                        @item.DepartmentName
+                                    </td>
+                                    <td>
+                                        @item.LocationName
                                     </td>
                                     <td>
                                         @(item.PendingSince?.ToString("dd-MMM-yyyy") ?? "-")

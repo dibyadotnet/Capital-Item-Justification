@@ -409,7 +409,7 @@ namespace Capital_Item_Justification.Repository
                 LocationId = a.LocationId,
                 LocationName = a.LocationName,
                 Prefix = a.Prefix
-            }).ToListAsync();
+            }).OrderBy(a=>a.LocationName).ToListAsync();
         }
         public async Task<List<CijDepartment>> GetDepartment()
         {

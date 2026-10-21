@@ -12,35 +12,113 @@
                 @ViewBag.Page Approval
             </strong>
         </div>
-        <div class="d-flex justify-content-end align-items-center px-3 mt-1">
+        <div class="px-3 pt-3">
             @{
                 var actionName = ViewBag.Page?.ToString() == "Completed"
                 ? "CompletedApproval"
                 : "MyApproval";
             }
-           
-                    <form asp-controller="WorkFlow"
-                          asp-action="@actionName"
-                          method="get"
-                          class="d-flex align-items-center gap-2 mb-0">
-                <label for="pageSize" class="mb-0">Show:</label>
+            <form asp-controller="WorkFlow"
+                      asp-action="@actionName"
+                      method="get"
+                      class="mb-0">
 
-                <select id="pageSize"
-                        name="pageSize"
-                        class="form-select form-select-sm"
-                        style="width: 80px;"
-                        onchange="this.form.submit()">
+                    @{
+                        var departmentId = Context.Request.Query["departmentId"].ToString();
+                        var locationId = Context.Request.Query["locationId"].ToString();
+                        var fromDate = Context.Request.Query["fromDate"].ToString();
+                        var toDate = Context.Request.Query["toDate"].ToString();
+                    }
 
-                    <option value="10" selected="@(Model.Pagination.PageSize == 10)">10</option>
-                    <option value="25" selected="@(Model.Pagination.PageSize == 25)">25</option>
-                    <option value="50" selected="@(Model.Pagination.PageSize == 50)">50</option>
+                    <div class="row g-3 align-items-end">
 
-                </select>
+                        <!-- Department -->
+                        <div class="col-lg-2 col-md-6">
+                            <label for="departmentId" class="form-label">Department</label>
+                            <select id="departmentId" name="departmentId"
+                                    class="form-select form-select-sm">
+                                <option value="">Select Department</option>
+                                @foreach (SelectListItem dept in ViewBag.Departments)
+                                {
+                                    <option value="@dept.Value"
+                                            selected="@(departmentId == dept.Value)">
+                                        @dept.Text
+                                    </option>
+                                }
+                            </select>
+                        </div>
 
-                <input type="hidden" name="page" value="1" />
+                        <!-- Location -->
+                        <div class="col-lg-2 col-md-6">
+                            <label for="locationId" class="form-label">Location</label>
+                            <select id="locationId" name="locationId"
+                                    class="form-select form-select-sm">
+                                <option value="">Select Location</option>
+                                @foreach (SelectListItem loc in ViewBag.Locations)
+                                {
+                                    <option value="@loc.Value"
+                                            selected="@(locationId == loc.Value)">
+                                        @loc.Text
+                                    </option>
+                                }
+                            </select>
+                        </div>
 
-            </form>
+                        <!-- Date From -->
+                        <div class="col-lg-2 col-md-6">
+                            <label for="fromDate" class="form-label">Date From</label>
+                            <input type="date" id="fromDate" name="fromDate"
+                                   value="@fromDate"
+                                   class="form-control form-control-sm" />
+                        </div>
 
+                        <!-- Date To -->
+                        <div class="col-lg-2 col-md-6">
+                            <label for="toDate" class="form-label">Date To</label>
+                            <input type="date" id="toDate" name="toDate"
+                                   value="@toDate"
+                                   class="form-control form-control-sm" />
+                        </div>
+
+                        <!-- Filter and Reset -->
+                        <div class="col-lg-2 col-md-6">
+                            <div class="d-flex gap-2">
+                                <button type="submit"
+                                    class="btn btn-primary btn-sm">
+                                    <i class="bi bi-search"></i> Filter
+                                </button>
+
+                                <a asp-controller="WorkFlow"
+                               asp-action="@actionName" style="height: 37px;"
+                                   class="btn btn-secondary btn-sm">
+                                    Reset
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Show page size -->
+                        <div class="col-lg-2 col-md-6">
+                            <div class="d-flex justify-content-lg-end align-items-center gap-2">
+                                <label for="pageSize" class="mb-0">Show:</label>
+
+                                <select id="pageSize" name="pageSize"
+                                        class="form-select form-select-sm"
+                                        style="width: 80px;"
+                                        onchange="this.form.submit()">
+                                    <option value="10"
+                                            selected="@(Model.Pagination.PageSize == 10)">10</option>
+                                    <option value="25"
+                                            selected="@(Model.Pagination.PageSize == 25)">25</option>
+                                    <option value="50"
+                                            selected="@(Model.Pagination.PageSize == 50)">50</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="page" value="1" />
+
+                    </div>
+                </form>
         </div>
         <div class="card-body">
 

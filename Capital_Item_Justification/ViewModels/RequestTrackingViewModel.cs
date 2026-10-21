@@ -11,5 +11,6 @@
         public string? WorkFlowStepCode { get; set; }
         public string? DepartmentName { get; set; }
         public string LocationName { get; set; } = null!;
+        public DateTime? RequestDate { get; set; }
     }
 }
