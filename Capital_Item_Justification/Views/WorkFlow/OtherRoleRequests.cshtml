@@ -1,9 +1,6 @@
 ﻿@model Capital_Item_Justification.ViewModels.MyApprovalListViewModel
 
 <div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-    </div>
     <!-- Approval Card -->
     <div class="card shadow-sm">
 
@@ -14,33 +11,104 @@
         </div>
 
         <!-- Show entries control -->
-        <div class="d-flex justify-content-end align-items-center px-3 mt-1">
+        <div class="px-3 pt-3">
+            @{
+                var departmentId = Context.Request.Query["departmentId"].ToString();
+                var locationId = Context.Request.Query["locationId"].ToString();
+                var fromDate = Context.Request.Query["fromDate"].ToString();
+                var toDate = Context.Request.Query["toDate"].ToString();
+            }
 
             <form asp-controller="WorkFlow"
                   asp-action="OtherRoleRequests"
                   method="get"
-                  class="d-flex align-items-center gap-2 mb-0">
+                  class="mb-0">
 
-                <label for="pageSize" class="mb-0">Show:</label>
+                <div class="d-flex flex-wrap align-items-end gap-3">
 
-                <select id="pageSize"
-                        name="pageSize"
-                        class="form-select form-select-sm"
-                        style="width: 80px;"
-                        onchange="this.form.submit()">
+                    <!-- Department -->
+                    <div style="width: 155px;">
+                        <label for="departmentId" class="form-label">Department</label>
+                        <select id="departmentId" name="departmentId"
+                                class="form-select form-select-sm">
+                            <option value="">Select Departments</option>
+                            @foreach (SelectListItem dept in ViewBag.Departments)
+                            {
+                                <option value="@dept.Value"
+                                        selected="@(departmentId == dept.Value)">
+                                    @dept.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
 
-                    <option value="10" selected="@(Model.Pagination.PageSize == 10)">10</option>
-                    <option value="25" selected="@(Model.Pagination.PageSize == 25)">25</option>
-                    <option value="50" selected="@(Model.Pagination.PageSize == 50)">50</option>
+                    <!-- Location -->
+                    <div style="width: 155px;">
+                        <label for="locationId" class="form-label">Location</label>
+                        <select id="locationId" name="locationId"
+                                class="form-select form-select-sm">
+                            <option value="">Select Locations</option>
+                            @foreach (SelectListItem loc in ViewBag.Locations)
+                            {
+                                <option value="@loc.Value"
+                                        selected="@(locationId == loc.Value)">
+                                    @loc.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
 
-                </select>
+                    <!-- Date From -->
+                    <div style="width: 155px;">
+                        <label for="fromDate" class="form-label">Date From</label>
+                        <input type="date" id="fromDate" name="fromDate"
+                               value="@fromDate"
+                               class="form-control form-control-sm" />
+                    </div>
 
-                <input type="hidden" name="page" value="1" />
+                    <!-- Date To -->
+                    <div style="width: 155px;">
+                        <label for="toDate" class="form-label">Date To</label>
+                        <input type="date" id="toDate" name="toDate"
+                               value="@toDate"
+                               class="form-control form-control-sm" />
+                    </div>
 
+                    <!-- Filter and Reset -->
+                    <div class="d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center justify-content-center">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+
+                        <a asp-controller="WorkFlow"
+                           asp-action="OtherRoleRequests" style="height: 37px;"
+                           class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center">
+                            Reset
+                        </a>
+                    </div>
+
+                    <!-- Show entries -->
+                    <div class="d-flex align-items-center gap-2 ms-lg-auto">
+                        <label for="pageSize" class="mb-0">Show:</label>
+
+                        <select id="pageSize" name="pageSize"
+                                class="form-select form-select-sm"
+                                style="width: 80px;"
+                                onchange="this.form.submit()">
+                            <option value="10"
+                                    selected="@(Model.Pagination.PageSize == 10)">10</option>
+                            <option value="25"
+                                    selected="@(Model.Pagination.PageSize == 25)">25</option>
+                            <option value="50"
+                                    selected="@(Model.Pagination.PageSize == 50)">50</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="page" value="1" />
+
+                </div>
             </form>
-
         </div>
-     
         <div class="card-body">
 
             <div class="table-responsive">

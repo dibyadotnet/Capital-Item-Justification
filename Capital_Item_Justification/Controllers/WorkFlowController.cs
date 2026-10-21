@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using PdfSharp.Pdf.Filters;
 using System;
 using System.Diagnostics;
 using System.Drawing.Printing;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Capital_Item_Justification.Controllers
 {
@@ -36,7 +38,7 @@ namespace Capital_Item_Justification.Controllers
             _cijService = cijService;
             _emailService = emailService;
         }
-        public async Task<IActionResult> MyApproval(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> MyApproval(int? departmentId, int? locationId, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
             List<MyApprovalViewModel> vm = new();
             MyApprovalListViewModel model = new MyApprovalListViewModel();
@@ -67,9 +69,40 @@ namespace Capital_Item_Justification.Controllers
                 roleIds = new() { workingRoleId };
                 user.DepartmentId = workingDepartmentId;
                 user.LocationId = workingLocationId;
+
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName != "Completed").ToList();
                 ViewBag.Page = "Pending";
+
+                var departmentsList = await _cijService.GetDepartment();
+                var locationList = await _cijService.GetLocation();
+                ViewBag.Locations = new SelectList(locationList, "LocationId", "LocationName", locationId);
+                ViewBag.Departments = new SelectList(departmentsList, "DepartmentId", "DepartmentName", departmentId);
+
+                if (departmentId.HasValue)
+                {
+                    vm = vm.Where(x => x.DepartmentId == departmentId.Value).ToList();
+                }
+                if (locationId.HasValue)
+                {
+                    vm = vm.Where(x => x.LocationId == locationId.Value).ToList();
+                }
+
+                if (fromDate.HasValue)
+                {
+                    vm = vm.Where(x =>
+                        x.RequestDate.HasValue &&
+                        x.RequestDate.Value >= fromDate.Value.Date).ToList();
+                }
+
+                if (toDate.HasValue)
+                {
+                    var endDateExclusive = toDate.Value.Date.AddDays(1);
+
+                    vm = vm.Where(x =>
+                        x.RequestDate.HasValue &&
+                        x.RequestDate.Value < endDateExclusive).ToList();
+                }
 
                 var totalRecords = vm.Count();
                 var otherRequests = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
@@ -96,7 +129,7 @@ namespace Capital_Item_Justification.Controllers
 
             return View(model);
         }
-        public async Task<IActionResult> CompletedApproval(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> CompletedApproval(int? departmentId, int? locationId, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
             List<MyApprovalViewModel> vm = new();
             MyApprovalListViewModel model = new MyApprovalListViewModel();
@@ -109,27 +142,47 @@ namespace Capital_Item_Justification.Controllers
                 }
                 List<string> roleIds = new();
 
-                //var roles = await _userManager.GetRolesAsync(user);
-                //foreach (var roleName in roles)
-                //{
-                //    var role = await _roleManager.FindByNameAsync(roleName);
-
-                //    if (role != null)
-                //    {
-                //        roleIds.Add(role.Id);
-                //    }
-                //}
-
                 if (string.IsNullOrEmpty(workingRoleId) || string.IsNullOrEmpty(assignmentId))
                 {
                     return RedirectToAction("SelectRole", "Account");
                 }
                 roleIds = new() { workingRoleId };
                 user.DepartmentId = workingDepartmentId;
-                user.LocationId=workingLocationId;
+                user.LocationId = workingLocationId;
                 vm = await _service.GetMyApprovalAsync(user, roleIds);
                 vm = vm.Where(a => a.StatusName == "Completed").ToList();
                 ViewBag.Page = "Completed";
+
+                var departmentsList = await _cijService.GetDepartment();
+                var locationList = await _cijService.GetLocation();
+                ViewBag.Locations = new SelectList(locationList, "LocationId", "LocationName", locationId);
+                ViewBag.Departments = new SelectList(departmentsList, "DepartmentId", "DepartmentName", departmentId);
+
+
+                if (departmentId.HasValue)
+                {
+                    vm = vm.Where(x => x.DepartmentId == departmentId.Value).ToList();
+                }
+                if (locationId.HasValue)
+                {
+                    vm = vm.Where(x => x.LocationId == locationId.Value).ToList();
+                }
+
+                if (fromDate.HasValue)
+                {
+                    vm = vm.Where(x =>
+                        x.RequestDate.HasValue &&
+                        x.RequestDate.Value >= fromDate.Value.Date).ToList();
+                }
+
+                if (toDate.HasValue)
+                {
+                    var endDateExclusive = toDate.Value.Date.AddDays(1);
+
+                    vm = vm.Where(x =>
+                        x.RequestDate.HasValue &&
+                        x.RequestDate.Value < endDateExclusive).ToList();
+                }
 
                 var totalRecords = vm.Count();
                 var otherRequests = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
@@ -427,7 +480,7 @@ namespace Capital_Item_Justification.Controllers
             }
         }
 
-        public async Task<IActionResult> TrackRequest(int? cijId, int? statusId, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> TrackRequest(int? cijId, int? statusId, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
             try
             {
@@ -443,6 +496,22 @@ namespace Capital_Item_Justification.Controllers
                 ViewBag.StatusList = new SelectList(statusList, "StatusId", "StatusName", statusId);
 
                 var trackRequsetResults = await _service.TrackRequsterRequestAsync(user.Id, cijId, statusId);
+
+                if (fromDate.HasValue)
+                {
+                    trackRequsetResults = trackRequsetResults.Where(x =>
+                        x.RequestDate.HasValue &&
+                        x.RequestDate.Value >= fromDate.Value.Date).ToList();
+                }
+
+                if (toDate.HasValue)
+                {
+                    var endDateExclusive = toDate.Value.Date.AddDays(1);
+
+                    trackRequsetResults = trackRequsetResults.Where(x =>
+                        x.RequestDate.HasValue &&
+                        x.RequestDate.Value < endDateExclusive).ToList();
+                }
 
                 var totalRecords = trackRequsetResults.Count();
                 var trackMyRequests = trackRequsetResults.Skip((page - 1) * pageSize).Take(pageSize).ToList();
@@ -471,7 +540,7 @@ namespace Capital_Item_Justification.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> OtherRoleRequests(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> OtherRoleRequests(int? departmentId, int? locationId, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
             List<MyApprovalViewModel> vm = new();
             MyApprovalListViewModel model = new MyApprovalListViewModel();
@@ -483,15 +552,43 @@ namespace Capital_Item_Justification.Controllers
                     return Unauthorized();
                 }
                 //var roles = await _userManager.GetRolesAsync(user);
+                var departmentsList = await _cijService.GetDepartment();
+                var locationList = await _cijService.GetLocation();
+                ViewBag.Locations = new SelectList(locationList, "LocationId", "LocationName", locationId);
+                ViewBag.Departments = new SelectList(departmentsList, "DepartmentId", "DepartmentName", departmentId);
 
                 vm = await _service.GetOtherRoleRequestsAsync();
-                List<string> roles= string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName };
-                
+                List<string> roles = string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName };
+
                 if (roles.Any(r => r.Contains("Purchase", StringComparison.OrdinalIgnoreCase)))
                 {
                     vm = vm.Where(x => !(x.ApproverRole?.Contains("Purchase", StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
                 }
                 ViewBag.Page = "Pending/Query/Rejected";
+                if (departmentId.HasValue)
+                {
+                    vm = vm.Where(x => x.DepartmentId == departmentId.Value).ToList();
+                }
+                if (locationId.HasValue)
+                {
+                    vm = vm.Where(x => x.LocationId == locationId.Value).ToList(); 
+                }
+
+                if (fromDate.HasValue)
+                {
+                    vm = vm.Where(x =>
+                        x.RequestDate.HasValue &&
+                        x.RequestDate.Value >= fromDate.Value.Date).ToList(); 
+                }
+
+                if (toDate.HasValue)
+                {
+                    var endDateExclusive = toDate.Value.Date.AddDays(1);
+
+                    vm = vm.Where(x =>
+                        x.RequestDate.HasValue &&
+                        x.RequestDate.Value < endDateExclusive).ToList();
+                }
 
                 var totalRecords = vm.Count();
                 var otherRequests = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
