@@ -584,20 +584,33 @@ $(document).on('keydown', '#BudgetLimit', function (e) {
 });
 
 //$('#cijForm').on('submit', function (e) {
-
 //    const $form = $(this);
 //    const $saveButton = $('#btnSave');
 //    const $updateButton = $('#btnUpdate');
 
-//    // Prevent duplicate submissions
 //    if ($form.data('processing')) {
 //        e.preventDefault();
 //        return false;
 //    }
-
-//    // Validate the form
+//    const $cost = $('[name="CIJRequest.Scehcost"]');
+//    if ($cost.length) {
+//        const rawValue = $cost.val().replace(/[₹,\s]/g, '');
+//        $cost.val(rawValue);
+//    }
+//    // Validate the form first
 //    if (!$form.valid()) {
 //        e.preventDefault();
+
+//        const validator = $form.data('validator');
+
+//        console.log('Form is invalid.');
+//        console.table(
+//            validator?.errorList.map(error => ({
+//                field: error.element.name,
+//                value: error.element.value,
+//                message: error.message
+//            }))
+//        );
 
 //        $saveButton
 //            .prop('disabled', false)
@@ -610,18 +623,22 @@ $(document).on('keydown', '#BudgetLimit', function (e) {
 //        return false;
 //    }
 
-//    // Form is valid
+//    // Mark form as processing
 //    $form.data('processing', true);
 
-//    $saveButton
-//        .prop('disabled', true)
-//        .text('Saving...');
+//    // Change button text without spinner
+//    if ($saveButton.is(':visible')) {
+//        $saveButton
+//            .prop('disabled', true)
+//            .text('Saving...');
+//    }
 
-//    $updateButton
-//        .prop('disabled', true)
-//        .text('Updating...');
+//    if ($updateButton.is(':visible')) {
+//        $updateButton
+//            .prop('disabled', true)
+//            .text('Updating...');
+//    }
 //});
-
 
 
 

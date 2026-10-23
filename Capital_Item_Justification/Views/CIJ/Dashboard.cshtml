@@ -9,8 +9,10 @@
     </div>
 
     <div class="row g-3">
-
-        @if (ViewBag.Roles.Contains("Requester"))
+        @{
+            var workingRoleName = Context.Session.GetString("WorkingRoleName");
+        }
+        @if (workingRoleName == "Requester")
         {
             <div class="col-lg-3 col-md-6">
                 <div class="card dashboard-card dashboard-total shadow-sm border-0 h-100">
@@ -51,25 +53,25 @@
         }
 
         <!-- Pending -->
-        @if (ViewBag.Roles.Contains("Requester"))
+        @if (workingRoleName == "Requester")
         {
-            <div class="col-lg-3 col-md-6">
-                <div class="card dashboard-card dashboard-pending shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-2">Pending Approval</h6>
-                            <a asp-controller="WorkFlow"
-                               asp-action="TrackRequest" asp-route-statusId="@Model.PendingStatusId"
-                               class="text-decoration-none text-dark">
-                                <h2 class="fw-bold mb-0">@Model.PendingCount</h2>
-                            </a>
-                        </div>
-                        <i class="bi bi-hourglass-split fs-1 text-warning"></i>
-                    </div>
-                </div>
-            </div>
-            </div>
+            @*  <div class="col-lg-3 col-md-6">
+        <div class="card dashboard-card dashboard-pending shadow-sm border-0 h-100">
+        <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+        <div>
+        <h6 class="text-muted mb-2">Pending Approval</h6>
+        <a asp-controller="WorkFlow"
+        asp-action="TrackRequest" asp-route-statusId="@Model.PendingStatusId"
+        class="text-decoration-none text-dark">
+        <h2 class="fw-bold mb-0">@Model.PendingCount</h2>
+        </a>
+        </div>
+        <i class="bi bi-hourglass-split fs-1 text-warning"></i>
+        </div>
+        </div>
+        </div>
+        </div> *@
         }
         else
         {
@@ -91,7 +93,7 @@
                 </div>
             </div>
         }
-        @if (!ViewBag.Roles.Contains("Requester") && !ViewBag.Roles.Contains("Purchase"))
+        @if (workingRoleName != "Requester" && workingRoleName != "Purchase")
         {
             <div class="col-lg-3 col-md-6">
                 <div class="card dashboard-card dashboard-query shadow-sm border-0 h-100">
@@ -117,7 +119,7 @@
                 </div>
             </div>
         }
-        @if (ViewBag.Roles.Contains("Requester") || ViewBag.Roles.Contains("Purchase"))
+        @if (workingRoleName == "Requester" || workingRoleName == "Purchase")
         {
             <!-- Rejected -->
             <div class="col-lg-3 col-md-6">
@@ -161,7 +163,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-muted mb-2">Completed</h6>
-                                @if (ViewBag.Roles.Contains("Purchase"))
+                                @if (workingRoleName == "Purchase")
                                 {
                                     <a asp-controller="WorkFlow"
                                        asp-action="CompletedApproval"

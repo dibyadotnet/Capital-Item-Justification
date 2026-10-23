@@ -16,9 +16,9 @@ namespace Capital_Item_Justification.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
-        private readonly ILogger<WorkFlowController> _logger;
+        private readonly ILogger<AccountController> _logger;
         private readonly CIJDbContext _context;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailService emailService, ILogger<WorkFlowController> logger
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailService emailService, ILogger<AccountController> logger
             , CIJDbContext context)
         {
             _signInManager = signInManager;
@@ -837,8 +837,7 @@ namespace Capital_Item_Justification.Controllers
                     assignment.DepartmentId,
                     assignment.LocationId);
 
-                var role = await _context.Roles
-                    .FirstOrDefaultAsync(x => x.Id == assignment.RoleId);
+                var role = await _context.Roles.FirstOrDefaultAsync(x => x.Id == assignment.RoleId);
 
                 var identityRoles = await _userManager.GetRolesAsync(user);
 
@@ -929,5 +928,83 @@ namespace Capital_Item_Justification.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SwitchRole(int assignmentId)
+        {
+            try
+            {
+                // 1. Get the currently logged-in user
+                var user = await _userManager.GetUserAsync(User);
+
+                if (user == null)
+                {
+                    return Challenge();
+                }
+
+                // 2. Find the selected active assignment using JOIN
+                //    Only allow assignments belonging to the logged-in user.
+                var result = await (
+                    from assignment in _context.CijUserRoleAssignments
+                    join role in _context.Roles
+                        on assignment.RoleId equals role.Id
+                    where assignment.AssignmentId == assignmentId
+                          && assignment.UserId == user.Id
+                          && assignment.IsActive
+                    select new
+                    {
+                        Assignment = assignment,
+                        RoleName = role.Name
+                    })
+                    .FirstOrDefaultAsync();
+
+                // 3. Validate the selected assignment
+                if (result == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "Invalid or inactive role assignment.";
+
+                    return RedirectToAction("Dashboard", "CIJ");
+                }
+
+                // 4. Verify that the role is assigned to the user
+                var identityRoles = await _userManager.GetRolesAsync(user);
+
+                if (string.IsNullOrWhiteSpace(result.RoleName) ||
+                    !identityRoles.Contains(result.RoleName))
+                {
+                    TempData["ErrorMessage"] =
+                        "You are not authorized to access this role.";
+
+                    return RedirectToAction("Dashboard", "CIJ");
+                }
+
+                // 5. Set the selected assignment as the working assignment.
+                //    Reuse your existing method from SelectRole.
+                await SetWorkingRole(result.Assignment.AssignmentId);
+
+                // 6. Optional: clear any role-specific temporary state here
+                //    if your application maintains such state.
+
+                TempData["SuccessMessage"] =
+                    $"Switched to {result.RoleName} successfully.";
+
+                // 7. Return to the dashboard
+                return RedirectToAction("Dashboard", "CIJ");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error switching role. AssignmentId: {AssignmentId}",
+                    assignmentId);
+
+                TempData["ErrorMessage"] =
+                    "Unable to switch role. Please try again.";
+
+                return RedirectToAction("Dashboard", "CIJ");
+            }
+        }  
     }
 }
