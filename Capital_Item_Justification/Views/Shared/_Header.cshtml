@@ -1,9 +1,50 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Capital_Item_Justification.Models
+@using Capital_Item_Justification.Data
+@using Capital_Item_Justification.ViewModels
 @inject UserManager<ApplicationUser> UserManager
+@inject CIJDbContext _context
+
 
 @{
     var currentUser = await UserManager.GetUserAsync(User);
     var workingRoleName = Context.Session.GetString("WorkingRoleName");
+    var workingAssignmentId = Context.Session.GetInt32("WorkingAssignmentId");
+}
+@{
+    var roleAssignments = new List<RoleAssignmentOptionViewModel>();
+
+    if (currentUser != null)
+    {
+        var identityRoles = await UserManager.GetRolesAsync(currentUser);
+
+            roleAssignments = await (
+                from a in _context.CijUserRoleAssignments
+                join r in _context.Roles
+                    on a.RoleId equals r.Id
+                join d in _context.CijDepartments
+                    on a.DepartmentId equals d.DepartmentId into deptJoin
+                from d in deptJoin.DefaultIfEmpty()
+                join l in _context.CijLocations
+                    on a.LocationId equals l.LocationId into locationJoin
+                from l in locationJoin.DefaultIfEmpty()
+                where a.UserId == currentUser.Id
+                      && a.IsActive
+                      && identityRoles.Contains(r.Name!)
+                select new RoleAssignmentOptionViewModel
+                        {
+                            AssignmentId = a.AssignmentId,
+                            RoleName = r.Name ?? string.Empty,
+                            DepartmentName = d != null
+                                ? d.DepartmentName
+                                : "All Departments",
+                            LocationName = l != null
+                                ? l.LocationName
+                                : "All Locations"
+                        })
+                .ToListAsync();
+        }
 }
 
 <nav class="app-header navbar navbar-expand bg-body">
@@ -38,23 +79,88 @@
         </ul>
         <!-- Right side -->
         <ul class="navbar-nav ms-auto align-items-center">
-            <!-- Current Working Role -->
             @if (!string.IsNullOrWhiteSpace(workingRoleName))
             {
                 <li class="nav-item me-3">
                     <div class="d-flex align-items-center gap-2">
+                        @* 
                         <span class="text-muted small d-none d-md-inline">
                             Current Role:
                         </span>
-
-                        <span class="badge bg-danger px-3 py-2">
+                        *@
+                        <span class="badge bg-danger rounded-pill px-3 py-2">
                             <i class="bi bi-person-badge me-1"></i>
                             @workingRoleName
                         </span>
+
+                        <!-- Switch Role Dropdown -->
+                        @if (roleAssignments.Count> 0)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                        type="button"
+                                        id="switchRoleDropdown"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="bi bi-arrow-left-right me-1"></i>
+                                    <span class="d-none d-lg-inline">Switch Role</span>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow"
+                                    aria-labelledby="switchRoleDropdown"
+                                    style="min-width: 280px;">
+
+                                    <li>
+                                        <h6 class="dropdown-header">
+                                            Select Role / Department
+                                        </h6>
+                                    </li>
+
+                                    @foreach (var assignment in roleAssignments)
+                                    {
+                                        <li>
+                                            <form asp-controller="Account"
+                                                  asp-action="SwitchRole"
+                                                  method="post"
+                                                  class="m-0">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="assignmentId"
+                                                       value="@assignment.AssignmentId" />
+
+                                                <button type="submit"
+                                                        class="dropdown-item py-2
+                                            @(workingAssignmentId?.ToString() == assignment.AssignmentId.ToString()
+                                                ? "active" : "")">
+
+                                                    <div class="fw-semibold">
+                                                        @assignment.RoleName
+                                                    </div>
+
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-building me-1"></i>
+                                                        @(assignment.DepartmentName ?? "All Departments")
+                                                    </small>
+
+                                                    <br />
+
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-geo-alt me-1"></i>
+                                                        @(assignment.LocationName ?? "All Locations")
+                                                    </small>
+
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
                     </div>
                 </li>
             }
-
             @if (User.Identity?.IsAuthenticated == true)
             {
 
