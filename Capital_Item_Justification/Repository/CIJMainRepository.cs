@@ -655,35 +655,47 @@ namespace Capital_Item_Justification.Repository
                 throw new InvalidOperationException("Email Configuration is not found.");
             return emaliConfig;
         }
-        public async Task<EmailViewModel> GetApproveEmail(int cijId, string action)
+        public async Task<List<EmailViewModel>?> GetApproveEmail(int cijId, string action)
         {
-            var locationSpecificRoles = new[] { "Finance", "Purchase" };
-            int statusId = await _context.CijStatuses.Where(a => a.IsActive && a.StatusName == action).Select(a => a.StatusId).FirstOrDefaultAsync();
-            var nextApproverEmails = await (from approval in _context.CijWorkflowApprovals
-                                            join userRole in _context.UserRoles
-                                                on approval.ApproverRoleId equals userRole.RoleId
-                                            join user in _context.Users
-                                                on userRole.UserId equals user.Id
-                                            join role in _context.Roles
-                                                on userRole.RoleId equals role.Id
-                                            where approval.Cijid == cijId
-                                                  && approval.StatusId == statusId
-                                                  &&
-                                                  (
-                                                      locationSpecificRoles.Contains(role.Name)
-                                                      ||
-                                                      (
-                                                         approval.LocationId == user.LocationId
-                                                      )
-                                                  )
-                                                  && approval.DepartmentId == user.DepartmentId
-                                                  && user.IsActive && !string.IsNullOrEmpty(user.Email)
-                                            select new EmailViewModel()
-                                            {
-                                                approverName = user.FullName,
-                                                approverEmail = user.Email
-                                            }
-                                        ).Distinct().FirstOrDefaultAsync();
+            int? statusId = await _context.CijStatuses.Where(a => a.IsActive && a.StatusName == action).Select(a => a.StatusId).FirstOrDefaultAsync();
+            if (statusId == null)
+            {
+                return null;
+            }
+            var nextApproverEmails = await _context.Set<EmailViewModel>().FromSqlInterpolated($@"
+                                EXEC dbo.SP_GetNextApproverEmails
+                                    @CijId = {cijId},
+                                    @StatusId = {statusId}")
+                            .AsNoTracking().ToListAsync();
+     
+            return nextApproverEmails;
+        }
+        public async Task<List<EmailViewModel>?> GetQueryEmail(int cijId, string targetRoleId)
+        {
+            var nextApproverEmails = await _context.Set<EmailViewModel>().FromSqlInterpolated($@"
+                                EXEC dbo.SP_GetQueryEmail
+                                    @CijId = {cijId},
+                                    @RoleId = {targetRoleId}")
+                            .AsNoTracking().ToListAsync();
+
+            return nextApproverEmails;
+        }
+        public async Task<List<EmailViewModel>?> GetAnsweredEmail(int cijId, int clarificationId)
+        {
+            var nextApproverEmails = await _context.Set<EmailViewModel>().FromSqlInterpolated($@"
+                                EXEC dbo.SP_GetAnsweredEmail
+                                    @CijId = {cijId},
+                                    @ClarificationId = {clarificationId}")
+                            .AsNoTracking().ToListAsync();
+
+            return nextApproverEmails;
+        }
+        public async Task<List<EmailViewModel>?> GetRejectedEmail(int cijId)
+        {
+            var nextApproverEmails = await _context.Set<EmailViewModel>().FromSqlInterpolated($@"
+                                EXEC dbo.SP_GetRejectedEmail
+                                    @CijId = {cijId}")
+                            .AsNoTracking().ToListAsync();
 
             return nextApproverEmails;
         }
