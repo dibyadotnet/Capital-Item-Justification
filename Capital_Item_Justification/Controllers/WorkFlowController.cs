@@ -319,7 +319,7 @@ namespace Capital_Item_Justification.Controllers
                 bool? approved = await _service.ApproveRequestAsync(vm);
                 if (approved == true)
                 {
-                    await _emailService.SendEmailAsync(cijId, cijNumber, action, remarks);
+                    await _emailService.SendEmailAsync(cijId, action, null, null);
                     TempData["ToastMessage"] = "CIJ request is approved successfully.";
                     TempData["ToastType"] = "success";
                 }
@@ -368,6 +368,7 @@ namespace Capital_Item_Justification.Controllers
                 bool? approved = await _service.ApproveRequestAsync(vm);
                 if (approved == true)
                 {
+                    await _emailService.SendEmailAsync(cijId, action, targetRoleId, null);
                     TempData["ToastMessage"] = "Clarification Query submitted successfully.";
                     TempData["ToastType"] = "success";
                 }
@@ -414,6 +415,7 @@ namespace Capital_Item_Justification.Controllers
                 bool? approved = await _service.ApproveRequestAsync(vm);
                 if (approved == true)
                 {
+                    await _emailService.SendEmailAsync(cijId, action, null, clarificationId);
                     TempData["ToastMessage"] = "Clarification answer submitted successfully..";
                     TempData["ToastType"] = "success";
                 }
@@ -461,6 +463,7 @@ namespace Capital_Item_Justification.Controllers
                 bool? approved = await _service.ApproveRequestAsync(vm);
                 if (approved == true)
                 {
+                    await _emailService.SendEmailAsync(cijId, action, null, null);
                     TempData["ToastMessage"] = "CIJ request is Rejected successfully.";
                     TempData["ToastType"] = "success";
                 }
@@ -571,14 +574,14 @@ namespace Capital_Item_Justification.Controllers
                 }
                 if (locationId.HasValue)
                 {
-                    vm = vm.Where(x => x.LocationId == locationId.Value).ToList(); 
+                    vm = vm.Where(x => x.LocationId == locationId.Value).ToList();
                 }
 
                 if (fromDate.HasValue)
                 {
                     vm = vm.Where(x =>
                         x.RequestDate.HasValue &&
-                        x.RequestDate.Value >= fromDate.Value.Date).ToList(); 
+                        x.RequestDate.Value >= fromDate.Value.Date).ToList();
                 }
 
                 if (toDate.HasValue)
