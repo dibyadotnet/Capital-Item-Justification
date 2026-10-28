@@ -8,5 +8,6 @@
         public string? CIJSNumber { get; set; }
         public bool CanReject { get; set; }
         public bool CanQuery { get; set; }
+        public string ItemTypeName { get; set; } = null!;
     }
 }

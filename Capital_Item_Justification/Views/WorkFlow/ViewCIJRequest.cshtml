@@ -392,7 +392,7 @@
                             </div>
                         </div>
                     }
-                    @if (Model.CIJRequest.ItemTypeName == "Medical")
+                    @* @if (Model.CIJRequest.ItemTypeName == "Medical")
                     {
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">
@@ -403,7 +403,7 @@
                                 @(string.IsNullOrWhiteSpace(Model.committeeCommentViewModel?.Comments) ? "-" : Model.committeeCommentViewModel.Comments)
                             </div>
                         </div>
-                    }
+                    } *@
                 </div>
             }
         </div>
@@ -591,15 +591,27 @@
                                         @history.RoleName
                                     </td>
                                     <td>
-                                        @if (history.StatusName == "Submitted" || history.StatusName == "Approved")
+                                        @if (history.StatusName == "Submitted")
+                                        {
+                                            <span class="badge bg-primary">
+                                                @history.StatusName
+                                            </span>
+                                        }
+                                        else if (history.StatusName == "Approved")
                                         {
                                             <span class="badge bg-success">
                                                 @history.StatusName
                                             </span>
                                         }
+                                        else if (history.StatusName == "Rejected")
+                                        {
+                                            <span class="badge bg-danger">
+                                                @history.StatusName
+                                            </span>
+                                        }
                                         else
                                         {
-                                            <span class="badge bg-secondary">
+                                            <span class="badge bg-info">
                                                 @history.StatusName
                                             </span>
                                         }

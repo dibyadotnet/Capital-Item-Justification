@@ -14,9 +14,9 @@
 
                     <thead class="table-light">
                         <tr>
-                            <th>Date</th>
+                            <th>Approved Date</th>
+                            <th>Approved By</th>
                             <th>Role</th>
-                            <th>Action By</th>
                             <th>Status</th>
                             <th>Remarks</th>
                         </tr>
@@ -30,10 +30,10 @@
                                     @history.ActionDate?.ToString("dd-MMM-yyyy HH:mm")
                                 </td>
                                 <td>
-                                    @history.RoleName
+                                    @history.UserName
                                 </td>
                                 <td>
-                                    @history.UserName
+                                    @history.RoleName
                                 </td>
                                 <td>
                                     @if (history.StatusName == "Submitted")
@@ -42,10 +42,22 @@
                                             Submitted
                                         </span>
                                     }
-                                    @if (history.StatusName == "Approved")
+                                    else if (history.StatusName == "Approved")
                                     {
                                         <span class="badge bg-success">
                                             Approved
+                                        </span>
+                                    }
+                                    else if (history.StatusName == "Rejected")
+                                    {
+                                        <span class="badge bg-danger">
+                                            @history.StatusName
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">
+                                            @history.StatusName
                                         </span>
                                     }
                                 </td>

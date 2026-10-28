@@ -110,7 +110,7 @@
                     </li>
                 }
                 @* @if (User.IsInRole("Purchase")) *@
-                @if (workingRoleName == "Purchase")
+                @if (workingRoleName == "Purchase" || workingRoleName == "Admin")
                 {
                     <li class="nav-item">
                         <a asp-controller="WorkFlow"
@@ -189,16 +189,6 @@
                 @*  @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin")) *@
                 @if (workingRoleName == "Admin" || workingRoleName == "SuperAdmin")
                 {
-                    <li class="nav-item">
-                        <a asp-controller="WorkFlow"
-                           asp-action="OtherRoleRequests"
-                           class="nav-link">
-                            <i class="nav-icon bi bi-people"></i>
-                            <p>
-                                Upcoming Requests
-                            </p>
-                        </a>
-                    </li>
                     <li class="nav-item @(isMastersActive ? "menu-open" : "")">
                         <a href="#" class="nav-link @(isMastersActive ? "active" : "")">
                             <i class="nav-icon bi bi-sliders"></i>

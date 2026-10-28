@@ -335,7 +335,8 @@ namespace Capital_Item_Justification.Repository
                     CIJSNumber = approvalDetail.CIJSNumber,
                     CanReject = approvalDetail.CanReject,
                     CanQuery = approvalDetail.CanQuery,
-                    CIJNumber = approvalDetail.CIJSNumber
+                    CIJNumber = approvalDetail.CIJSNumber,
+                    ItemTypeName= approvalDetail.ItemTypeName
                 };
             }
             return vm;
@@ -927,7 +928,7 @@ namespace Capital_Item_Justification.Repository
                     ApproverUserId = vm.userId,
                     ApproverRole = approval.ApproverRole,
                     ApproverRoleId = approval.ApproverRoleId,
-                    Remarks = vm.Answer,
+                    Remarks = vm.remarks,
                     ActionOn = DateTime.Now,
                     StepId = approval.StepId,
                     CreatedBy = vm.userId,

@@ -11,6 +11,7 @@ using PdfSharp.Pdf.Filters;
 using System;
 using System.Diagnostics;
 using System.Drawing.Printing;
+using System.Reflection.Metadata;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Capital_Item_Justification.Controllers
@@ -23,13 +24,14 @@ namespace Capital_Item_Justification.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ICIJRequestService _cijService;
         private readonly IEmailService _emailService;
+        private readonly CIJDbContext _cIJDbContext;
         private string? workingRoleId => HttpContext.Session.GetString("WorkingRoleId");
         private string? workingRoleName => HttpContext.Session.GetString("WorkingRoleName");
         private string? assignmentId => HttpContext.Session.GetString("WorkingAssignmentId");
         private int? workingDepartmentId => HttpContext.Session.GetInt32("WorkingDepartmentId");
         private int? workingLocationId => HttpContext.Session.GetInt32("WorkingLocationId");
         public WorkFlowController(ILogger<WorkFlowController> logger, IWorkflowService service, UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager, ICIJRequestService cijService, IEmailService emailService)
+            RoleManager<ApplicationRole> roleManager, ICIJRequestService cijService, IEmailService emailService, CIJDbContext cIJDbContext)
         {
             _logger = logger;
             _service = service;
@@ -37,6 +39,7 @@ namespace Capital_Item_Justification.Controllers
             _roleManager = roleManager;
             _cijService = cijService;
             _emailService = emailService;
+            _cIJDbContext = cIJDbContext;
         }
         public async Task<IActionResult> MyApproval(int? departmentId, int? locationId, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
@@ -131,8 +134,8 @@ namespace Capital_Item_Justification.Controllers
         }
         public async Task<IActionResult> CompletedApproval(int? departmentId, int? locationId, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
-            List<MyApprovalViewModel> vm = new();
-            MyApprovalListViewModel model = new MyApprovalListViewModel();
+            List<CompletedRequestViewModel> vm = new();
+            CompletedRequestsListViewModel model = new();
             try
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -149,7 +152,12 @@ namespace Capital_Item_Justification.Controllers
                 roleIds = new() { workingRoleId };
                 user.DepartmentId = workingDepartmentId;
                 user.LocationId = workingLocationId;
-                vm = await _service.GetMyApprovalAsync(user, roleIds);
+                //vm = await _service.GetMyApprovalAsync(user, roleIds);
+
+                vm = await _cIJDbContext.Database
+                  .SqlQueryRaw<CompletedRequestViewModel>(
+                      "EXEC dbo.SP_GetCompletedRequests").ToListAsync();
+
                 vm = vm.Where(a => a.StatusName == "Completed").ToList();
                 ViewBag.Page = "Completed";
 
@@ -187,9 +195,9 @@ namespace Capital_Item_Justification.Controllers
                 var totalRecords = vm.Count();
                 var otherRequests = vm.Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-                model = new MyApprovalListViewModel
+                model = new CompletedRequestsListViewModel
                 {
-                    myApprovalViewModels = otherRequests,
+                    completedRequestViewModels = otherRequests,
                     Pagination = new PaginationViewModel
                     {
                         CurrentPage = page,
@@ -197,7 +205,7 @@ namespace Capital_Item_Justification.Controllers
                         TotalRecords = totalRecords,
                         TotalPages = totalPages,
                         ControllerName = "WorkFlow",
-                        ActionName = "MyApproval"
+                        ActionName = "CompletedApproval"
                     }
                 };
             }
@@ -205,7 +213,7 @@ namespace Capital_Item_Justification.Controllers
             {
                 throw;
             }
-            return View("MyApproval", model);
+            return View(model);
         }
         public async Task<IActionResult> ViewCIJRequest(int approvalId, int cijId)
         {
