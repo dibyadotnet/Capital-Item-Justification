@@ -20,5 +20,6 @@ namespace Capital_Item_Justification.ViewModels
         public string? CIJNumber { get; set; }
         public List<SelectListItem> TargetRoles { get; set; } = new();
         public List<AttachmentViewModel> AttachmentVm { get; set; } = new();
+        public string ItemTypeName { get; set; } = null!;
     }
 }

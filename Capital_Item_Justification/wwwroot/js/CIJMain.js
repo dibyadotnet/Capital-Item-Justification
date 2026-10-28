@@ -24,14 +24,14 @@ $(document).ready(function () {
         $("#divCommiteeComments").hide();
     }
 
-
     togglePreviousPurchase();
 
-    //changeCostCenter();
     changeCostCenterPageLoad();
+
     changeBudgetProvision();
 
-    enableBudgetType();
+    //enableBudgetType();
+    enableBudgetTypePageLoad();
 
     changePurchasePurpose();
 
@@ -122,6 +122,8 @@ function changeCostCenter() {
         $('#CIJRequest_Scehcost').val('');
         $('#CIJRequest_ProjectId').prop('disabled', false);
         //$("#CIJRequest_ProjectId").val("");
+        $('#CIJRequest_ProjectCost').val("");
+        $('#CIJRequest_ProjectCostHidden').val("");
     } else {
         $('#CIJRequest_BudgetTypeId').prop('disabled', true);
         $("#CIJRequest_BudgetTypeId").val("");
@@ -133,6 +135,8 @@ function changeCostCenter() {
         //$('#CIJRequest_Scehcost').val($("#CIJRequest_TotalEquipmentCost").val());
         $('#CIJRequest_Scehcost').val($("#CIJRequest_TotalEquipmentCostDisplay").val());
         $('#CIJRequest_ScehcostHidden').val($("#CIJRequest_TotalEquipmentCost").val());
+        $('#CIJRequest_ProjectCost').val("");
+        $('#CIJRequest_ProjectCostHidden').val("");
     }
 }
 function changeCostCenterPageLoad() {
@@ -182,15 +186,42 @@ function togglePreviousPurchase() {
 //}
 function enableBudgetType() {
     var budgetTypeId = $("#CIJRequest_BudgetTypeId option:selected").val();
-    //if (budgetTypeId === "2" || !budgetTypeId) {
     if (budgetTypeId === "2") {//Partially Funded
         $('#CIJRequest_Scehcost').prop('readonly', false);
+        $('#CIJRequest_ProjectCost').prop('readonly', false);
+        $('#CIJRequest_ProjectCost').val("")
+        $('#CIJRequest_ProjectCostHidden').val("")
     } else {
         $('#CIJRequest_Scehcost').prop('readonly', true);
+        $('#CIJRequest_ProjectCost').prop('readonly', true);
         if ($("#CIJRequest_CostCenterId").val()==="1") {
             $("#CIJRequest_Scehcost").val("");
             $('#CIJRequest_ScehcostHidden').val("");
         }
+        if ($("#CIJRequest_CostCenterId").val() === "1" && budgetTypeId === "1") {
+            $('#CIJRequest_ProjectCost').val($("#CIJRequest_TotalEquipmentCostDisplay").val());
+            $('#CIJRequest_ProjectCostHidden').val($("#CIJRequest_TotalEquipmentCost").val());
+    }
+
+    }
+}
+function enableBudgetTypePageLoad() {
+    var budgetTypeId = $("#CIJRequest_BudgetTypeId option:selected").val();
+    if (budgetTypeId === "2") {//Partially Funded
+        $('#CIJRequest_Scehcost').prop('readonly', false);
+        $('#CIJRequest_ProjectCost').prop('readonly', false);
+    } else {
+        $('#CIJRequest_Scehcost').prop('readonly', true);
+        $('#CIJRequest_ProjectCost').prop('readonly', true);
+        if ($("#CIJRequest_CostCenterId").val() === "1") {
+            $("#CIJRequest_Scehcost").val("");
+            $('#CIJRequest_ScehcostHidden').val("");
+        }
+        if ($("#CIJRequest_CostCenterId").val() === "1" && budgetTypeId === "1") {
+            $('#CIJRequest_ProjectCost').val($("#CIJRequest_TotalEquipmentCostDisplay").val());
+            $('#CIJRequest_ProjectCostHidden').val($("#CIJRequest_TotalEquipmentCost").val());
+        }
+
     }
 }
 function changeBudgetProvision() {
@@ -382,6 +413,12 @@ function calculateTotalEquipmentCost() {
     if (costCenterId === "2") {
         $('#CIJRequest_Scehcost').val(eqpCost)
         $('#CIJRequest_ScehcostHidden').val(total)
+    }
+    //Project and Fully Funded
+    var budgetFund = $("#CIJRequest_BudgetTypeId option:selected").val();
+    if (costCenterId === "1" && budgetFund =="1") {
+        $('#CIJRequest_ProjectCost').val($("#CIJRequest_TotalEquipmentCostDisplay").val());
+        $('#CIJRequest_ProjectCostHidden').val($("#CIJRequest_TotalEquipmentCost").val());
     }
 }
 $("#btnModalClose").on("click", function () {

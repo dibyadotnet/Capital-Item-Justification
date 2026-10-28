@@ -23,6 +23,7 @@ namespace Capital_Item_Justification.ViewModels
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? ProjectCost { get; set; }
 
+        public decimal? ProjectCostHidden { get; set; }
         [Column("SCEHCost", TypeName = "decimal(18, 2)")]
         public decimal? Scehcost { get; set; }
         public decimal? ScehcostHidden { get; set; }

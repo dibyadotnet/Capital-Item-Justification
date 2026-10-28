@@ -325,6 +325,7 @@ namespace Capital_Item_Justification.Controllers
                 @ViewBag.TotalEstEquipmentCost = formattedCost;
 
                 cIJMainViewModel.CIJRequest.ScehcostHidden = cIJMainViewModel.CIJRequest.Scehcost;
+                cIJMainViewModel.CIJRequest.ProjectCostHidden = cIJMainViewModel.CIJRequest.ProjectCost;
 
                 //get attachments
                 List<AttachmentViewModel> model = await _service.GetAttachmentsById(cijId);

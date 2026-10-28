@@ -78,6 +78,9 @@
                     @if (Model.workFlowStepCode == "Purchase")
                     {
                         <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                Uploaded Files
+                            </label>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-hover align-middle mb-0 table-sm" id="tblAttachments">
                                     <thead class="table-light">
@@ -123,7 +126,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="attachmentFile"
-                                   class="form-label fw-semibold">
+                                   class="form-label fw-bold">
                                 Select File
                             </label>
                             <input type="file" id="purchaseAttachments" name="PurchaseAttachments" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple />
@@ -157,7 +160,7 @@
                             </button>
                         }
                         <button type="submit" name="Action" value="Approve" formaction="@Url.Action("WorkFlowApproval", "WorkFlow")"
-                                class="btn btn-success" onclick="return validateApprove();">
+                                class="btn btn-success" onclick='return validateApprove(@Json.Serialize(Model.ItemTypeName.Trim()), @Json.Serialize(Model.workFlowStepCode));'>
                             <i class="bi bi-check-lg me-1"></i>
                             Approve
                         </button>
@@ -171,68 +174,93 @@
         <partial name="_AddWorkFlowClarification" model="Model" />
     }
 }
-<style>
-    .button-margin {
-        margin-top: 1%;
-    }
-</style>
 
 @section Scripts {
-    <script>
-        function validateRemarks(action) {
-            // var remarks = document.getElementById("remarks").value.trim();
-            // if (remarks === "") {
-            //     alert("Please enter remarks before " + action + ".");
-            //     document.getElementById("remarks").focus();
-            //     return false;
-            // }
-            return confirm(
-                "Are you sure you want to " +
-                action.toLowerCase() +
-                " this CIJ?"
-            );
-        }
-        function validateApprove() {
+    <script type="text/javascript">
+        function validateApprove(ItemTypeName, workFlowStepCode) {
+            let isValid = true;
+            if (ItemTypeName === 'Medical' && workFlowStepCode === 'Purchase_Committee') {
+                if (!validateRemarksField("#remarks", "Remarks is required.")) {
+                    isValid = false;
+                }
+                if (!isValid) {
+                    return false;
+                }
+            }
                 const departmentSelect = document.getElementById('assignedDept');
-            if (departmentSelect) {
+                if (departmentSelect) {
 
-                const selected = $('#assignedDept').val();
+                    const selected = $('#assignedDept').val();
 
-                if (!selected || selected.length === 0) {
-                    $('#assignedDeptError').removeClass('d-none').show();
-                    $('#assignedDept').next('.select2-container')
+                    if (!selected || selected.length === 0) {
+                        $('#assignedDeptError').removeClass('d-none').show();
+                        $('#assignedDept').next('.select2-container')
+                            .find('.select2-selection')
+                            .addClass('is-invalid');
+
+                        return false;
+                    }
+
+                    $('#assignedDeptError').addClass('d-none').hide();
+                }
+                return confirm(
+                    "Are you sure you want to approve this CIJ?"
+                );
+            }
+        
+
+            $('#assignedDept').on('change', function () {
+                if ($(this).val() && $(this).val().length > 0) {
+                    $('#assignedDeptError').addClass('d-none');
+                    $(this).next('.select2-container')
                         .find('.select2-selection')
-                        .addClass('is-invalid');
+                        .removeClass('is-invalid');
+                }
+            });
+
+            $('#assignedDept').select2({
+                placeholder: '-- Select --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            function validateRemarksField(selector, message) {
+                const field = $(selector);
+
+                if (!field.val()) {
+                    field.addClass("is-invalid");
+
+                    if (field.next(".custom-error").length === 0) {
+                        field.after(
+                            `<span class="invalid-feedback custom-error">${message}</span>`
+                        );
+                    }
 
                     return false;
                 }
 
-                $('#assignedDeptError').addClass('d-none').hide();
-            }
-            return confirm(
-                "Are you sure you want to approve this CIJ?"
-            );
-        }
+                field.removeClass("is-invalid");
+                field.next(".custom-error").remove();
 
-        $('#assignedDept').on('change', function () {
-            if ($(this).val() && $(this).val().length > 0) {
-                $('#assignedDeptError').addClass('d-none');
-                $(this).next('.select2-container')
-                    .find('.select2-selection')
-                    .removeClass('is-invalid');
+                return true;
             }
-        });
 
-        $('#assignedDept').select2({
-            placeholder: '-- Select --',
-            allowClear: true,
-            width: '100%'
-        });
+            function validateRemarks(action) {
+                return confirm(
+                    "Are you sure you want to " +
+                    action.toLowerCase() +
+                    " this CIJ?"
+                );
+            }
     </script>
 }
 <style>
     .select2-container .select2-selection.is-invalid {
         border: 1px solid #dc3545 !important;
         box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.15);
+    }
+
+    .button-margin {
+        margin-top: 1%;
     }
 </style>
