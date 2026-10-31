@@ -153,8 +153,16 @@
                         @*  @if (!User.IsInRole("Finance") || !User.IsInRole("Purchase")) *@
                         @if (Model.CanReject)
                         {
-                            <button type="submit" name="Action" formaction="@Url.Action("RejectWorkFlow", "WorkFlow")" class="btn btn-danger"
-                                    onclick="return validateRemarks('Reject');">
+                            <button type="submit"
+                                    name="Action"
+                                    value="Reject"
+                                    formaction="@Url.Action("RejectWorkFlow", "WorkFlow")"
+                                    class="btn btn-danger"
+                                    data-action="Reject"
+                                    data-item-type="@Model.ItemTypeName?.Trim()"
+                                    data-workflow-step="@Model.workFlowStepCode"
+                                    onclick="return validateReject(this);">
+
                                 <i class="bi bi-x-lg me-1"></i>
                                 Reject
                             </button>
@@ -245,7 +253,20 @@
                 return true;
             }
 
-            function validateRemarks(action) {
+        function validateReject(button) {
+            const action = button.dataset.action;
+            const itemTypeName = button.dataset.itemType;
+            const workFlowStepCode = button.dataset.workflowStep;
+            let isValid = true;
+            if (itemTypeName === 'Medical' && workFlowStepCode === 'Purchase_Committee') {
+                if (!validateRemarksField("#remarks", "Remarks is required.")) {
+                    isValid = false;
+                }
+                if (!isValid) {
+                    return false;
+                }
+            }
+
                 return confirm(
                     "Are you sure you want to " +
                     action.toLowerCase() +

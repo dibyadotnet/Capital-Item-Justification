@@ -186,8 +186,9 @@ function togglePreviousPurchase() {
 //}
 function enableBudgetType() {
     var budgetTypeId = $("#CIJRequest_BudgetTypeId option:selected").val();
-    if (budgetTypeId === "2") {//Partially Funded
-        $('#CIJRequest_Scehcost').prop('readonly', false);
+    //Partially Funded
+    if (budgetTypeId === "2") {
+        $('#CIJRequest_Scehcost').prop('readonly', true);
         $('#CIJRequest_ProjectCost').prop('readonly', false);
         $('#CIJRequest_ProjectCost').val("")
         $('#CIJRequest_ProjectCostHidden').val("")
@@ -208,7 +209,7 @@ function enableBudgetType() {
 function enableBudgetTypePageLoad() {
     var budgetTypeId = $("#CIJRequest_BudgetTypeId option:selected").val();
     if (budgetTypeId === "2") {//Partially Funded
-        $('#CIJRequest_Scehcost').prop('readonly', false);
+        $('#CIJRequest_Scehcost').prop('readonly', true);
         $('#CIJRequest_ProjectCost').prop('readonly', false);
     } else {
         $('#CIJRequest_Scehcost').prop('readonly', true);
@@ -420,6 +421,8 @@ function calculateTotalEquipmentCost() {
         $('#CIJRequest_ProjectCost').val($("#CIJRequest_TotalEquipmentCostDisplay").val());
         $('#CIJRequest_ProjectCostHidden').val($("#CIJRequest_TotalEquipmentCost").val());
     }
+    //Calculate Scehcost
+    calculateScehCost();
 }
 $("#btnModalClose").on("click", function () {
     clearEquipment();
@@ -529,6 +532,12 @@ $("#cijForm").on("submit", function (e) {
             isValid = false;
         }
     }
+    //Project and partial funded
+    if ($("#CIJRequest_CostCenterId").val() === "1" && $("#CIJRequest_BudgetTypeId").val() === "2") {
+        if (!validateField("#CIJRequest_ProjectCost", "Project Cost is required.")) {
+            isValid = false;
+        }
+    }
 
 
     if (!isValid) {
@@ -583,41 +592,86 @@ $('#vendorAttachments').on('change', function () {
         return;
     }
 });
-$(document).on('keydown', '#EquipmentQty', function (e) {
-    if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === '-') {
-        e.preventDefault();
-    }
+//$(document).on('keydown', '#EquipmentQty', function (e) {
+//    if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === '-') {
+//        e.preventDefault();
+//    }
+//});
+$(document).on('input', '#EquipmentQty', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
 });
-$(document).on('keydown', '#EquipmentCost', function (e) {
-    if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === '-') {
-        e.preventDefault();
-    }
+//$(document).on('keydown', '#EquipmentCost', function (e) {
+//    if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === '-') {
+//        e.preventDefault();
+//    }
+//});
+$(document).on('input', '#EquipmentCost', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-$(document).on('keydown', '#CIJRequest_Scehcost', function (e) {
-    if (e.key === '.' || e.key === 'e' || e.key === '-') {
-        e.preventDefault();
-    }
+//$(document).on('keydown', '#CIJRequest_Scehcost', function (e) {
+//    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+//        e.preventDefault();
+//    }
+//});
+$(document).on('input', '#CIJRequest_Scehcost', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
 });
-$(document).on('keydown', '#CIJRequest_BudgetAmount', function (e) {
-    if (e.key === '.' || e.key === 'e' || e.key === '-') {
-        e.preventDefault();
-    }
+//$(document).on('keydown', '#CIJRequest_BudgetAmount', function (e) {
+//    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+//        e.preventDefault();
+//    }
+//});
+$(document).on('input', '#CIJRequest_BudgetAmount', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
 });
-$(document).on('keydown', '#CIJRequest_ProjectCost', function (e) {
-    if (e.key === '.' || e.key === 'e' || e.key === '-') {
-        e.preventDefault();
-    }
+//$(document).on('keydown', '#CIJRequest_ProjectCost', function (e) {
+//    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+//        e.preventDefault();
+//    }
+//});
+$(document).on('input', '#CIJRequest_ProjectCost', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
 });
-$(document).on('keydown', '#CIJRequest_OldEquipmentCost', function (e) {
-    if (e.key === '.' || e.key === 'e' || e.key === '-') {
-        e.preventDefault();
-    }
+//$(document).on('keydown', '#CIJRequest_OldEquipmentCost', function (e) {
+//    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+//        e.preventDefault();
+//    }
+//});
+$(document).on('input', '#CIJRequest_OldEquipmentCost', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
 });
-$(document).on('keydown', '#BudgetLimit', function (e) {
-    if (e.key === '.' || e.key === 'e' || e.key === '-') {
-        e.preventDefault();
-    }
+//$(document).on('keydown', '#BudgetLimit', function (e) {
+//    if (e.key === '.' || e.key === 'e' || e.key === '-') {
+//        e.preventDefault();
+//    }
+//});
+$(document).on('input', '#BudgetLimit', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+
+
+// calculate when Project cost changes
+$(document).on('input blur', '#CIJRequest_ProjectCost', function () {
+    calculateScehCost();
+});
+function calculateScehCost() {
+    debugger;
+    let equipmentCost = parseFloat(
+        ($('#CIJRequest_TotalEquipmentCost').val() || '')) || 0;
+
+    let projectCost = parseFloat(
+        ($('#CIJRequest_ProjectCost').val() || '').replace(/[^0-9]/g, '')) || 0;
+
+    let scehCost = equipmentCost - projectCost;
+
+    $('#CIJRequest_Scehcost').val(scehCost.toLocaleString('en-IN'));
+    $('#CIJRequest_ScehcostHidden').val(scehCost.toLocaleString('en-IN'));
+}
+
+// Recalculate when either cost changes
+$(document).on('input blur', '#CIJRequest_EquipmentCost, #CIJRequest_ProjectCost', function () {
+    calculateScehCost();
 });
 
 //$('#cijForm').on('submit', function (e) {

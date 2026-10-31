@@ -29,8 +29,8 @@ namespace Capital_Item_Justification.Repository.Interfaces
         Task<List<StatusViewModel>> GetStatusListAsync();
         Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(string userId);
         Task<List<EmailViewModel>?> GetApproveEmail(int cijId, string action);
-        Task<List<EmailViewModel>?> GetQueryEmail(int cijId, string targetRoleId);
-        Task<List<EmailViewModel>?> GetAnsweredEmail(int cijId, int clarificationId);
+        Task<List<EmailViewModel>?> GetQueryEmail(int cijId, int? approvalId);
+        Task<List<EmailViewModel>?> GetAnsweredEmail(int cijId, int? clarificationId);
         Task<List<EmailViewModel>?> GetRejectedEmail(int cijId);
     }
 }

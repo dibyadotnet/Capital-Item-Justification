@@ -278,7 +278,7 @@ namespace Capital_Item_Justification.Controllers
                 var rolevm = await _service.GetRoleToSendQueryAsync(approvalId, cijId);
                 vm.TargetRoles = rolevm.Select(x => new SelectListItem
                 {
-                    Value = x.Id,
+                    Value = x.ApprovalId.ToString(),
                     Text = x.RoleName
                 }).ToList();
 
@@ -348,7 +348,7 @@ namespace Capital_Item_Justification.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendClarification(int workflowApprovalId, int cijId, string clarificationPoint, string targetRoleId)
+        public async Task<IActionResult> SendClarification(int workflowApprovalId, int cijId, string clarificationPoint, int approvalId)
         {
             try
             {
@@ -371,12 +371,12 @@ namespace Capital_Item_Justification.Controllers
                     userDepartmentId = user.DepartmentId,
                     Action = action,
                     ClarificationPoint = clarificationPoint,
-                    targetRoleId = targetRoleId
+                    approvalId = approvalId
                 };
                 bool? approved = await _service.ApproveRequestAsync(vm);
                 if (approved == true)
                 {
-                    await _emailService.SendEmailAsync(cijId, action, targetRoleId, null);
+                    await _emailService.SendEmailAsync(cijId, action, approvalId, null);
                     TempData["ToastMessage"] = "Clarification Query submitted successfully.";
                     TempData["ToastType"] = "success";
                 }

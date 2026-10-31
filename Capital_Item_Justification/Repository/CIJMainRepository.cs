@@ -670,17 +670,17 @@ namespace Capital_Item_Justification.Repository
      
             return nextApproverEmails;
         }
-        public async Task<List<EmailViewModel>?> GetQueryEmail(int cijId, string targetRoleId)
+        public async Task<List<EmailViewModel>?> GetQueryEmail(int cijId, int? approvalId)
         {
             var nextApproverEmails = await _context.Set<EmailViewModel>().FromSqlInterpolated($@"
                                 EXEC dbo.SP_GetQueryEmail
                                     @CijId = {cijId},
-                                    @RoleId = {targetRoleId}")
+                                    @ApprovalId = {approvalId}")
                             .AsNoTracking().ToListAsync();
 
             return nextApproverEmails;
         }
-        public async Task<List<EmailViewModel>?> GetAnsweredEmail(int cijId, int clarificationId)
+        public async Task<List<EmailViewModel>?> GetAnsweredEmail(int cijId, int? clarificationId)
         {
             var nextApproverEmails = await _context.Set<EmailViewModel>().FromSqlInterpolated($@"
                                 EXEC dbo.SP_GetAnsweredEmail

@@ -10,15 +10,16 @@
         @if (Model.workflowHistory != null && Model.workflowHistory.Any())
         {
             <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
+                <table class="table table-bordered table-hover align-middle approval-history-table">
 
                     <thead class="table-light">
                         <tr>
                             <th>Approved Date</th>
                             <th>Approved By</th>
                             <th>Role</th>
+                            <th>Department</th>
                             <th>Status</th>
-                            <th>Remarks</th>
+                            <th class="remarks-column">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -27,13 +28,16 @@
                         {
                             <tr>
                                 <td>
-                                    @history.ActionDate?.ToString("dd-MMM-yyyy HH:mm")
+                                    @history.ActionDate.ToString("dd-MMM-yyyy")
                                 </td>
                                 <td>
                                     @history.UserName
                                 </td>
                                 <td>
                                     @history.RoleName
+                                </td>
+                                <td>
+                                    @history.Departmentname
                                 </td>
                                 <td>
                                     @if (history.StatusName == "Submitted")
@@ -61,7 +65,7 @@
                                         </span>
                                     }
                                 </td>
-                                <td>
+                                <td class="remarks-column">
                                     @history.Remark
                                 </td>
                             </tr>
@@ -79,3 +83,21 @@
 
     </div>
 </div>
+<style>
+    .approval-history-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+        .approval-history-table th,
+        .approval-history-table td {
+            vertical-align: top;
+            white-space: normal;
+        }
+
+            .approval-history-table th.remarks-column,
+            .approval-history-table td.remarks-column {
+                width: 30%;
+                overflow-wrap: anywhere;
+            }
+</style>

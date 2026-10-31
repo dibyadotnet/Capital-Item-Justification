@@ -2,7 +2,7 @@
 {
     public interface IEmailService
     {
-        Task SendEmailAsync(int cijId, string action, string? targetRoleId, int? clarificationId);
+        Task SendEmailAsync(int cijId, string action, int? approvalId, int? clarificationId);
         Task SendUserCreationEmailAsync(string userName, string email);
         Task SendPasswordResetEmailAsync(string email, string resetLink);
     }

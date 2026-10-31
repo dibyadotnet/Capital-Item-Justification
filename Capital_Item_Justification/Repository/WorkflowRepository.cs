@@ -5,6 +5,7 @@ using Capital_Item_Justification.Repository.Interfaces;
 using Capital_Item_Justification.ViewModels;
 using Humanizer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Elfie.Model.Tree;
 using Microsoft.Data.SqlClient;
@@ -143,7 +144,7 @@ namespace Capital_Item_Justification.Repository
                     workflowId = 2;
                     workflowCode = "WF002";
                 }
-               
+
                 //------
                 var firstStep = await _context.CijWorkflowSteps.Where(x => x.IsActive && x.WorkflowId == workflowId).OrderBy(x => x.StepNo).FirstOrDefaultAsync();
                 if (firstStep == null)
@@ -336,7 +337,7 @@ namespace Capital_Item_Justification.Repository
                     CanReject = approvalDetail.CanReject,
                     CanQuery = approvalDetail.CanQuery,
                     CIJNumber = approvalDetail.CIJSNumber,
-                    ItemTypeName= approvalDetail.ItemTypeName
+                    ItemTypeName = approvalDetail.ItemTypeName
                 };
             }
             return vm;
@@ -704,18 +705,18 @@ namespace Capital_Item_Justification.Repository
                 //                           && x.StatusId == approvedStatusId && x.ApproverRole == "Director SC")
                 //                          .OrderByDescending(x => x.ApprovalId).FirstOrDefaultAsync();
                 //}
-                RoleViewModel? targetRole = new();
-                if (!string.IsNullOrWhiteSpace(vm.targetRoleId))
-                {
-                    targetRole = await _context.Roles.Where(a => a.Id == vm.targetRoleId).Select(x => new RoleViewModel()
-                    {
-                        Id = x.Id,
-                        RoleName = x.Name
-                    }).FirstOrDefaultAsync();
-                }
+                //RoleViewModel? targetRole = new();
+                //if (!string.IsNullOrWhiteSpace(vm.targetRoleId))
+                //{
+                //    targetRole = await _context.Roles.Where(a => a.Id == vm.targetRoleId).Select(x => new RoleViewModel()
+                //    {
+                //        Id = x.Id,
+                //        RoleName = x.Name
+                //    }).FirstOrDefaultAsync();
+                //}
 
-                if (targetRole == null)
-                    throw new InvalidOperationException("Target approval not found.");
+                //if (targetRole == null)
+                //    throw new InvalidOperationException("Target approval not found.");
 
                 bool hasRequiredRole = vm.userRoles.Any(x => x.Equals(currentApproval.ApproverRole, StringComparison.OrdinalIgnoreCase));
                 if (!hasRequiredRole)
@@ -732,8 +733,7 @@ namespace Capital_Item_Justification.Repository
                 //}
 
                 var tragetapproval = await _context.CijWorkflowApprovals.FirstOrDefaultAsync(x =>
-                            x.Cijid == vm.cijId && x.StatusId == approvedStatusId
-                            && x.ApproverRoleId == targetRole.Id);
+                            x.Cijid == vm.cijId && x.StatusId == approvedStatusId && x.ApprovalId == vm.approvalId);
 
                 var clarification = new CijWorkflowClarification
                 {
@@ -743,8 +743,8 @@ namespace Capital_Item_Justification.Repository
                     StepId = currentApproval.StepId ?? 0,
                     RaisedBy = vm.userId,
                     RaisedByRole = currentApproval.ApproverRoleId,
-                    TargetRoleId = targetRole.Id,
-                    TargetRoleName = targetRole.RoleName,
+                    TargetRoleId = tragetapproval?.ApproverRoleId, //targetRole.Id,
+                    TargetRoleName = tragetapproval?.ApproverRole,
                     ClarificationPoint = vm.ClarificationPoint,
                     RaisedOn = DateTime.Now,
                     StatusId = queryStatusId,
@@ -1912,16 +1912,24 @@ namespace Capital_Item_Justification.Repository
         }
         public async Task<List<RoleViewModel>> GetRoleToSendQueryAsync(int approvalId, int cijId)
         {
-            var approvedStatusId = await _context.CijStatuses.Where(x => x.StatusName == "Approved").Select(x => x.StatusId).FirstOrDefaultAsync();
-            var approvedRoles = await (from a in _context.CijWorkflowApprovals
-                                       join b in _context.Roles on a.ApproverRoleId equals b.Id
-                                       where a.Cijid == cijId && a.StatusId == approvedStatusId
-                                       select new RoleViewModel()
-                                       {
-                                           Id = b.Id,
-                                           RoleName = b.Name
-                                       }).Distinct().ToListAsync();
+            var approvedStatusId = await _context.CijStatuses
+                .Where(x => x.StatusName == "Approved")
+                .Select(x => x.StatusId)
+                .FirstOrDefaultAsync();
 
+            var approvedRoles = await (
+                from a in _context.CijWorkflowApprovals
+                join b in _context.Roles on a.ApproverRoleId equals b.Id
+                join d in _context.CijDepartments
+                    on a.DepartmentId equals d.DepartmentId into departmentGroup
+                from d in departmentGroup.DefaultIfEmpty()
+                where a.Cijid == cijId && a.StatusId == approvedStatusId
+                select new RoleViewModel
+                {
+                    ApprovalId =(int)a.ApprovalId,
+                    RoleName = d == null ? b.Name : $"{b.Name} - {d.DepartmentName}"
+                })
+                .Distinct().ToListAsync();
 
             return approvedRoles;
         }

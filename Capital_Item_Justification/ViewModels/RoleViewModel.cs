@@ -9,5 +9,7 @@ namespace Capital_Item_Justification.ViewModels
         [Required]
         [Display(Name = "Role Name")]
         public string RoleName { get; set; } = string.Empty;
+
+        public int ApprovalId { get; set; }
     }
 }

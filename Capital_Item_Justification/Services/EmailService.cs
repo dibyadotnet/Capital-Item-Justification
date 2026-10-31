@@ -23,7 +23,7 @@ namespace Capital_Item_Justification.Services
             _logger = logger;
         }
 
-        public async Task SendEmailAsync(int cijId, string action,string targetRoleId,int? clarificationId)
+        public async Task SendEmailAsync(int cijId, string action,int? approvalId,int? clarificationId)
         {
             CIJMainViewModel? cijRequest = new();
             try
@@ -52,13 +52,13 @@ namespace Capital_Item_Justification.Services
                     case "Query":
                         emailAction = "Query";
                         subject = $"CIJ {cijRequest.CIJRequest.CIJSNumber} - {emailAction}";
-                        emails = await _cijMainRepository.GetQueryEmail(cijId, targetRoleId);
+                        emails = await _cijMainRepository.GetQueryEmail(cijId, approvalId);
                         break;
 
                     case "Answer":
                         emailAction = "Answered";
                         subject = $"CIJ {cijRequest.CIJRequest.CIJSNumber} - {emailAction}";
-                        emails = await _cijMainRepository.GetAnsweredEmail(cijId, clarificationId??0);
+                        emails = await _cijMainRepository.GetAnsweredEmail(cijId, clarificationId);
                         break;
 
                     case "Rejected":

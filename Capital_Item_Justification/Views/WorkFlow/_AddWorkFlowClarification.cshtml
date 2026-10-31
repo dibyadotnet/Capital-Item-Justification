@@ -29,10 +29,10 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">
-                                Target Role
+                                Assign Query To
                                 <span class="text-danger">*</span>
                             </label>
-                            <select id="targetRoleId" name="targetRoleId" asp-items="Model.TargetRoles" class="form-select" required>
+                            <select id="approvalId" name="approvalId" asp-items="Model.TargetRoles" class="form-select" required>
                                 <option value="">-- Select Role --</option>
                             </select>
                         </div>
@@ -44,9 +44,8 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <button type="submit" value="Query" class="btn btn-warning">
-                        <i class="bi bi-send me-1"></i>
-                        Send Query
+                    <button type="submit" value="Query" class="btn btn-success">
+                        Submit Query
                     </button>
                 </div>
             </form>
