@@ -1,91 +1,200 @@
 ﻿@model Capital_Item_Justification.ViewModels.ApprovalDetailViewModel
 
 <!-- Clarification History -->
-<div class="card card-warning card-outline mb-3">
+<div class="card card-primary card-outline mb-3">
 
     <div class="card-header">
         <h3 class="card-title">
-            <i class="bi bi-question-circle me-2"></i>
+            <i class="bi bi-clock-history me-2"></i>
             Clarification History
         </h3>
     </div>
+
     <div class="card-body">
-        @if (Model.Clarifications != null && Model.Clarifications.Any())
+
+        @if (Model?.Clarifications != null && Model.Clarifications.Any())
         {
-            @foreach (var clarification in Model.Clarifications)
-            {
-                <div class="border rounded p-3 mb-3">
-                    <div class="mb-2">
-                        <strong>Raised By:</strong>
-                        <span class="ms-1">@clarification.RaisedByRole</span>
-                    </div>
-                    <div class="mb-3">
-                        <strong>Assigned Date:</strong>
-                        <span class="ms-1 text-muted">
-                            @clarification.RaisedOn.ToString("dd-MMM-yyyy HH:mm")
-                        </span>
-                    </div>
-                    <div class="mb-2">
-                        <strong>Query:</strong>
-                        <span class="ms-1">@clarification.ClarificationPoint</span>
-                    </div>
-                    <!-- Answer -->
-                    @if (!string.IsNullOrWhiteSpace(clarification.Answer))
-                    {
-                        @if (clarification.AnsweredOn.HasValue)
-                        {
-                            <div class="mb-2">
-                                <strong> Answered Date:</strong>
-                                @clarification.AnsweredOn.Value.ToString("dd-MMM-yyyy HH:mm")
+            <div class="clarification-list">
+
+                @foreach (var item in Model.Clarifications)
+                {
+                    <div class="clarification-item">
+
+                        <!-- Query Details -->
+                        <div class="clarification-section query-section">
+
+                            <div class="section-heading">
+                                <i class="bi bi-chat-square-text me-2"></i>
+                                Query Details
                             </div>
-                        }
-                        <div class="mb-2">
-                            <strong>Answer:</strong>
-                            <span class="ms-1">@clarification.Answer</span>
+
+                            <div class="clarification-info">
+
+                                <div class="info-item">
+                                    <span class="info-label">Raised Date</span>
+                                    <span class="info-value">
+                                        @item.RaisedOn.ToString("dd-MMM-yyyy")
+                                    </span>
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="info-label">Raised By</span>
+                                    <span class="info-value">
+                                        @(string.IsNullOrWhiteSpace(item.RaisedBy) ? "-" : item.RaisedBy)
+                                    </span>
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="info-label">Role</span>
+                                    <span class="info-value">
+                                        @(string.IsNullOrWhiteSpace(item.RaisedByRole) ? "-" : item.RaisedByRole)
+                                    </span>
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="info-label">Department</span>
+                                    <span class="info-value">
+                                        @(string.IsNullOrWhiteSpace(item.RaisedDepartment) ? "-" : item.RaisedDepartment)
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            <div class="detail-label">Query</div>
+
+                            <div class="message-box">
+                                @(string.IsNullOrWhiteSpace(item.ClarificationPoint)
+                                    ? "-"
+                                    : item.ClarificationPoint)
+                            </div>
+
                         </div>
-                    }
-                    else
-                    {
-                        <!-- HOD Answer -->
-                        @if (Model.CanAnswerClarification && clarification.StatusName == "Query")
-                        {
-                            <form asp-action="AnswerClarification" asp-controller="WorkFlow" method="post">
 
-                                @Html.AntiForgeryToken()
+                        <!-- Answer Details -->
+                        <div class="clarification-section answer-section">
 
-                                <input type="hidden"
-                                       name="cijId"
-                                       value="@Model.Cijid" />
+                            <div class="section-heading">
+                                <i class="bi bi-chat-left-text me-2"></i>
+                                Answer Details
+                            </div>
 
-                                <input type="hidden"
-                                       name="clarificationId"
-                                       value="@clarification.ClarificationId" />
+                            @if (!string.IsNullOrWhiteSpace(item.Answer))
+                            {
+                                <!-- Answer already submitted -->
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">
-                                        Answer
-                                    </label>
+                                <div class="clarification-info">
 
-                                    <textarea name="answer" class="form-control custom-textarea"
-                                              rows="3"
-                                              required
-                                              placeholder="Enter your answer..."></textarea>
+                                    <div class="info-item">
+                                        <span class="info-label">Answered Date</span>
+                                        <span class="info-value">
+                                            @(item.AnsweredOn.HasValue
+                                                ? item.AnsweredOn.Value.ToString("dd-MMM-yyyy")
+                                                : "-")
+                                        </span>
+                                    </div>
+
+                                    <div class="info-item">
+                                        <span class="info-label">Answered By</span>
+                                        <span class="info-value">
+                                            @(string.IsNullOrWhiteSpace(item.AnsweredBy)
+                                                ? "-"
+                                                : item.AnsweredBy)
+                                        </span>
+                                    </div>
+
+                                    <div class="info-item">
+                                        <span class="info-label">Role</span>
+                                        <span class="info-value">
+                                            @(string.IsNullOrWhiteSpace(item.AnsweredByRole)
+                                                ? "-"
+                                                : item.AnsweredByRole)
+                                        </span>
+                                    </div>
+
+                                    <div class="info-item">
+                                        <span class="info-label">Department</span>
+                                        <span class="info-value">
+                                            @(string.IsNullOrWhiteSpace(item.AnsweredDepartment)
+                                                ? "-"
+                                                : item.AnsweredDepartment)
+                                        </span>
+                                    </div>
+
                                 </div>
 
-                                <div class="text-end">
-                                    <a asp-action="MyApproval" class="btn btn-secondary">
-                                        <i class="bi bi-x-circle me-1"></i>
-                                        Cancel
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        Submit Answer
-                                    </button>
+                                <div class="detail-label">Answer</div>
+
+                                <div class="message-box">
+                                    @item.Answer
                                 </div>
-                            </form>
-                        }
-                    }
-                </div>
-            }
+                            }
+                            else
+                            {
+                                <!-- Answer pending -->
+                                @if (Model.CanAnswerClarification && item.StatusName == "Query")
+                                {
+                                    <form asp-action="AnswerClarification"
+                                          asp-controller="WorkFlow"
+                                          method="post">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="cijId"
+                                               value="@Model.Cijid" />
+
+                                        <input type="hidden"
+                                               name="clarificationId"
+                                               value="@item.ClarificationId" />
+
+                                        <div class="mb-3">
+
+                                            <label class="form-label fw-bold">
+                                                Your Answer
+                                            </label>
+
+                                            <textarea name="answer"
+                                                      class="form-control custom-textarea"
+                                                      rows="3"
+                                                      required
+                                                      placeholder="Enter your answer..."></textarea>
+
+                                        </div>
+
+                                        <div class="text-end">
+
+                                            <a asp-action="MyApproval"
+                                               class="btn btn-secondary">
+                                                <i class="bi bi-x-circle me-1"></i>
+                                                Cancel
+                                            </a>
+
+                                            <button type="submit"
+                                                    class="btn btn-primary">
+                                                <i class="bi bi-send me-1"></i>
+                                                Submit Answer
+                                            </button>
+
+                                        </div>
+
+                                    </form>
+                                }
+                                else
+                                {
+                                    <div class="message-box">
+                                        <span class="text-muted">
+                                            Awaiting response.
+                                        </span>
+                                    </div>
+                                }
+                            }
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
         }
         else
         {
@@ -97,3 +206,110 @@
 
     </div>
 </div>
+
+<style type="text/css">
+    .clarification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .clarification-item {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .clarification-section {
+        padding: 16px;
+    }
+
+    .query-section {
+        background: #f1f6ff;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .answer-section {
+        background: #fff;
+    }
+
+    .section-heading {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #0d6efd;
+    }
+
+    .answer-section .section-heading {
+        color: #198754;
+    }
+
+    /* Metadata layout */
+    .clarification-info {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .info-item {
+        min-width: 0;
+    }
+
+    .info-label {
+        font-weight: 500;
+    }
+
+    .info-value {
+        display: block;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+
+    .detail-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 7px;
+    }
+
+    /* Query and answer content */
+    .message-box {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 12px;
+        background: #fff;
+        color: #343a40;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+        min-height: 50px;
+    }
+
+    .answer-section .message-box {
+        background: #f8f9fa;
+    }
+
+    .answer-status {
+        margin-top: 12px;
+        text-align: right;
+    }
+
+    .approval-history-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+        .approval-history-table th,
+        .approval-history-table td {
+            vertical-align: top;
+            white-space: normal;
+        }
+
+            .approval-history-table th.remarks-column,
+            .approval-history-table td.remarks-column {
+                width: 30%;
+                overflow-wrap: anywhere;
+            }
+</style>
+

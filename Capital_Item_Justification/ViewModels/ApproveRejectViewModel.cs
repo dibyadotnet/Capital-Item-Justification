@@ -16,5 +16,6 @@
         public string? Answer { get; set; }
         public string? targetRoleId { get; set; }
         public List<IFormFile>? PurchaseAttachments { get; set; }
+        public int approvalId { get; set; }
     }
 }

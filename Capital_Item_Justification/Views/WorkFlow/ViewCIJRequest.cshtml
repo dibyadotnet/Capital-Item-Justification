@@ -91,8 +91,8 @@
                             </div>
                             <div class="col-sm-7">
                                 : ₹@(Model.CIJRequest.TotalEquipmentCost.HasValue
-                                   ? Model.CIJRequest.TotalEquipmentCost.Value.ToString("N0")
-                                   : "0")
+                                 ? Model.CIJRequest.TotalEquipmentCost.Value.ToString("N0")
+                                 : "0")
                             </div>
                         </div>
                         <div class="row">
@@ -393,17 +393,17 @@
                         </div>
                     }
                     @* @if (Model.CIJRequest.ItemTypeName == "Medical")
-                    {
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">
-                                Equipment Committee Comments
-                            </label>
-                            <div class="border rounded p-2 bg-light"
-                                 style="min-height:70px;">
-                                @(string.IsNullOrWhiteSpace(Model.committeeCommentViewModel?.Comments) ? "-" : Model.committeeCommentViewModel.Comments)
-                            </div>
-                        </div>
-                    } *@
+                {
+                <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">
+                Equipment Committee Comments
+                </label>
+                <div class="border rounded p-2 bg-light"
+                style="min-height:70px;">
+                @(string.IsNullOrWhiteSpace(Model.committeeCommentViewModel?.Comments) ? "-" : Model.committeeCommentViewModel.Comments)
+                </div>
+                </div>
+                } *@
                 </div>
             }
         </div>
@@ -467,6 +467,7 @@
 
         </div>
     </div>
+    <!-- Clarification History -->
     <div class="card card-primary card-outline mb-3">
         <div class="card-header">
             <h3 class="card-title">
@@ -474,77 +475,141 @@
                 Clarification History
             </h3>
         </div>
+
         <div class="card-body">
-            @if (Model.Clarifications != null && Model.Clarifications.Any())
+            @if (Model?.Clarifications != null && Model.Clarifications.Any())
             {
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Raised By</th>
-                                <th>Role</th>
-                                <th>Query</th>
-                                <th>Answered By</th>
-                                <th>Answer</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
+                <div class="clarification-list">
+                    @foreach (var item in Model.Clarifications)
+                    {
+                        <div class="clarification-item">
 
-                        <tbody>
-                            @foreach (var clarification in Model.Clarifications)
-                            {
-                                <tr>
-                                    <td>
-                                        @clarification.RaisedOn.ToString("dd-MMM-yyyy")
-                                    </td>
+                            <!-- Query Details -->
+                            <div class="clarification-section query-section">
+                                <div class="section-heading">
+                                    <i class="bi bi-chat-square-text me-2"></i>
+                                    Query Details
+                                </div>
 
-                                    <td>
-                                        @clarification.RaisedBy
-                                    </td>
+                                <div class="clarification-info">
+                                    <div class="info-item">
+                                        <span class="info-label">Raised Date</span>
+                                        <span class="info-value">
+                                            @item.RaisedOn.ToString("dd-MMM-yyyy")
+                                        </span>
+                                    </div>
 
-                                    <td>
-                                        @clarification.RaisedByRole
-                                    </td>
+                                    <div class="info-item">
+                                        <span class="info-label">Raised By</span>
+                                        <span class="info-value">
+                                            @(string.IsNullOrWhiteSpace(item.RaisedBy)
+                                                ? "-"
+                                                : item.RaisedBy)
+                                        </span>
+                                    </div>
 
-                                    <td>
-                                        @clarification.ClarificationPoint
-                                    </td>
+                                    <div class="info-item">
+                                        <span class="info-label">Role</span>
+                                        <span class="info-value">
+                                            @(string.IsNullOrWhiteSpace(item.RaisedByRole)
+                                                ? "-"
+                                                : item.RaisedByRole)
+                                        </span>
+                                    </div>
 
-                                    <td>
-                                        @(string.IsNullOrEmpty(clarification.AnsweredBy)
-                                            ? "-"
-                                            : clarification.AnsweredBy)
-                                    </td>
+                                    <div class="info-item">
+                                        <span class="info-label">Department</span>
+                                        <span class="info-value">
+                                            @(string.IsNullOrWhiteSpace(item.RaisedDepartment)
+                                                ? "-"
+                                                : item.RaisedDepartment)
+                                        </span>
+                                    </div>
+                                </div>
 
-                                    <td>
-                                        @(string.IsNullOrEmpty(clarification.Answer) ? "-" : clarification.Answer)
-                                    </td>
+                                <div class="detail-label">Query</div>
+                                <div class="message-box">
+                                    @(string.IsNullOrWhiteSpace(item.ClarificationPoint)
+                                        ? "-"
+                                        : item.ClarificationPoint)
+                                </div>
+                            </div>
 
-                                    <td>
-                                        @if (clarification.StatusName == "Answered")
-                                        {
-                                            <span class="badge bg-success">
-                                                Answered
+                            <!-- Answer Details -->
+                            <div class="clarification-section answer-section">
+                                <div class="section-heading">
+                                    <i class="bi bi-chat-left-text me-2"></i>
+                                    Answer Details
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(item.Answer))
+                                {
+                                    <div class="clarification-info">
+                                        <div class="info-item">
+                                            <span class="info-label">Answered Date</span>
+                                            <span class="info-value">
+                                                @* Replace with your actual answer date property *@
+                                                @(
+                                            item.AnsweredOn.HasValue
+                                        ? item.AnsweredOn.Value.ToString("dd-MMM-yyyy")
+                                        : "-"
+                                            )
                                             </span>
-                                        }
-                                        else if (clarification.StatusName == "Pending")
-                                        {
-                                            <span class="badge bg-warning text-dark">
-                                                Pending
+                                        </div>
+
+                                        <div class="info-item">
+                                            <span class="info-label">Answered By</span>
+                                            <span class="info-value">
+                                                @(
+                                            string.IsNullOrWhiteSpace(item.AnsweredBy)
+                                        ? "-"
+                                        : item.AnsweredBy
+                                            )
                                             </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">
-                                                @clarification.StatusName
+                                        </div>
+
+                                        <div class="info-item">
+                                            <span class="info-label">Role</span>
+                                            <span class="info-value">
+                                                @(
+                                            string.IsNullOrWhiteSpace(item.AnsweredByRole)
+                                        ? "-"
+                                        : item.AnsweredByRole
+                                            )
                                             </span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                                        </div>
+
+                                        <div class="info-item">
+                                            <span class="info-label">Department</span>
+                                            <span class="info-value">
+                                                @(
+                                            string.IsNullOrWhiteSpace(item.AnsweredDepartment)
+                                        ? "-"
+                                        : item.AnsweredDepartment
+                                            )
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-label">Answer</div>
+                                    <div class="message-box">
+                                        @(
+                                    string.IsNullOrWhiteSpace(item.Answer)
+                                        ? "Awaiting response."
+                                        : item.Answer
+                                    )
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="message-box">
+                                        <span class="text-muted">
+                                            Awaiting response.
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+                    }
                 </div>
             }
             else
@@ -567,14 +632,15 @@
             @if (Model.workflowHistory != null && Model.workflowHistory.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle">
+                    <table class="table table-bordered table-hover align-middle approval-history-table">
                         <thead class="table-light">
                             <tr>
                                 <th>Approved Date</th>
                                 <th>Approved By</th>
                                 <th>Role</th>
+                                <th>Department</th>
                                 <th>Status</th>
-                                <th>Remarks</th>
+                                <th class="remarks-column">Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -582,13 +648,16 @@
                             {
                                 <tr>
                                     <td>
-                                        @history.ActionDate
+                                        @history.ActionDate.ToString("dd-MMM-yyyy")
                                     </td>
                                     <td>
                                         @history.UserName
                                     </td>
                                     <td>
                                         @history.RoleName
+                                    </td>
+                                    <td>
+                                        @history.Departmentname
                                     </td>
                                     <td>
                                         @if (history.StatusName == "Submitted")
@@ -616,7 +685,7 @@
                                             </span>
                                         }
                                     </td>
-                                    <td>
+                                    <td class="remarks-column">
                                         @history.Remark
                                     </td>
                                 </tr>
@@ -644,3 +713,109 @@
         </div>
     </div>
 </div>
+
+<style type="text/css">
+.clarification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.clarification-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.clarification-section {
+    padding: 16px;
+}
+
+.query-section {
+    background: #f1f6ff;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.answer-section {
+    background: #fff;
+}
+
+.section-heading {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #0d6efd;
+}
+
+.answer-section .section-heading {
+    color: #198754;
+}
+
+/* Metadata layout */
+.clarification-info {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.info-item {
+    min-width: 0;
+}
+
+.info-label {
+    font-weight: 500;
+}
+
+.info-value {
+    display: block;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.detail-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 7px;
+}
+
+/* Query and answer content */
+.message-box {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px;
+    background: #fff;
+    color: #343a40;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    min-height: 50px;
+}
+
+.answer-section .message-box {
+    background: #f8f9fa;
+}
+
+.answer-status {
+    margin-top: 12px;
+    text-align: right;
+}
+
+.approval-history-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.approval-history-table th,
+.approval-history-table td {
+    vertical-align: top;
+    white-space: normal;
+}
+
+.approval-history-table th.remarks-column,
+.approval-history-table td.remarks-column {
+    width: 30%;
+    overflow-wrap: anywhere;
+}
+</style>

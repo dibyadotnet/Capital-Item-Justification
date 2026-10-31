@@ -805,7 +805,7 @@ namespace Capital_Item_Justification.Services
 
             string[] values =
             {
-        item.ActionDate?.ToString("dd-MMM-yyyy hh:mm") ?? "",
+        item.ActionDate.ToString("dd-MMM-yyyy") ?? "",
         item.UserName,
         item.RoleName,
         item.Remark,
