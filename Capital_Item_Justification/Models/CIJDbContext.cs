@@ -74,6 +74,8 @@ public partial class CIJDbContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<RequestTrackingViewModel>().HasNoKey();
         modelBuilder.Entity<TotalCountDashboardViewModel>().HasNoKey().ToView(null);
         modelBuilder.Entity<EmailViewModel>().HasNoKey();
+        modelBuilder.Entity<UpcomingRequestsViewModel>().HasNoKey();
+        
 
         modelBuilder.Entity<CijUserRoleAssignment>(entity =>
         {

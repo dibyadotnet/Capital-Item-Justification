@@ -1934,10 +1934,10 @@ namespace Capital_Item_Justification.Repository
             return approvedRoles;
         }
 
-        public async Task<List<MyApprovalViewModel>> GetOtherRoleRequestsAsync()
+        public async Task<List<UpcomingRequestsViewModel>> GetOtherRoleRequestsAsync()
         {
 
-            var result = await _context.Set<MyApprovalViewModel>()
+            var result = await _context.Set<UpcomingRequestsViewModel>()
                 .FromSqlRaw(
                     "EXEC dbo.SP_GetOtherRoleRequests").AsNoTracking().ToListAsync();
 

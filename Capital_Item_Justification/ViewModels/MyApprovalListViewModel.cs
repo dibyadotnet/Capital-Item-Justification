@@ -4,5 +4,6 @@
     {
         public List<MyApprovalViewModel> myApprovalViewModels { get; set; } = new();
         public PaginationViewModel Pagination { get; set; } = new();
+        public List<UpcomingRequestsViewModel> upcomingRequestsViewModels { get; set; } = new();
     }
 }
