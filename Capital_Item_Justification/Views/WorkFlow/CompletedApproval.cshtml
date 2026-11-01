@@ -9,7 +9,7 @@
 
         <div class="card-header">
             <strong class="bi bi-check2-square me-2">
-                Completed Approval
+                Completed Requests
             </strong>
         </div>
         <div class="px-3 pt-3">
@@ -122,9 +122,9 @@
                         <tr>
                             <th>CIJ Number</th>
                             <th>Request Date</th>
+                            <th>Request Department</th>
+                            <th>Request Location</th>
                             <th>Completion Date</th>
-                            <th>Department</th>
-                            <th>Location</th>
                             <th>Status</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -149,9 +149,6 @@
                                         @item.RequestDate?.ToString("dd-MMM-yyyy")
                                     </td>
                                     <td>
-                                        @item.CompletionDate?.ToString("dd-MMM-yyyy")
-                                    </td>
-                                    <td>
                                         @if (!string.IsNullOrEmpty(item.DepartmentName))
                                         {
                                             @item.DepartmentName
@@ -171,7 +168,9 @@
                                             <span class="text-muted">N/A</span>
                                         }
                                     </td>
-
+                                    <td>
+                                        @item.CompletionDate?.ToString("dd-MMM-yyyy")
+                                    </td>
                                     <td>
 
                                         <span class="badge bg-primary text-dark">

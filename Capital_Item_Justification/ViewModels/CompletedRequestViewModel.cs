@@ -13,5 +13,6 @@
         public int? LocationId { get; set; }
         public string? LocationName { get; set; }
         public DateTime? RequestDate { get; set; }
+        public string? CreatedBy { get; set; }
     }
 }

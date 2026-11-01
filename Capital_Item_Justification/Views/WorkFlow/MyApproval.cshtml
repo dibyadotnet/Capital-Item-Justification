@@ -130,10 +130,10 @@
                         <tr>
                             <th>CIJ Number</th>
                             <th>Request Date</th>
-                            <th>Approver Role</th>
+                            <th>Request Department</th>
+                            <th>Request Location</th>
+                            <th>Pending With</th>
                             <th>Assigned Date</th>
-                            <th>Department</th>
-                            <th>Location</th>
                             <th>Status</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -157,13 +157,6 @@
                                     <td>
                                         @item.RequestDate?.ToString("dd-MMM-yyyy")
                                     </td>
-
-                                    <td>
-                                        @item.ApproverRole
-                                    </td>
-                                    <td>
-                                        @item.AssignedDate?.ToString("dd-MMM-yyyy")
-                                    </td>
                                     <td>
                                         @if (!string.IsNullOrEmpty(item.DepartmentName))
                                         {
@@ -185,6 +178,13 @@
                                         }
                                     </td>
 
+                                    <td>
+                                        @item.ApproverRole
+                                    </td>
+                                    <td>
+                                        @item.AssignedDate?.ToString("dd-MMM-yyyy")
+                                    </td>
+                                    
                                     <td>
                                         @if (item.StatusName == "Pending")
                                         {

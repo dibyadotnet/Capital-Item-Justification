@@ -128,7 +128,7 @@
                            class="nav-link">
                             <i class="nav-icon bi bi-check2-all"></i>
                             <p>
-                                Completed Approval
+                                Completed Requests
                             </p>
                         </a>
                     </li>
@@ -177,7 +177,18 @@
                                    class="nav-link @(isTrackRequestActive ? "active" : "")">
                                     <i class="nav-icon bi bi-search"></i>
                                     <p>
-                                        Request Tracking
+                                        Track My Requests
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a asp-controller="WorkFlow"
+                                   asp-action="CompletedApproval"
+                                   class="nav-link">
+                                    <i class="nav-icon bi bi-check2-all"></i>
+                                    <p>
+                                        Completed Requests
                                     </p>
                                 </a>
                             </li>

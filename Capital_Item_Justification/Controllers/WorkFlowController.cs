@@ -158,7 +158,10 @@ namespace Capital_Item_Justification.Controllers
                   .SqlQueryRaw<CompletedRequestViewModel>(
                       "EXEC dbo.SP_GetCompletedRequests").ToListAsync();
 
-                vm = vm.Where(a => a.StatusName == "Completed").ToList();
+                if (workingRoleName == "Requester")
+                {
+                    vm = vm.Where(a => a.CreatedBy == user.Id).ToList();
+                }
                 ViewBag.Page = "Completed";
 
                 var departmentsList = await _cijService.GetDepartment();
@@ -553,7 +556,7 @@ namespace Capital_Item_Justification.Controllers
         [HttpGet]
         public async Task<IActionResult> OtherRoleRequests(int? departmentId, int? locationId, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
-            List<MyApprovalViewModel> vm = new();
+            List<UpcomingRequestsViewModel> vm = new();
             MyApprovalListViewModel model = new MyApprovalListViewModel();
             try
             {
@@ -606,7 +609,7 @@ namespace Capital_Item_Justification.Controllers
                 var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
                 model = new MyApprovalListViewModel
                 {
-                    myApprovalViewModels = otherRequests,
+                    upcomingRequestsViewModels = otherRequests,
                     Pagination = new PaginationViewModel
                     {
                         CurrentPage = page,

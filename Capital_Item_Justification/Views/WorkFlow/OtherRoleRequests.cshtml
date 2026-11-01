@@ -6,7 +6,7 @@
 
         <div class="card-header">
             <strong class="bi bi-people me-2">
-                @ViewBag.Page Approval
+                Upcoming Requests
             </strong>
         </div>
 
@@ -119,10 +119,10 @@
                         <tr>
                             <th>CIJ Number</th>
                             <th>Request Date</th>
-                            <th>Approver Role</th>
+                            <th>Request Details</th>
+                            <th>Pending With</th>
+                            <th>Pending Details</th>
                             <th>Assigned Date</th>
-                            <th>Department</th>
-                            <th>Location</th>
                             <th>Status</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -130,11 +130,11 @@
 
                     <tbody>
 
-                        @if (Model != null && Model.myApprovalViewModels.Any())
+                        @if (Model != null && Model.upcomingRequestsViewModels.Any())
                         {
                             var index = 1;
 
-                            foreach (var item in Model.myApprovalViewModels)
+                            foreach (var item in Model.upcomingRequestsViewModels)
                             {
                                 <tr>
 
@@ -147,12 +147,24 @@
                                         @item.RequestDate?.ToString("dd-MMM-yyyy")
                                     </td>
                                     <td>
+                                        @(item.RequestDepartmentName ?? "N/A")
+                                        <small class="d-block text-muted">
+                                            @(item.RequestLocationName ?? "N/A")
+                                        </small>
+                                    </td>
+                                    <td>
                                         @item.ApproverRole
+                                    </td>
+                                    <td>
+                                        @(item.DepartmentName ?? "N/A")
+                                        <small class="d-block text-muted">
+                                            @(item.LocationName ?? "N/A")
+                                        </small>
                                     </td>
                                     <td>
                                         @item.AssignedDate?.ToString("dd-MMM-yyyy")
                                     </td>
-                                    <td>
+                                   @*  <td>
                                         @if (!string.IsNullOrEmpty(item.DepartmentName))
                                         {
                                             @item.DepartmentName
@@ -171,7 +183,7 @@
                                         {
                                             <span class="text-muted">N/A</span>
                                         }
-                                    </td>
+                                    </td> *@
 
                                     <td>
                                         @if (item.StatusName == "Pending")
