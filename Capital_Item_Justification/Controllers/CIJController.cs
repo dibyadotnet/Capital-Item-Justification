@@ -61,40 +61,15 @@ namespace Capital_Item_Justification.Controllers
                 }
                 var roles = await _userManager.GetRolesAsync(user);
                 ViewBag.Roles = roles;
-                if (string.IsNullOrEmpty(workingRoleName) || string.IsNullOrEmpty(assignmentId))
+                List<string> roleIds = new();
+                if (string.IsNullOrEmpty(workingRoleId) || string.IsNullOrEmpty(assignmentId))
                 {
                     return RedirectToAction("SelectRole", "Account");
                 }
-                //if (User.IsInRole("Requester"))
-                if (workingRoleName == "Requester")
-                {
-                    totalVM = await _service.GetDashboardRequestsCount(user.Id);
-                }
-                else
-                {
-                    List<string> roleIds = new();
-                    //foreach (var roleName in roles)
-                    //{
-                    //    var role = await _roleManager.FindByNameAsync(roleName);
-
-                    //    if (role != null)
-                    //    {
-                    //        roleIds.Add(role.Id);
-                    //    }
-                    //}
-                    if (string.IsNullOrEmpty(workingRoleId) || string.IsNullOrEmpty(assignmentId))
-                    {
-                        return RedirectToAction("SelectRole", "Account");
-                    }
-                    roleIds = new() { workingRoleId };
-                    user.DepartmentId = workingDepartmentId ?? 0;
-                    user.LocationId = workingLocationId ?? 0;
-                    var vm = await _workflowService.GetMyApprovalAsync(user, roleIds);
-                    totalVM.PendingCount = vm.Where(a => a.StatusName == "Pending").Count();
-                    totalVM.CompletedCount = vm.Where(a => a.StatusName == "Completed").Count();
-                    totalVM.QueryCount = vm.Where(a => a.StatusName == "Query").Count();
-                }
-
+                roleIds = new() { workingRoleId };
+                user.DepartmentId = workingDepartmentId ?? 0;
+                user.LocationId = workingLocationId ?? 0;
+                totalVM = await _service.GetDashboardRequestsCount(user, workingRoleId);
             }
             catch (Exception)
             {
@@ -511,7 +486,7 @@ namespace Capital_Item_Justification.Controllers
                 cIJMainViewModel.userId = user.Id;
                 cIJMainViewModel.userRoles = string.IsNullOrEmpty(workingRoleName) ? new List<string>() : new List<string> { workingRoleName };//roles.ToList();
                 await _workflowService.SubmitCIJAsync(cIJMainViewModel);
-                await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.Cijid, "Submitted",null,null);
+                await _emailService.SendEmailAsync(cIJMainViewModel.CIJRequest.Cijid, "Submitted", null, null);
                 TempData["ToastMessage"] = "CIJ request submitted successfully.";
                 TempData["ToastType"] = "success";
 

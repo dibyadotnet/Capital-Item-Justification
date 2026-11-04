@@ -27,7 +27,7 @@ namespace Capital_Item_Justification.Repository.Interfaces
         Task<CijEmailConfiguration> GetEmailConfig();
         Task<List<RequestTrackingViewModel>> GetCijNumberListAsync(string userId);
         Task<List<StatusViewModel>> GetStatusListAsync();
-        Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(string userId);
+        Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(ApplicationUser user, string roleId);
         Task<List<EmailViewModel>?> GetApproveEmail(int cijId, string action);
         Task<List<EmailViewModel>?> GetQueryEmail(int cijId, int? approvalId);
         Task<List<EmailViewModel>?> GetAnsweredEmail(int cijId, int? clarificationId);

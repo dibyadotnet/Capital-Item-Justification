@@ -668,6 +668,7 @@ namespace Capital_Item_Justification.Services
 
             y += 10;
         }
+
         private List<string> WrapText(XGraphics gfx, string text, XFont font, double maxWidth)
         {
             var result = new List<string>();
@@ -675,9 +676,9 @@ namespace Capital_Item_Justification.Services
             if (string.IsNullOrWhiteSpace(text))
                 return result;
 
-            string[] paragraphs =
-                text.Replace("\r\n", "\n")
-                    .Split('\n');
+            string[] paragraphs = text
+                .Replace("\r\n", "\n")
+                .Split('\n');
 
             foreach (var paragraph in paragraphs)
             {
@@ -687,35 +688,64 @@ namespace Capital_Item_Justification.Services
                     continue;
                 }
 
-                string[] words =
-                    paragraph.Split(
-                        ' ',
-                        StringSplitOptions.RemoveEmptyEntries);
+                string[] words = paragraph.Split(
+                    ' ',
+                    StringSplitOptions.RemoveEmptyEntries);
 
                 string currentLine = "";
 
                 foreach (var word in words)
                 {
-                    string testLine =
-                        string.IsNullOrEmpty(currentLine)
-                            ? word
-                            : currentLine + " " + word;
+                    string testLine = string.IsNullOrEmpty(currentLine)
+                        ? word
+                        : currentLine + " " + word;
 
-                    double width =
-                        gfx.MeasureString(
-                            testLine,
-                            font).Width;
-
-                    if (width <= maxWidth)
+                    if (gfx.MeasureString(testLine, font).Width <= maxWidth)
                     {
                         currentLine = testLine;
+                        continue;
                     }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(currentLine))
-                            result.Add(currentLine);
 
-                        currentLine = word;
+                    // Add existing line
+                    if (!string.IsNullOrEmpty(currentLine))
+                    {
+                        result.Add(currentLine);
+                        currentLine = "";
+                    }
+
+                    // Handle long words without spaces
+                    string remainingWord = word;
+
+                    while (!string.IsNullOrEmpty(remainingWord))
+                    {
+                        int length = 0;
+
+                        for (int i = 1; i <= remainingWord.Length; i++)
+                        {
+                            string part = remainingWord.Substring(0, i);
+
+                            if (gfx.MeasureString(part, font).Width > maxWidth)
+                                break;
+
+                            length = i;
+                        }
+
+                        // At least one character must fit
+                        if (length == 0)
+                            length = 1;
+
+                        string chunk = remainingWord.Substring(0, length);
+
+                        remainingWord = remainingWord.Substring(length);
+
+                        if (string.IsNullOrEmpty(remainingWord))
+                        {
+                            currentLine = chunk;
+                        }
+                        else
+                        {
+                            result.Add(chunk);
+                        }
                     }
                 }
 
@@ -725,6 +755,7 @@ namespace Capital_Item_Justification.Services
 
             return result;
         }
+
         private void DrawApprovalHistory(PdfDocument document, XGraphics gfx, PdfPage page, CIJPdfViewModel model, ref double y, ref int pageNumber)
         {
             if (model.workflowHistory == null ||
@@ -943,8 +974,8 @@ namespace Capital_Item_Justification.Services
                     PageWidth - MarginLeft - MarginRight - 20);
 
                 // Calculate required height
-                double queryHeight = 78 + (queryLines.Count * 12);
-                double answerHeight = 78 + (answerLines.Count * 12);
+                double queryHeight = 88 + (queryLines.Count * 12);
+                double answerHeight = 88 + (answerLines.Count * 12);
 
                 double totalHeight = queryHeight + answerHeight + 5;
 
@@ -1007,7 +1038,7 @@ namespace Capital_Item_Justification.Services
 
             double contentHeight = descriptionLines.Count * 12;
 
-            double height = 78 + contentHeight;
+            double height = 88 + contentHeight;
 
             // Background colors
             XColor backgroundColor = isQuery
