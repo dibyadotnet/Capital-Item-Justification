@@ -20,3 +20,190 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+/* =========================================
+   CIJ CORPORATE DASHBOARD
+========================================= */
+
+.dashboard-container {
+    padding-top: 8px;
+}
+
+/* Dashboard heading */
+.dashboard-heading h4 {
+    color: #17365D;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+    .dashboard-heading h4 i {
+        color: #4169C1;
+    }
+
+.dashboard-heading small {
+    font-size: 13px;
+    color: #8490A3 !important;
+}
+
+/* Remove anchor decoration */
+.dashboard-card-link {
+    display: block;
+    height: 100%;
+    text-decoration: none !important;
+    color: inherit;
+    border-radius: 12px;
+}
+
+    .dashboard-card-link:hover {
+        color: inherit;
+    }
+
+/* Common card design */
+.dashboard-card {
+    background: #FFFFFF;
+    border: 1px solid #EDF0F4 !important;
+    border-top: 3px solid var(--card-accent) !important;
+    border-radius: 12px;
+    min-height: 135px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(20, 40, 70, 0.05);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Hover effect */
+.dashboard-card-link:hover .dashboard-card {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 22px rgba(20, 40, 70, 0.11);
+}
+
+/* Card content */
+.dashboard-card .card-body {
+    padding: 20px;
+}
+
+/* Card title */
+.dashboard-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748B;
+    margin-bottom: 14px;
+}
+
+/* Count */
+.dashboard-count {
+    font-size: 34px;
+    font-weight: 750;
+    line-height: 1;
+    margin: 0;
+    color: var(--card-accent);
+    transition: color 0.2s ease;
+}
+
+/* Icon background */
+.dashboard-icon-box {
+    height: 48px;
+    width: 48px;
+    min-width: 48px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--card-bg);
+    color: var(--card-accent);
+    font-size: 23px;
+    transition: transform 0.25s ease;
+}
+
+/* Icon hover */
+.dashboard-card-link:hover .dashboard-icon-box {
+    transform: scale(1.10);
+}
+
+/* =========================================
+   INDIVIDUAL CARD COLORS
+========================================= */
+
+/* Total CIJ Requests - Blue */
+.dashboard-total {
+    --card-accent: #4169C1;
+    --card-bg: #E8F0FF;
+}
+
+/* Draft - Grey */
+.dashboard-draft {
+    --card-accent: #718096;
+    --card-bg: #EDF0F4;
+}
+
+/* Pending Approval - Orange */
+.dashboard-pending {
+    --card-accent: #E99A00;
+    --card-bg: #FFF0D6;
+}
+
+/* Query - Blue */
+.dashboard-query {
+    --card-accent: #2475CE;
+    --card-bg: #E5F1FF;
+}
+
+/* Rejected - Red */
+.dashboard-rejected {
+    --card-accent: #DC3545;
+    --card-bg: #FCE8EA;
+}
+
+/* Completed - Green */
+.dashboard-completed {
+    --card-accent: #23965C;
+    --card-bg: #E2F5EA;
+}
+
+/* Keyboard accessibility */
+.dashboard-card-link:focus-visible {
+    outline: 3px solid #7AA7E8;
+    outline-offset: 3px;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 768px) {
+
+    .dashboard-heading h4 {
+        font-size: 21px;
+    }
+
+    .dashboard-card {
+        min-height: 120px;
+    }
+
+        .dashboard-card .card-body {
+            padding: 17px;
+        }
+
+    .dashboard-count {
+        font-size: 30px;
+    }
+
+    .dashboard-icon-box {
+        height: 43px;
+        width: 43px;
+        min-width: 43px;
+        font-size: 21px;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .dashboard-label {
+        font-size: 13px;
+    }
+
+    .dashboard-count {
+        font-size: 28px;
+    }
+}

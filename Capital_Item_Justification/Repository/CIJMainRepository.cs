@@ -409,7 +409,7 @@ namespace Capital_Item_Justification.Repository
                 LocationId = a.LocationId,
                 LocationName = a.LocationName,
                 Prefix = a.Prefix
-            }).OrderBy(a=>a.LocationName).ToListAsync();
+            }).OrderBy(a => a.LocationName).ToListAsync();
         }
         public async Task<List<CijDepartment>> GetDepartment()
         {
@@ -417,7 +417,7 @@ namespace Capital_Item_Justification.Repository
             {
                 DepartmentId = a.DepartmentId,
                 DepartmentName = a.DepartmentName
-            }).OrderBy(a=>a.DepartmentName).ToListAsync();
+            }).OrderBy(a => a.DepartmentName).ToListAsync();
         }
 
         public async Task<CIJMainViewModel> GetCIJById(int cijId)
@@ -667,7 +667,7 @@ namespace Capital_Item_Justification.Repository
                                     @CijId = {cijId},
                                     @StatusId = {statusId}")
                             .AsNoTracking().ToListAsync();
-     
+
             return nextApproverEmails;
         }
         public async Task<List<EmailViewModel>?> GetQueryEmail(int cijId, int? approvalId)
@@ -720,15 +720,13 @@ namespace Capital_Item_Justification.Repository
 
             return statusList;
         }
-        public async Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(string userId)
+        public async Task<TotalCountDashboardViewModel> GetDashboardRequestsCount(ApplicationUser user, string roleId)
         {
             var dashboardData = await _context
                 .Set<TotalCountDashboardViewModel>()
                 .FromSqlRaw(
-                    "EXEC SP_GetCIJDashboardCount @UserId = {0}",
-                    userId)
-                .AsNoTracking()
-                .ToListAsync();
+                    "EXEC SP_GetCIJDashboardCount @UserId = {0},@UserDepartmentId = {1},@RoleIds = {2},@LocationId = {3}",
+                    user.Id, user.DepartmentId ?? 0, roleId, user.LocationId ?? 0).AsNoTracking().ToListAsync();
 
             return dashboardData.FirstOrDefault() ?? new TotalCountDashboardViewModel();
         }

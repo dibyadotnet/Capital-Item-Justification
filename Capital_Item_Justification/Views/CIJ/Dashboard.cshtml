@@ -1,199 +1,223 @@
-﻿@model Capital_Item_Justification.ViewModels.TotalCountDashboardViewModel
-<div class="container-fluid">
+﻿
+@model Capital_Item_Justification.ViewModels.TotalCountDashboardViewModel
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>
-            <i class="bi bi-speedometer2"></i>
-            CIJ Dashboard
-        </h4>
+@{
+    var workingRoleName = Context.Session.GetString("WorkingRoleName");
+}
+
+<div class="container-fluid dashboard-container">
+
+    <!-- Dashboard Heading -->
+    <div class="d-flex justify-content-between align-items-center mb-4 dashboard-heading">
+        <div>
+            <h4 class="mb-1">
+                <i class="bi bi-speedometer2 me-2"></i>
+                CIJ Dashboard
+            </h4>
+            <small class="text-muted">
+                Overview of your CIJ activities and requests
+            </small>
+        </div>
     </div>
 
     <div class="row g-3">
-        @{
-            var workingRoleName = Context.Session.GetString("WorkingRoleName");
-        }
+
+        <!-- TOTAL CIJ REQUESTS -->
         @if (workingRoleName == "Requester")
         {
-            <div class="col-lg-3 col-md-6">
-                <div class="card dashboard-card dashboard-total shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted mb-2">Total CIJ Requests</h6>
-                                <a asp-controller="WorkFlow"
-                                   asp-action="TrackRequest"
-                                   class="text-decoration-none text-dark">
-                                    <h2 class="fw-bold mb-0">@Model.TotalRequests</h2>
-                                </a>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a asp-controller="WorkFlow"
+                   asp-action="TrackRequest"
+                   class="dashboard-card-link">
+
+                    <div class="card dashboard-card dashboard-total h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <div>
+                                    <h6 class="dashboard-label">
+                                        Total CIJ Requests
+                                    </h6>
+
+                                    <h2 class="dashboard-count">
+                                        @Model.TotalRequests
+                                    </h2>
+                                </div>
+
+                                <div class="dashboard-icon-box">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </div>
+
                             </div>
-                            <i class="bi bi-file-earmark-text fs-1 text-primary"></i>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
-            <!-- Draft -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card dashboard-card dashboard-draft shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted mb-2">Draft</h6>
-                                <a asp-controller="CIJ"
-                                   asp-action="MyRequests"
-                                   class="text-decoration-none text-dark">
-                                    <h2 class="fw-bold mb-0">@Model.DraftCount</h2>
-                                </a>
+            <!-- DRAFT -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a asp-controller="CIJ"
+                   asp-action="MyRequests"
+                   class="dashboard-card-link">
+
+                    <div class="card dashboard-card dashboard-draft h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <div>
+                                    <h6 class="dashboard-label">
+                                        Draft
+                                    </h6>
+
+                                    <h2 class="dashboard-count">
+                                        @Model.DraftCount
+                                    </h2>
+                                </div>
+
+                                <div class="dashboard-icon-box">
+                                    <i class="bi bi-file-earmark"></i>
+                                </div>
+
                             </div>
-                            <i class="bi bi-file-earmark fs-1 text-secondary"></i>
                         </div>
                     </div>
-                </div>
+                </a>
+            </div>
+        }
+
+        <!-- PENDING APPROVAL -->
+        @if (workingRoleName != "Requester")
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a asp-controller="WorkFlow"
+                   asp-action="MyApproval"
+                   class="dashboard-card-link">
+
+                    <div class="card dashboard-card dashboard-pending h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <div>
+                                    <h6 class="dashboard-label">
+                                        Pending Approval
+                                    </h6>
+
+                                    <h2 class="dashboard-count">
+                                        @Model.PendingCount
+                                    </h2>
+                                </div>
+
+                                <div class="dashboard-icon-box">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
         }
 
-        <!-- Pending -->
-        @if (workingRoleName == "Requester")
+        <!-- QUERY -->
+        @if (workingRoleName != "Requester" &&
+             workingRoleName != "Purchase")
         {
-            @*  <div class="col-lg-3 col-md-6">
-        <div class="card dashboard-card dashboard-pending shadow-sm border-0 h-100">
-        <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
-        <div>
-        <h6 class="text-muted mb-2">Pending Approval</h6>
-        <a asp-controller="WorkFlow"
-        asp-action="TrackRequest" asp-route-statusId="@Model.PendingStatusId"
-        class="text-decoration-none text-dark">
-        <h2 class="fw-bold mb-0">@Model.PendingCount</h2>
-        </a>
-        </div>
-        <i class="bi bi-hourglass-split fs-1 text-warning"></i>
-        </div>
-        </div>
-        </div>
-        </div> *@
-        }
-        else
-        {
-            <div class="col-lg-3 col-md-6">
-                <div class="card dashboard-card dashboard-pending shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted mb-2">Pending Approval</h6>
-                                <a asp-controller="WorkFlow"
-                                   asp-action="MyApproval"
-                                   class="text-decoration-none text-dark">
-                                    <h2 class="fw-bold mb-0">@Model.PendingCount</h2>
-                                </a>
-                            </div>
-                            <i class="bi bi-hourglass-split fs-1 text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-        @if (workingRoleName != "Requester" && workingRoleName != "Purchase")
-        {
-            <div class="col-lg-3 col-md-6">
-                <div class="card dashboard-card dashboard-query shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted mb-2">Query</h6>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a asp-controller="WorkFlow"
+                   asp-action="MyApproval"
+                   class="dashboard-card-link">
 
-                                <a asp-controller="WorkFlow"
-                                   asp-action="MyApproval"
-                                   class="text-decoration-none text-dark">
+                    <div class="card dashboard-card dashboard-query h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
 
-                                    <h2 class="fw-bold mb-0">
+                                <div>
+                                    <h6 class="dashboard-label">
+                                        Query
+                                    </h6>
+
+                                    <h2 class="dashboard-count">
                                         @Model.QueryCount
                                     </h2>
+                                </div>
 
-                                </a>
+                                <div class="dashboard-icon-box">
+                                    <i class="bi bi-question-circle"></i>
+                                </div>
+
                             </div>
-
-                            <i class="bi bi-question-circle fs-1 dashboard-query-icon"></i>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         }
-        @if (workingRoleName == "Requester" || workingRoleName == "Purchase")
+
+        <!-- REJECTED AND COMPLETED -->
+        @if (workingRoleName == "Requester" ||
+        workingRoleName == "Purchase" || workingRoleName == "Admin")
         {
-            <!-- Rejected -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card dashboard-card dashboard-rejected shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted mb-2">Rejected</h6>
-                                @if (ViewBag.Roles.Contains("Purchase"))
-                                {
-                                    <a asp-controller="WorkFlow"
-                                       asp-action="MyApproval"
-                                       class="text-decoration-none text-dark">
-                                        <h2 class="fw-bold mb-0">
-                                            @Model.RejectedCount
-                                        </h2>
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a asp-controller="WorkFlow"
-                                       asp-action="TrackRequest"
-                                       asp-route-statusId="@Model.RejectedStatusId"
-                                       class="text-decoration-none text-dark">
-                                        <h2 class="fw-bold mb-0">
-                                            @Model.RejectedCount
-                                        </h2>
-                                    </a>
-                                }
-                            </div>
-                            <i class="bi bi-x-circle fs-1 text-danger"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- REJECTED -->
+            if (workingRoleName == "Requester"){
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a asp-controller="WorkFlow"
+                           asp-action="TrackRequest"
+                           asp-route-statusId="@Model.RejectedStatusId"
+                           class="dashboard-card-link">
 
-            <!-- Completed -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card dashboard-card dashboard-completed shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted mb-2">Completed</h6>
-                                @if (workingRoleName == "Purchase")
-                                {
-                                    <a asp-controller="WorkFlow"
-                                       asp-action="CompletedApproval"
-                                       class="text-decoration-none text-dark">
-                                        <h2 class="fw-bold mb-0">
-                                            @Model.CompletedCount
-                                        </h2>
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a asp-controller="WorkFlow"
-                                       asp-action="TrackRequest"
-                                       asp-route-statusId="@Model.CompletedStatusId"
-                                       class="text-decoration-none text-dark">
-                                        <h2 class="fw-bold mb-0">
-                                            @Model.CompletedCount
-                                        </h2>
-                                    </a>
-                                }
+                            <div class="card dashboard-card dashboard-rejected h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+
+                                        <div>
+                                            <h6 class="dashboard-label">
+                                                Rejected
+                                            </h6>
+
+                                            <h2 class="dashboard-count">
+                                                @Model.RejectedCount
+                                            </h2>
+                                        </div>
+
+                                        <div class="dashboard-icon-box">
+                                            <i class="bi bi-x-circle"></i>
+                                        </div>
+
+                                    </div>
+                                </div>
                             </div>
-                            <i class="bi bi-check2-all fs-1 text-success"></i>
-                        </div>
-                    </div>
+                        </a>
                 </div>
+            }
+            <!-- COMPLETED -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a asp-controller="WorkFlow"
+                       asp-action="CompletedApproval"
+                       class="dashboard-card-link">
+
+                        <div class="card dashboard-card dashboard-completed h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <div>
+                                        <h6 class="dashboard-label">
+                                            Completed
+                                        </h6>
+
+                                        <h2 class="dashboard-count">
+                                            @Model.CompletedCount
+                                        </h2>
+                                    </div>
+
+                                    <div class="dashboard-icon-box">
+                                        <i class="bi bi-check2-all"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </a>
             </div>
         }
-
-
 
     </div>
-
 </div>
