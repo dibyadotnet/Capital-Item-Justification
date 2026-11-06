@@ -525,6 +525,22 @@
                                                 : item.RaisedDepartment)
                                         </span>
                                     </div>
+                                     <div class="info-item">
+                                        <span class="info-label">Assigned To Role</span>
+                                        <span class="info-value">
+                                            @(string.IsNullOrWhiteSpace(item.AssignedToRole)
+                                                ? "-"
+                                                : item.AssignedToRole)
+                                        </span>
+                                    </div>
+                                     <div class="info-item">
+                                        <span class="info-label">Assigned To Department</span>
+                                        <span class="info-value">
+                                            @(string.IsNullOrWhiteSpace(item.AssignedToDepartment)
+                                                ? "-"
+                                                : item.AssignedToDepartment)
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div class="info-label">Query</div>

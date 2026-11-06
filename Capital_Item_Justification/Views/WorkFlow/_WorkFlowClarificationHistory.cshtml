@@ -57,6 +57,22 @@
                                         @(string.IsNullOrWhiteSpace(item.RaisedDepartment) ? "-" : item.RaisedDepartment)
                                     </span>
                                 </div>
+                                <div class="info-item">
+                                    <span class="info-label">Assigned To Role</span>
+                                    <span class="info-value">
+                                        @(string.IsNullOrWhiteSpace(item.AssignedToRole)
+                                            ? "-"
+                                            : item.AssignedToRole)
+                                    </span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Assigned To Department</span>
+                                    <span class="info-value">
+                                        @(string.IsNullOrWhiteSpace(item.AssignedToDepartment)
+                                            ? "-"
+                                            : item.AssignedToDepartment)
+                                    </span>
+                                </div>
 
                             </div>
 
@@ -135,7 +151,8 @@
                                 {
                                     <form asp-action="AnswerClarification"
                                           asp-controller="WorkFlow"
-                                          method="post">
+                                          method="post"
+                                          class="clarification-answer-form">
 
                                         @Html.AntiForgeryToken()
 
@@ -156,7 +173,6 @@
                                             <textarea name="answer"
                                                       class="form-control custom-textarea"
                                                       rows="3"
-                                                      required
                                                       placeholder="Enter your answer..."></textarea>
 
                                         </div>
@@ -206,8 +222,17 @@
 
     </div>
 </div>
-
 <style type="text/css">
+
+    .custom-textarea.is-invalid {
+        border-color: #dc3545 !important;
+        background-image: none !important;
+    }
+
+        .custom-textarea.is-invalid:focus {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+        }
     .clarification-list {
         display: flex;
         flex-direction: column;

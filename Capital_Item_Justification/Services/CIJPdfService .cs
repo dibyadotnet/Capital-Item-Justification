@@ -934,7 +934,13 @@ namespace Capital_Item_Justification.Services
                     15),
                 XStringFormats.TopRight);
         }
-        private void DrawClarificationHistory(PdfDocument document, ref XGraphics gfx, ref PdfPage page, CIJPdfViewModel model, ref double y, ref int pageNumber)
+        private void DrawClarificationHistory(
+     PdfDocument document,
+     ref XGraphics gfx,
+     ref PdfPage page,
+     CIJPdfViewModel model,
+     ref double y,
+     ref int pageNumber)
         {
             if (model.Clarifications == null ||
                 model.Clarifications.Count == 0)
@@ -949,98 +955,165 @@ namespace Capital_Item_Justification.Services
 
             foreach (var item in model.Clarifications)
             {
-                string raisedDate =
-                    item.RaisedOn.ToString("dd-MMM-yyyy");
+                // =====================================
+                // QUERY INFORMATION
+                // =====================================
 
-                string answeredDate =
-                    item.AnsweredOn?.ToString("dd-MMM-yyyy") ?? "Pending";
+                string raisedDate = item.RaisedOn.ToString("dd-MMM-yyyy");
 
-                // Query text wrapping
-                var queryLines = WrapText(
-                    gfx,
+                string queryText =
                     string.IsNullOrWhiteSpace(item.ClarificationPoint)
                         ? "No query details available."
-                        : item.ClarificationPoint,
+                        : item.ClarificationPoint;
+
+                var queryLines = WrapText(
+                    gfx,
+                    queryText,
                     _normalFont,
                     PageWidth - MarginLeft - MarginRight - 20);
 
-                // Answer text wrapping
+                // =====================================
+                // ANSWER INFORMATION
+                // =====================================
+
+                bool isAnswered =
+                    item.AnsweredOn.HasValue &&
+                    !string.IsNullOrWhiteSpace(item.Answer);
+
+                string answeredDate = isAnswered
+                    ? item.AnsweredOn!.Value.ToString("dd-MMM-yyyy")
+                    : "Pending";
+
+                string answerText = isAnswered
+                    ? item.Answer!
+                    : "Awaiting response.";
+
                 var answerLines = WrapText(
                     gfx,
-                    string.IsNullOrWhiteSpace(item.Answer)
-                        ? "No answer provided."
-                        : item.Answer,
+                    answerText,
                     _normalFont,
                     PageWidth - MarginLeft - MarginRight - 20);
 
-                // Calculate required height
-                double queryHeight = 88 + (queryLines.Count * 12);
-                double answerHeight = 88 + (answerLines.Count * 12);
+                // =====================================
+                // QUERY METADATA
+                // =====================================
 
-                double totalHeight = queryHeight + answerHeight + 5;
-
-                // Move to next page if required
-                if (y + totalHeight > PageHeight - MarginBottom)
-                {
-                    page = document.AddPage();
-                    page.Size = PdfSharp.PageSize.A4;
-
-                    gfx = XGraphics.FromPdfPage(page);
-
-                    pageNumber++;
-                    y = MarginTop;
-
-                    DrawSectionTitle(
-                        gfx,
-                        "CLARIFICATION HISTORY - CONTINUED",
-                        ref y);
-                }
+                var queryMetadata = new List<(string Label, string Value)>
+        {
+            ("Raised Date", raisedDate),
+            ("Raised By", item.RaisedBy ?? "-"),
+            ("Raised By Role", item.RaisedByRole ?? "-"),
+            ("Raised Department", item.RaisedDepartment ?? "-"),
+            ("Assigned To Role", item.AssignedToRole ?? "-"),
+            ("Assigned To Department", item.AssignedToDepartment ?? "-")
+        };
 
                 // =====================================
-                // QUERY DETAILS
+                // DRAW QUERY DETAILS
                 // =====================================
 
                 DrawClarificationBlock(
-                    gfx,
+                    document,
+                    ref gfx,
+                    ref page,
+                    ref y,
+                    ref pageNumber,
                     "QUERY DETAILS",
-                    raisedDate,
-                    item.RaisedBy ?? "",
-                    item.RaisedByRole ?? "",
-                    item.RaisedDepartment ?? "",
+                    queryMetadata,
                     "Query",
                     queryLines,
-                    true,
-                    ref y);
+                    true);
 
                 // =====================================
-                // ANSWER DETAILS
+                // ANSWER METADATA
+                // =====================================
+
+                var answerMetadata = new List<(string Label, string Value)>
+        {
+            ("Answered Date", answeredDate),
+            ("Answered By", isAnswered ? item.AnsweredBy ?? "-" : "-"),
+            ("Answered By Role", isAnswered ? item.AnsweredByRole ?? "-" : "-"),
+            ("Answered Department", isAnswered ? item.AnsweredDepartment ?? "-" : "-")
+        };
+
+                // =====================================
+                // DRAW ANSWER DETAILS
                 // =====================================
 
                 DrawClarificationBlock(
-                    gfx,
+                    document,
+                    ref gfx,
+                    ref page,
+                    ref y,
+                    ref pageNumber,
                     "ANSWER DETAILS",
-                    answeredDate,
-                    item.AnsweredBy ?? "",
-                    item.AnsweredByRole ?? "",
-                    item.AnsweredDepartment ?? "",
+                    answerMetadata,
                     "Answer",
                     answerLines,
-                    false,
-                    ref y);
+                    false);
 
                 y += 10;
             }
         }
-        private void DrawClarificationBlock(XGraphics gfx, string heading, string date, string person, string role, string department, string descriptionLabel, List<string> descriptionLines, bool isQuery, ref double y)
+        private void DrawClarificationBlock(
+      PdfDocument document,
+      ref XGraphics gfx,
+      ref PdfPage page,
+      ref double y,
+      ref int pageNumber,
+      string heading,
+      List<(string Label, string Value)> metadata,
+      string descriptionLabel,
+      List<string> descriptionLines,
+      bool isQuery)
         {
             double x = MarginLeft;
-            double width = PageWidth - MarginLeft - MarginRight;
 
-            double contentHeight = descriptionLines.Count * 12;
+            double width =
+                PageWidth - MarginLeft - MarginRight;
 
-            double height = 88 + contentHeight;
+            // =====================================
+            // LAYOUT DIMENSIONS
+            // =====================================
 
-            // Background colors
+            int columnCount = 3;
+
+            double columnWidth =
+                (width - 30) / columnCount;
+
+            double contentHeight =
+                descriptionLines.Count * 12;
+
+            // Includes heading, two metadata rows,
+            // description label and description text.
+            double height = 120 + contentHeight;
+
+            // =====================================
+            // PAGE BREAK CHECK
+            // =====================================
+
+            if (y + height > PageHeight - MarginBottom)
+            {
+                page = document.AddPage();
+
+                page.Size = PdfSharp.PageSize.A4;
+
+                gfx = XGraphics.FromPdfPage(page);
+
+                pageNumber++;
+
+                y = MarginTop;
+
+                DrawSectionTitle(
+                    gfx,
+                    "CLARIFICATION HISTORY - CONTINUED",
+                    ref y);
+            }
+
+            // =====================================
+            // COLORS
+            // =====================================
+
             XColor backgroundColor = isQuery
                 ? XColor.FromArgb(239, 245, 255)
                 : XColor.FromArgb(250, 250, 250);
@@ -1053,9 +1126,14 @@ namespace Capital_Item_Justification.Services
                 new XSolidBrush(backgroundColor);
 
             var borderPen =
-                new XPen(XColor.FromArgb(210, 220, 230), 0.7);
+                new XPen(
+                    XColor.FromArgb(210, 220, 230),
+                    0.7);
 
-            // Main background
+            // =====================================
+            // MAIN BACKGROUND
+            // =====================================
+
             gfx.DrawRectangle(
                 backgroundBrush,
                 x,
@@ -1070,74 +1148,85 @@ namespace Capital_Item_Justification.Services
                 width,
                 height);
 
-            // Section heading
+            // =====================================
+            // SECTION HEADING
+            // =====================================
+
             gfx.DrawString(
                 heading,
                 _boldFont,
                 new XSolidBrush(headingColor),
-                new XRect(x + 10, y + 8, width - 20, 15),
+                new XRect(
+                    x + 10,
+                    y + 8,
+                    width - 20,
+                    15),
                 XStringFormats.TopLeft);
 
-            // Four-column information
-            double columnWidth = (width - 30) / 4;
+            // =====================================
+            // METADATA
+            // THREE COLUMNS
+            // =====================================
 
-            string[] labels =
+            for (int i = 0; i < metadata.Count; i++)
             {
-        isQuery ? "Raised Date" : "Answered Date",
-        isQuery ? "Raised By" : "Answered By",
-        "Role",
-        "Department"
-    };
+                int row = i / columnCount;
 
-            string[] values =
-            {
-        date,
-        person,
-        role,
-        department
-    };
+                int column = i % columnCount;
 
-            for (int i = 0; i < 4; i++)
-            {
-                double columnX = x + 10 + (i * columnWidth);
+                double columnX =
+                    x + 10 + (column * columnWidth);
 
+                double rowY =
+                    y + 32 + (row * 30);
+
+                // Metadata label
                 gfx.DrawString(
-                    labels[i],
+                    metadata[i].Label,
                     _boldFont,
                     XBrushes.Black,
                     new XRect(
                         columnX,
-                        y + 32,
+                        rowY,
                         columnWidth - 5,
                         13),
                     XStringFormats.TopLeft);
 
+                // Metadata value
                 gfx.DrawString(
-                    values[i] ?? "",
+                    metadata[i].Value ?? "-",
                     _normalFont,
                     XBrushes.Black,
                     new XRect(
                         columnX,
-                        y + 48,
+                        rowY + 14,
                         columnWidth - 5,
                         13),
                     XStringFormats.TopLeft);
             }
 
-            // Query / Answer label
+            // =====================================
+            // QUERY / ANSWER LABEL
+            // =====================================
+
+            double descriptionY = y + 96;
+
             gfx.DrawString(
                 descriptionLabel,
                 _boldFont,
                 XBrushes.Black,
                 new XRect(
                     x + 10,
-                    y + 65,
+                    descriptionY,
                     width - 20,
                     13),
                 XStringFormats.TopLeft);
 
-            // Query / Answer text
-            double textY = y + 80;
+            // =====================================
+            // QUERY / ANSWER TEXT
+            // =====================================
+
+            double textY = y + 112;
 
             foreach (var line in descriptionLines)
             {
@@ -1155,6 +1244,7 @@ namespace Capital_Item_Justification.Services
                 textY += 12;
             }
 
+            // Move Y position for next block
             y += height;
         }
 
