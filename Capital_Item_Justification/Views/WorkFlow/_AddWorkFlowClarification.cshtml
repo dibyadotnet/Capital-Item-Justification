@@ -3,7 +3,7 @@
 <div class="modal fade" id="queryModal" tabindex="-1" aria-labelledby="queryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form asp-action="SendClarification" asp-controller="WorkFlow" method="post">
+            <form asp-action="SendClarification" asp-controller="WorkFlow" method="post" class="send-clarification-form">
                 @Html.AntiForgeryToken()
                 <div class="modal-header">
                     <h5 class="modal-title"
@@ -24,7 +24,7 @@
                             Clarification Point
                             <span class="text-danger">*</span>
                         </label>
-                            <textarea name="clarificationPoint" id="clarificationPoint" class="form-control custom-textarea" rows="6" required
+                            <textarea name="clarificationPoint" id="clarificationPoint" class="form-control custom-textarea" rows="6"
                                   placeholder="Enter your clarification point..."></textarea>
                         </div>
                         <div class="col-md-4">
@@ -32,7 +32,7 @@
                                 Assign Query To
                                 <span class="text-danger">*</span>
                             </label>
-                            <select id="approvalId" name="approvalId" asp-items="Model.TargetRoles" class="form-select" required>
+                            <select id="approvalId" name="approvalId" asp-items="Model.TargetRoles" class="form-select">
                                 <option value="">-- Select Role --</option>
                             </select>
                         </div>
@@ -52,3 +52,17 @@
         </div>
     </div>
 </div>
+
+<style>
+    .custom-textarea.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545 !important;
+        background-image: none !important;
+    }
+
+        .custom-textarea.is-invalid:focus,
+        .form-select.is-invalid:focus {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+        }
+</style>

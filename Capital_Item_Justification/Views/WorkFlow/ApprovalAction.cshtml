@@ -273,6 +273,132 @@
                     " this CIJ?"
                 );
             }
+
+        $(document).ready(function () {
+
+            // Submit Answer validation
+            $(document).on('submit', '.clarification-answer-form', function (e) {
+
+                var $form = $(this);
+                var $textarea = $form.find("textarea[name='answer']");
+
+                var answer = $.trim($textarea.val() || '');
+
+                if (answer === "") {
+
+                    e.preventDefault();
+
+                    $textarea.addClass("is-invalid");
+                    $textarea.attr("aria-invalid", "true");
+
+                    $textarea.focus();
+
+                    return false;
+                }
+
+                // Valid answer
+                $textarea.removeClass("is-invalid");
+                $textarea.removeAttr("aria-invalid");
+
+            });
+
+            // Remove validation error while typing
+            $(document).on(
+                'input',
+                '.clarification-answer-form textarea[name="answer"]',
+                function () {
+
+                    if ($.trim($(this).val() || '') !== "") {
+
+                        $(this).removeClass("is-invalid");
+                        $(this).removeAttr("aria-invalid");
+                    }
+                }
+            );
+
+        });
+
+        $(document).ready(function () {
+
+            // Submit Query validation
+            $(document).on('submit', '.send-clarification-form', function (e) {
+
+                var $form = $(this);
+
+                var $clarificationPoint = $form.find("#clarificationPoint");
+                var $approvalId = $form.find("#approvalId");
+
+                var clarificationPoint = $.trim($clarificationPoint.val() || '');
+                var approvalId = $approvalId.val();
+
+                var isValid = true;
+
+                // Validate Clarification Point
+                if (clarificationPoint === "") {
+
+                    $clarificationPoint.addClass("is-invalid");
+                    $clarificationPoint.attr("aria-invalid", "true");
+
+                    if (isValid) {
+                        $clarificationPoint.focus();
+                    }
+
+                    isValid = false;
+                }
+                else {
+                    $clarificationPoint.removeClass("is-invalid");
+                    $clarificationPoint.removeAttr("aria-invalid");
+                }
+
+                // Validate Assign Query To
+                if (!approvalId) {
+
+                    $approvalId.addClass("is-invalid");
+                    $approvalId.attr("aria-invalid", "true");
+
+                    if (isValid) {
+                        $approvalId.focus();
+                    }
+
+                    isValid = false;
+                }
+                else {
+                    $approvalId.removeClass("is-invalid");
+                    $approvalId.removeAttr("aria-invalid");
+                }
+
+                // Prevent submission if validation fails
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+
+            });
+
+            // Remove textarea validation while typing
+            $(document).on('input', '#clarificationPoint', function () {
+
+                if ($.trim($(this).val() || '') !== "") {
+
+                    $(this).removeClass("is-invalid");
+                    $(this).removeAttr("aria-invalid");
+                }
+
+            });
+
+            // Remove dropdown validation on selection
+            $(document).on('change', '#approvalId', function () {
+
+                if ($(this).val()) {
+
+                    $(this).removeClass("is-invalid");
+                    $(this).removeAttr("aria-invalid");
+                }
+
+            });
+
+        });
+
     </script>
 }
 <style>
