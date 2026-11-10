@@ -178,17 +178,21 @@ namespace Capital_Item_Justification.Controllers
                 }
 
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+                var encodedToken = WebEncoders.Base64UrlEncode(
+                    Encoding.UTF8.GetBytes(token)
+                );
+
                 var resetLink = Url.Action(
-                    nameof(ResetPassword),
+                    "ResetPassword",
                     "Account",
                     new
                     {
                         userId = user.Id,
                         token = encodedToken
                     },
-                    Request.Scheme);
-
+                    protocol: Request.Scheme
+                );
                 // TODO: Send resetLink through your email service
                 await _emailService.SendPasswordResetEmailAsync(user.Email!, resetLink!);
 
@@ -219,33 +223,23 @@ namespace Capital_Item_Justification.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword(string? userId, string? token)
         {
-            if (string.IsNullOrEmpty(userId) ||
-                string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
             {
-                return BadRequest();
+                return BadRequest("Invalid password reset link.");
             }
-            string decodedToken;
 
-            try
-            {
-                decodedToken = Encoding.UTF8.GetString(
-                    WebEncoders.Base64UrlDecode(token));
-            }
-            catch (FormatException)
-            {
-                return BadRequest("Invalid token format.");
-            }
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null || string.IsNullOrEmpty(user.Email))
             {
                 return BadRequest("Invalid user or email.");
             }
+
             return View(new ResetPasswordViewModel
             {
                 Email = user.Email,
                 Token = token,
-                UserId=userId
+                UserId = userId
             });
         }
 
@@ -261,28 +255,40 @@ namespace Capital_Item_Justification.Controllers
 
             if (user == null)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    "Invalid password reset request.");
+                ModelState.AddModelError("", "Invalid password reset request.");
+                return View(model);
+            }
 
+            string decodedToken;
+
+            try
+            {
+                decodedToken = Encoding.UTF8.GetString(
+                    WebEncoders.Base64UrlDecode(model.Token!)
+                );
+            }
+            catch (FormatException)
+            {
+                ModelState.AddModelError("", "Invalid password reset token.");
                 return View(model);
             }
 
             var result = await _userManager.ResetPasswordAsync(
                 user,
-                model.Token!,
-                model.Password);
+                decodedToken,
+                model.Password!
+            );
 
             if (result.Succeeded)
             {
+                TempData["SuccessMessage"] = "Your password has been reset successfully.";
+
                 return RedirectToAction(nameof(Login));
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    error.Description);
+                ModelState.AddModelError("", error.Description);
             }
 
             return View(model);
