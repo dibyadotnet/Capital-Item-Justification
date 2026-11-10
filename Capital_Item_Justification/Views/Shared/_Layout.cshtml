@@ -8,6 +8,10 @@
     var isRoleSelectionPage =
         currentController == "Account" &&
         currentAction == "SelectRole";
+
+    var isResetPasswordPage =
+         currentController == "Account" &&
+         currentAction == "ResetPassword";
 }
 
 <!DOCTYPE html>
@@ -39,10 +43,10 @@
     <!-- Application CSS -->
     <link rel="stylesheet"
           href="~/css/site.css" />
-@* 
+    @*
     <link rel="stylesheet"
-          href="~/Capital_Item_Justification.styles.css"
-          asp-append-version="true" /> *@
+    href="~/Capital_Item_Justification.styles.css"
+    asp-append-version="true" /> *@
 
     <link rel="stylesheet"
           href="~/css/CIJ.css"
@@ -73,11 +77,34 @@
             }
         </style>
     }
-</head>
+    @if (isResetPasswordPage)
+    {
+        <style>
+            body.reset-password-body .app-main {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
 
+            body.reset-password-body .app-footer {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+            body.reset-password-body .app-wrapper {
+                min-height: 100vh;
+            }
+
+            body.reset-password-body .app-content {
+                padding: 0;
+            }
+        </style>
+    }
+</head>
 <body class="@(isRoleSelectionPage
-                  ? "role-selection-body"
-                  : "layout-fixed sidebar-expand-lg bg-body-tertiary")">
+    ? "role-selection-body"
+    : isResetPasswordPage
+        ? "reset-password-body"
+        : "layout-fixed sidebar-expand-lg bg-body-tertiary")">
 
     @if (isRoleSelectionPage)
     {
@@ -95,8 +122,10 @@
             <partial name="_Header" />
 
             <!-- Sidebar -->
-            <partial name="_Sidebar" />
-
+            @if (!isResetPasswordPage)
+            {
+                <partial name="_Sidebar" />
+            }
             <!-- Main Content -->
             <main class="app-main">
 
@@ -156,7 +185,7 @@
 
     <!-- jQuery -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-   @*  <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    @*  <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script> *@
     <!-- Bootstrap Bundle -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>

@@ -52,6 +52,7 @@
                 <input type="hidden" name="cijId" value="@Model.Cijid" />
                 <input type="hidden" name="cijNumber" value="@Model.CIJNumber" />
                 <input type="hidden" name="workflowApprovalId" value="@Model.workflowApprovalId" />
+                <input type="hidden" name="action" id="approvalAction" />
                 <div class="row">
                     <div class="col-md-6">
                         <label for="remarks" class="form-label fw-bold">
@@ -154,7 +155,6 @@
                         @if (Model.CanReject)
                         {
                             <button type="submit"
-                                    name="Action"
                                     value="Reject"
                                     formaction="@Url.Action("RejectWorkFlow", "WorkFlow")"
                                     class="btn btn-danger"
@@ -167,7 +167,7 @@
                                 Reject
                             </button>
                         }
-                        <button type="submit" name="Action" value="Approve" formaction="@Url.Action("WorkFlowApproval", "WorkFlow")"
+                        <button type="submit" value="Approve" formaction="@Url.Action("WorkFlowApproval", "WorkFlow")"
                                 class="btn btn-success" onclick='return validateApprove(@Json.Serialize(Model.ItemTypeName.Trim()), @Json.Serialize(Model.workFlowStepCode));'>
                             <i class="bi bi-check-lg me-1"></i>
                             Approve
@@ -394,6 +394,44 @@
                     $(this).removeClass("is-invalid");
                     $(this).removeAttr("aria-invalid");
                 }
+
+            });
+
+        });
+
+        $(document).ready(function () {
+
+            $('#approvalForm').on('submit', function (e) {
+
+                const submitButton = e.originalEvent.submitter;
+
+                if (!submitButton) {
+                    return;
+                }
+
+                const $button = $(submitButton);
+
+                // Prevent duplicate submission
+                if ($(this).data('processing')) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Set action value before disabling button
+                $('#approvalAction').val(submitButton.value);
+
+                $(this).data('processing', true);
+
+                // Change button text
+                if (submitButton.value === 'Approve') {
+                    $button.html('<i class="bi bi-check-lg me-1"></i> Approving...');
+                }
+                else if (submitButton.value === 'Reject') {
+                    $button.html('<i class="bi bi-x-lg me-1"></i> Rejecting...');
+                }
+
+                // Disable clicked button
+                $button.prop('disabled', true);
 
             });
 
